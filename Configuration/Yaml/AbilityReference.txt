@@ -1,0 +1,61 @@
+====================================================================
+ VALHEIM ITEM ENHANCEMENTS - ABILITY ID REFERENCE
+ รายชื่อ Ability ID ทั้งหมดที่รองรับในระบบ
+====================================================================
+
+─── Item.yml (อาวุธ / ทั่วไป / เครื่องประดับ) ───
+
+  WeaponDamage              โบนัสพลังโจมตีทุกประเภท (%)
+  WeaponBackstab            โบนัสตัวคูณ Backstab (+x)
+  WeaponAttackStamina       ลดการใช้ Stamina โจมตี (%)
+  WeaponAttackEitr          ลดการใช้ Eitr ร่ายมนตร์ (%)
+  MaxDurability             เพิ่มความทนทานสูงสุด (%)
+  WeightReduction           ลดน้ำหนักอุปกรณ์ (%)
+  CarryWeightBonus          เพิ่มขีดจำกัดน้ำหนักบรรทุก (หน่วยตรง)
+
+─── Armor.yml (เกราะ / โล่ / ความคล่องตัว) ───
+
+  ArmorFlat                 พลังป้องกันเกราะคงที่ (+หน่วยตรง)
+  ArmorPercent              พลังป้องกันเกราะแบบ % (%)
+  ArmorMovementPenaltyReduction  ลดโทษความเร็วเดินของเกราะหนัก (%)
+  EitrRegen                 เพิ่มอัตราฟื้นฟู Eitr (%)
+
+  ShieldBlockPower          โบนัสพลังบล็อกของโล่ (%)
+  ShieldDeflectionForce     โบนัสแรงปัดป้อง (%)
+  ShieldTimedBlock          โบนัสตัวคูณ Parry (+x)
+  ShieldBlockStaminaReduction  ลด Stamina ที่ใช้ในการบล็อก (%)
+
+  DodgeStaminaReduction     ลด Stamina กลิ้งหลบ (%)
+  RunStaminaReduction       ลด Stamina วิ่งสปรินต์ (%)
+  JumpStaminaReduction      ลด Stamina กระโดด (%)
+
+─── Cheat.yml (โหมดโกง — ทำงานเมื่อเปิด EnableCheatAbilities) ───
+
+  MaxHealth                 เพิ่ม Max Health (หน่วยตรง)
+  MaxStamina                เพิ่ม Max Stamina (หน่วยตรง)
+  MaxEitr                   เพิ่ม Max Eitr (หน่วยตรง)
+  HealthRegen               เพิ่มอัตราฟื้นฟู Health (%)
+  StaminaRegen              เพิ่มอัตราฟื้นฟู Stamina (%)
+  HealingMultiplier         เพิ่มประสิทธิภาพการฮีล (%)
+
+====================================================================
+ รูปแบบการใช้งาน (YAML Syntax)
+====================================================================
+
+  Levels:
+    <ระดับ>:
+      - Ability: <Ability ID>
+        Value: <ค่าที่เพิ่มขึ้นในระดับนั้น>
+
+  ตัวอย่าง:
+    Levels:
+      1:
+        - Ability: WeaponDamage
+          Value: 5.0        # เพิ่มดาเมจ 5%
+        - Ability: MaxDurability
+          Value: 10.0       # เพิ่มความทนทาน 10%
+      5:
+        - Ability: CarryWeightBonus
+          Value: 25.0       # เพิ่มน้ำหนักบรรทุก +25
+
+====================================================================

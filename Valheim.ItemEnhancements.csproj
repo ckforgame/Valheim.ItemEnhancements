@@ -87,7 +87,7 @@
       <PluginFiles Include="$(TargetDir)*.dll" />
       <PluginFiles Include="$(TargetDir)$(TargetName).pdb" Condition="Exists('$(TargetDir)$(TargetName).pdb')" />
       <ConfigFiles Include="$(ProjectDir)Configuration\*.cfg" />
-      <YamlFiles Include="$(ProjectDir)Configuration\Yaml\*.yml" />
+      <YamlFiles Include="$(ProjectDir)Configuration\Yaml\*.yml;$(ProjectDir)Configuration\Yaml\*.txt" />
     </ItemGroup>
     <MakeDir Directories="$(R2ModmanPluginDir)" Condition="Exists('$(BepInExCore)')" />
     <Copy SourceFiles="@(PluginFiles)" DestinationFolder="$(R2ModmanPluginDir)" Condition="Exists('$(BepInExCore)')" />

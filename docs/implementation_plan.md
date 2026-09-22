@@ -144,3 +144,21 @@ Valheim.ItemEnhancements/
    - ตรวจสอบเอฟเฟกต์เสียงและข้อความแจ้งเตือน
 5. ตรวจสอบค่าสเตตัส (Damage, Armor, Block, Stamina Reduction, Movement Penalty) ว่าเพิ่มขึ้นจริงในเกมและแสดงใน Tooltip ถูกต้อง
 6. บันทึกเกม ออกและเข้าใหม่ เพื่อยืนยันว่าระดับ +X ยังคงอยู่และไม่หายไป
+
+---
+
+## 4. สถาปัตยกรรมระบบ YAML Configuration และ Level-by-Level Abilities
+
+### 4.1 การจัดเก็บและการแยกส่วน (Decoupled Modular Architecture)
+- **โฟลเดอร์เป้าหมาย**: `BepInEx/config/ckforgame.ItemEnhancements/`
+- **ไฟล์โครงสร้าง**:
+  - `AbilityReference.txt`: คู่มืออ้างอิงกลาง รวบรวม Ability ID ทั้งหมด 25 ตัว พร้อมคำอธิบายและตัวอย่างไวยากรณ์ (Single Source of Truth)
+  - `Item.yml`: กำหนดสเตตัสคงที่และ `Levels:` แบบรายระดับ (+1 ถึง +20) สำหรับอาวุธ, ความทนทาน, น้ำหนัก และเครื่องประดับ
+  - `Armor.yml`: กำหนดสเตตัสคงที่และ `Levels:` แบบรายระดับ (+1 ถึง +20) สำหรับเกราะ, โล่, การลด Stamina และ EitrRegen
+  - `Cheat.yml`: กำหนดสวิตช์ `EnableCheatAbilities` และ `Levels:` สำหรับสเตตัสพิเศษ (MaxHealth, MaxStamina, MaxEitr, HealthRegen, StaminaRegen, HealingMultiplier)
+  - `Success.yml`: กำหนดอัตราความสำเร็จ, กฎ SafeLevel, คัมภีร์ตีบวก และการดรอป
+- **การยกเลิก Abilities.yml**: นำรายชื่อ abilities รายระดับผสานเข้ากับไฟล์ประเภทของตนเองโดยตรง เพื่อความกระชับและง่ายต่อการดูแล
+- **ระบบคำนวณแบบผลรวมสะสม (Cumulative Addition)**: ในแต่ละระดับ ค่า Value ของ Ability จะถูกสะสมทบจากระดับ 1 ขึ้นมาจนถึงระดับปัจจุบัน
+- **ความปลอดภัยของโหมดโกง (Cheat Safety Gate)**: ใน `YamlConfigManager.GetCumulativeAbilityValue` จะข้ามการคำนวณ `Cheat.Levels` ทันทีเมื่อ `EnableCheatAbilities` เป็น `false`
+- **ระบบ Override ที่ปลอดภัย**: รองรับ `*.override.yml` ที่ผู้เล่นสามารถคัสตอมเฉพาะคีย์หรือระดับที่ต้องการได้ โดยไม่ถูกเขียนทับเมื่อม็อดอัปเดต พร้อม Hot-Reload แบบเรียลไทม์
+

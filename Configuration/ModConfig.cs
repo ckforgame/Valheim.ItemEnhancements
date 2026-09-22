@@ -40,43 +40,9 @@ namespace Valheim.ItemEnhancements.Configuration
         public static ConfigValue<int> BossMinDrop => new(() => YamlConfigManager.Success.BossMinDrop);
         public static ConfigValue<int> BossMaxDrop => new(() => YamlConfigManager.Success.BossMaxDrop);
 
-        // Stat Scaling: Weapons
-        public static ConfigValue<float> WeaponDamageBonusPerLevel => new(() => YamlConfigManager.Item.WeaponDamageBonusPerLevel);
-        public static ConfigValue<float> WeaponBackstabBonusPerLevel => new(() => YamlConfigManager.Item.WeaponBackstabBonusPerLevel);
-        public static ConfigValue<float> WeaponStaminaReductionPerLevel => new(() => YamlConfigManager.Item.WeaponStaminaReductionPerLevel);
-        public static ConfigValue<float> WeaponEitrReductionPerLevel => new(() => YamlConfigManager.Item.WeaponEitrReductionPerLevel);
-
-        // Stat Scaling: Armor & Defense
-        public static ConfigValue<float> ArmorFlatBonusPerLevel => new(() => YamlConfigManager.Armor.ArmorFlatBonusPerLevel);
-        public static ConfigValue<float> ArmorPercentBonusPerLevel => new(() => YamlConfigManager.Armor.ArmorPercentBonusPerLevel);
-        public static ConfigValue<float> ArmorMovementPenaltyReductionPerLevel => new(() => YamlConfigManager.Armor.ArmorMovementPenaltyReductionPerLevel);
-        public static ConfigValue<float> EitrRegenBonusPerLevel => new(() => YamlConfigManager.Armor.EitrRegenBonusPerLevel);
-
-        // Stat Scaling: Shields
-        public static ConfigValue<float> ShieldBlockPowerBonusPerLevel => new(() => YamlConfigManager.Armor.ShieldBlockPowerBonusPerLevel);
-        public static ConfigValue<float> ShieldDeflectionBonusPerLevel => new(() => YamlConfigManager.Armor.ShieldDeflectionBonusPerLevel);
-        public static ConfigValue<float> ShieldTimedBlockBonusPerLevel => new(() => YamlConfigManager.Armor.ShieldTimedBlockBonusPerLevel);
-        public static ConfigValue<float> ShieldBlockStaminaReductionPerLevel => new(() => YamlConfigManager.Armor.ShieldBlockStaminaReductionPerLevel);
-
-        // Stat Scaling: Player Mobility & Utilities
-        public static ConfigValue<float> DodgeStaminaReductionPerLevel => new(() => YamlConfigManager.Armor.DodgeStaminaReductionPerLevel);
-        public static ConfigValue<float> RunStaminaReductionPerLevel => new(() => YamlConfigManager.Armor.RunStaminaReductionPerLevel);
-        public static ConfigValue<float> JumpStaminaReductionPerLevel => new(() => YamlConfigManager.Armor.JumpStaminaReductionPerLevel);
-        public static ConfigValue<float> CarryWeightBonusPerLevel => new(() => YamlConfigManager.Item.CarryWeightBonusPerLevel);
-
-        // General Stat Scaling
-        public static ConfigValue<float> MaxDurabilityBonusPerLevel => new(() => YamlConfigManager.Item.MaxDurabilityBonusPerLevel);
-        public static ConfigValue<float> WeightReductionPerLevel => new(() => YamlConfigManager.Item.WeightReductionPerLevel);
-
         // Cheat Abilities
         public static ConfigValue<bool> EnableCheatAbilities => new(() => YamlConfigManager.Cheat.EnableCheatAbilities);
-        public static ConfigValue<float> CheatMaxHealthPerLevel => new(() => YamlConfigManager.Cheat.CheatMaxHealthPerLevel);
-        public static ConfigValue<float> CheatMaxStaminaPerLevel => new(() => YamlConfigManager.Cheat.CheatMaxStaminaPerLevel);
-        public static ConfigValue<float> CheatMaxEitrPerLevel => new(() => YamlConfigManager.Cheat.CheatMaxEitrPerLevel);
-        public static ConfigValue<float> CheatHealthRegenPerLevel => new(() => YamlConfigManager.Cheat.CheatHealthRegenPerLevel);
-        public static ConfigValue<float> CheatStaminaRegenPerLevel => new(() => YamlConfigManager.Cheat.CheatStaminaRegenPerLevel);
-        public static ConfigValue<float> CheatEitrRegenPerLevel => new(() => YamlConfigManager.Cheat.CheatEitrRegenPerLevel);
-        public static ConfigValue<float> CheatHealingMultiplierPerLevel => new(() => YamlConfigManager.Cheat.CheatHealingMultiplierPerLevel);
+
 
         #endregion
 

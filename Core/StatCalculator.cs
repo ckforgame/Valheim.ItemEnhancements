@@ -246,7 +246,7 @@ namespace Valheim.ItemEnhancements.Core
             if (!IsCheatEnabled || level <= 0 || item == null) return 0f;
             if (IsArmor(item) || IsShield(item) || IsUtility(item))
             {
-                return YamlConfigManager.GetCumulativeAbilityValue("CheatMaxHealth", level);
+                return YamlConfigManager.GetCumulativeAbilityValue("MaxHealth", level);
             }
             return 0f;
         }
@@ -256,7 +256,7 @@ namespace Valheim.ItemEnhancements.Core
             if (!IsCheatEnabled || level <= 0 || item == null) return 0f;
             if (IsArmor(item) || IsWeapon(item) || IsUtility(item))
             {
-                return YamlConfigManager.GetCumulativeAbilityValue("CheatMaxStamina", level);
+                return YamlConfigManager.GetCumulativeAbilityValue("MaxStamina", level);
             }
             return 0f;
         }
@@ -266,7 +266,7 @@ namespace Valheim.ItemEnhancements.Core
             if (!IsCheatEnabled || level <= 0 || item == null) return 0f;
             if (IsArmor(item) || IsWeapon(item) || IsUtility(item))
             {
-                return YamlConfigManager.GetCumulativeAbilityValue("CheatMaxEitr", level);
+                return YamlConfigManager.GetCumulativeAbilityValue("MaxEitr", level);
             }
             return 0f;
         }
@@ -276,7 +276,7 @@ namespace Valheim.ItemEnhancements.Core
             if (!IsCheatEnabled || level <= 0 || item == null) return 0f;
             if (IsArmor(item) || IsShield(item) || IsUtility(item))
             {
-                return YamlConfigManager.GetCumulativeAbilityValue("CheatHealthRegen", level) / 100f;
+                return YamlConfigManager.GetCumulativeAbilityValue("HealthRegen", level) / 100f;
             }
             return 0f;
         }
@@ -286,18 +286,14 @@ namespace Valheim.ItemEnhancements.Core
             if (!IsCheatEnabled || level <= 0 || item == null) return 0f;
             if (IsArmor(item) || IsShield(item) || IsWeapon(item) || IsUtility(item))
             {
-                return YamlConfigManager.GetCumulativeAbilityValue("CheatStaminaRegen", level) / 100f;
+                return YamlConfigManager.GetCumulativeAbilityValue("StaminaRegen", level) / 100f;
             }
             return 0f;
         }
 
         public static float GetCheatItemEitrRegen(ItemDrop.ItemData item, int level)
         {
-            if (!IsCheatEnabled || level <= 0 || item == null) return 0f;
-            if (IsArmor(item) || IsWeapon(item) || IsUtility(item))
-            {
-                return YamlConfigManager.GetCumulativeAbilityValue("CheatEitrRegen", level) / 100f;
-            }
+            // EitrRegen ใช้ค่าจาก Armor.yml โดยตรง ไม่มี Cheat variant แยก
             return 0f;
         }
 
@@ -306,7 +302,7 @@ namespace Valheim.ItemEnhancements.Core
             if (!IsCheatEnabled || level <= 0 || item == null) return 0f;
             if (IsArmor(item) || IsShield(item) || IsUtility(item))
             {
-                return YamlConfigManager.GetCumulativeAbilityValue("CheatHealingMultiplier", level) / 100f;
+                return YamlConfigManager.GetCumulativeAbilityValue("HealingMultiplier", level) / 100f;
             }
             return 0f;
         }

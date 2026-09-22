@@ -110,16 +110,16 @@ Time Elapsed 00:00:03.60
 
 ## 4. รายละเอียดฟีเจอร์ Cheat Abilities (โหมดโกงเสริม)
 
-- **การเปิด/ปิด**: ควบคุมผ่านหมวด `[10. Cheat Abilities (ความสามารถพิเศษเสริม / โหมดโกง)]` ด้วยตัวแปร `EnableCheatAbilities = true` / `false`
-- **ความจุสเตตัส (Capacities)**:
-  - `CheatMaxHealthPerLevel = 5` (+100 HP ที่ระดับ +20 ต่อชิ้นบนเกราะ/โล่/เครื่องประดับ)
-  - `CheatMaxStaminaPerLevel = 5` (+100 Stamina ที่ระดับ +20 ต่อชิ้นบนเกราะ/อาวุธ/เครื่องประดับ)
-  - `CheatMaxEitrPerLevel = 5` (+100 Eitr ที่ระดับ +20 ต่อชิ้น ทำให้ร่ายเวทได้แม้ไม่ได้กินอาหารเวทมนตร์!)
-- **อัตราการฟื้นฟูและการฮีล (Regenerations & Healing)**:
-  - `CheatHealthRegenPerLevel = 0.05` (+100% ที่ระดับ +20)
-  - `CheatStaminaRegenPerLevel = 0.05` (+100% ที่ระดับ +20)
-  - `CheatEitrRegenPerLevel = 0.05` (+100% ที่ระดับ +20)
-  - `CheatHealingMultiplierPerLevel = 0.05` (+100% ปริมาณฮีลที่ได้รับ)
+- **การเปิด/ปิด**: ควบคุมผ่านตัวแปร `EnableCheatAbilities = true` / `false` ใน `Cheat.yml` หรือผ่าน Config
+- **ความปลอดภัย (Safety Gate)**: ในระบบคำนวณ `YamlConfigManager.GetCumulativeAbilityValue()` จะตรวจสอบ `Cheat?.EnableCheatAbilities == true` ก่อน หากไม่ได้เปิดใช้งาน ระบบจะข้าม `Cheat.Levels` ทันที แม้จะมีการเขียน Ability ไว้ในไฟล์ ทำให้ไม่มีผลกระทบต่อสมดุลเกมทั่วไป
+- **Ability IDs ใน Cheat.yml (ไม่มี prefix `Cheat` นำหน้า)**:
+  - `MaxHealth`: เพิ่ม Max Health (ค่าตรง เช่น +5 ต่อระดับ สูงสุด +100 HP ที่ +20)
+  - `MaxStamina`: เพิ่ม Max Stamina (ค่าตรง เช่น +5 ต่อระดับ สูงสุด +100 Stamina ที่ +20)
+  - `MaxEitr`: เพิ่ม Max Eitr (ค่าตรง เช่น +5 ต่อระดับ ทำให้ร่ายเวทได้แม้ไม่ได้กินอาหารเวท)
+  - `HealthRegen`: เพิ่มอัตราฟื้นฟูเลือด (% เช่น +5% ต่อระดับ สูงสุด +100%)
+  - `StaminaRegen`: เพิ่มอัตราฟื้นฟูสเตมินา (% เช่น +5% ต่อระดับ สูงสุด +100%)
+  - `HealingMultiplier`: เพิ่มประสิทธิภาพการฮีลที่ได้รับ (% เช่น +5% ต่อระดับ สูงสุด +100%)
+- **ฟื้นฟู Eitr (`EitrRegen`)**: ปลายทางเป็นคุณสมบัติเดียวกันกับของชุดเกราะ จึงใช้ Ability ID `EitrRegen` ใน `Armor.yml` โดยตรง ไม่จำเป็นต้องมีคีย์ซ้ำซ้อนใน Cheat
 - **การประสานงานกับระบบเกม (Seamless Harmony Hooks)**:
   - Intercept ค่า Max Health ใน `Player.SetMaxHealth`, Max Stamina ใน `Player.SetMaxStamina`, และ Max Eitr ใน `Player.SetMaxEitr`
   - ซิงค์ทันทีเมื่อสวมใส่/ถอดอุปกรณ์ผ่าน `Humanoid.EquipItem` และ `Humanoid.UnequipItem`
@@ -132,14 +132,24 @@ Time Elapsed 00:00:03.60
 ## 5. รายละเอียดระบบแยกไฟล์ YAML และการทำงานของ *.override.yml
 
 - **ไฟล์จัดเก็บ**: อยู่ในโฟลเดอร์ `BepInEx/config/ckforgame.ItemEnhancements/`:
+  - `AbilityReference.txt`: เอกสารอ้างอิงกลาง (Single Source of Truth) รวมรายชื่อ Ability ID ทั้งหมด 25 ตัว พร้อมหมวดหมู่ คำอธิบาย และตัวอย่าง YAML
   - `Success.yml`: อัตราสำเร็จ +1 ถึง +20, SafeLevel, กฎล้มเหลว, ค่าธรรมเนียม, การดรอปคัมภีร์
-  - `Item.yml`: อาวุธ (Damage, Stamina, Eitr, Backstab), ความทนทาน, น้ำหนัก, เครื่องประดับ
-  - `Armor.yml`: พลังป้องกันเกราะ, โล่ (Block, Deflection, Parry), ลด Stamina กลิ้ง/วิ่ง/กระโดด
-  - `Cheat.yml`: โหมดโกง Capacity เลือด/สเตมินา/พลังเวท และรีเจนต่างๆ
+  - `Item.yml`: อาวุธ (Damage, Stamina, Eitr, Backstab), ความทนทาน, น้ำหนัก, เครื่องประดับ พร้อมส่วน `Levels:` กำหนด Ability รายระดับ (+1 ถึง +20)
+  - `Armor.yml`: พลังป้องกันเกราะ, โล่ (Block, Deflection, Parry), ลด Stamina กลิ้ง/วิ่ง/กระโดด, EitrRegen พร้อมส่วน `Levels:` กำหนด Ability รายระดับ (+1 ถึง +20)
+  - `Cheat.yml`: โหมดโกง (MaxHealth, MaxStamina, MaxEitr, HealthRegen, StaminaRegen, HealingMultiplier) พร้อมส่วน `Levels:`
 - **กลไก Override ที่ปลอดภัยต่อการอัปเดต (Safe Overrides)**:
-  - ผู้เล่นสามารถสร้างไฟล์ เช่น `Item.override.yml`, `Success.override.yml` แล้วใส่เฉพาะฟิลด์ที่ต้องการแก้
+  - ผู้เล่นสามารถสร้างไฟล์ เช่น `Item.override.yml`, `Armor.override.yml`, `Cheat.override.yml` หรือ `Success.override.yml` แล้วใส่เฉพาะฟิลด์หรือระดับที่ต้องการแก้
   - ระบบจะทำ Partial Merge นำค่าจาก override มาทับค่าฐานเฉพาะคีย์ที่ระบุ โดยค่าที่เหลือยังคงอ่านจากไฟล์หลักอย่างถูกต้อง
   - เมื่อ Mod ได้รับการอัปเดต ตัวติดตั้งจะอัปเดตเฉพาะไฟล์ `.yml` หลัก แต่จะไม่แตะต้องไฟล์ `*.override.yml` ของผู้เล่น
 - **Hot-Reload ในตัว**:
   - มี `FileSystemWatcher` คอยตรวจจับการเปลี่ยนแปลงไฟล์ในโฟลเดอร์ YAML แบบ Real-time ทันทีที่เซฟไฟล์ ไม่ต้องรีสตาร์ตเกม
+
+---
+
+## 6. การปรับปรุงสถาปัตยกรรมระดับรายขั้น (Level-by-Level Abilities Architecture)
+
+1. **ยกเลิก `Abilities.yml`**: นำคอนฟิกแบบรายระดับเข้าไปรวมกับ `Item.yml` และ `Armor.yml` โดยตรง ทำให้คอนฟิกไอเทมแต่ละประเภท (อาวุธ/เกราะ) อยู่ในไฟล์เดียวจบ ไม่ต้องสลับดูหลายไฟล์
+2. **ศูนย์รวมคำอธิบาย `AbilityReference.txt`**: เพื่อไม่ให้มีเอกสารซ้ำซ้อนในแต่ละไฟล์ จึงจัดทำไฟล์ Reference แผ่นเดียวที่แจกแจง Ability ID ทั้ง 25 ตัว ไวยากรณ์ตัวอย่าง และคำอธิบายภาษาไทย พร้อมคัดลอกลงโฟลเดอร์ BepInEx/config อัตโนมัติเมื่อบิลด์
+3. **การคำนวณผลรวมสะสม (Cumulative Addition)**: ค่า Ability จากระดับต่ำกว่าจะถูกนำมาบวกสะสมจนถึงระดับปัจจุบันของไอเทมอย่างถูกต้อง และรองรับการ Override รายระดับได้อย่างยืดหยุ่น
+
 

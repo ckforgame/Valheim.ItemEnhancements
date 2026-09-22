@@ -19,7 +19,7 @@ namespace Valheim.ItemEnhancements.Configuration
         public static ItemConfigData Item { get; private set; } = new ItemConfigData();
         public static ArmorConfigData Armor { get; private set; } = new ArmorConfigData();
         public static CheatConfigData Cheat { get; private set; } = new CheatConfigData();
-        public static AbilitiesConfigData Abilities { get; private set; } = new AbilitiesConfigData();
+
 
         private static FileSystemWatcher _watcher;
         private static System.Threading.Timer _reloadDebounceTimer;
@@ -72,7 +72,7 @@ namespace Valheim.ItemEnhancements.Configuration
             Item = LoadWithOverride<ItemConfigData>("Item.yml", "Item.override.yml");
             Armor = LoadWithOverride<ArmorConfigData>("Armor.yml", "Armor.override.yml");
             Cheat = LoadWithOverride<CheatConfigData>("Cheat.yml", "Cheat.override.yml");
-            Abilities = LoadWithOverride<AbilitiesConfigData>("Abilities.yml", "Abilities.override.yml");
+
 
             LogInfo($"[Valheim.ItemEnhancements] YAML Configurations loaded successfully from '{ConfigDirectory}'.");
             OnConfigReloaded?.Invoke();
@@ -80,11 +80,22 @@ namespace Valheim.ItemEnhancements.Configuration
 
         public static float GetCumulativeAbilityValue(string abilityName, int level)
         {
-            if (level <= 0 || Abilities?.Levels == null) return 0f;
+            if (level <= 0) return 0f;
+            float total = 0f;
+            total += SumFromLevels(Item?.Levels, abilityName, level);
+            total += SumFromLevels(Armor?.Levels, abilityName, level);
+            if (Cheat?.EnableCheatAbilities == true)
+                total += SumFromLevels(Cheat.Levels, abilityName, level);
+            return total;
+        }
+
+        private static float SumFromLevels(Dictionary<int, List<AbilityEntry>> levels, string abilityName, int level)
+        {
+            if (levels == null) return 0f;
             float total = 0f;
             for (int l = 1; l <= level; l++)
             {
-                if (Abilities.Levels.TryGetValue(l, out var list) && list != null)
+                if (levels.TryGetValue(l, out var list) && list != null)
                 {
                     foreach (var entry in list)
                     {
@@ -325,7 +336,7 @@ namespace Valheim.ItemEnhancements.Configuration
             WriteDefaultIfMissing("Item.yml", DefaultItemYaml);
             WriteDefaultIfMissing("Armor.yml", DefaultArmorYaml);
             WriteDefaultIfMissing("Cheat.yml", DefaultCheatYaml);
-            WriteDefaultIfMissing("Abilities.yml", DefaultAbilitiesYaml);
+
         }
 
         private static void WriteDefaultIfMissing(string fileName, string content)
@@ -403,72 +414,6 @@ BossMaxDrop: 3
 
         private const string DefaultItemYaml = @"# ====================================================================
 # VALHEIM ITEM ENHANCEMENTS - ITEM & WEAPON ABILITIES CONFIGURATION
-# หมวดหมู่อาวุธ, คุณสมบัติทั่วไป (ความทนทาน, น้ำหนัก) และเครื่องประดับ
-# ====================================================================
-# หากต้องการปรับแต่งค่าโดยไม่ให้การอัปเดต Mod ส่งผลกระทบ
-# ให้สร้างไฟล์ ""Item.override.yml"" ในโฟลเดอร์เดียวกันนี้
-# และใส่เฉพาะค่าที่ต้องการแก้ไข ระบบจะนำค่า override มาทับค่าเดิมอัตโนมัติ
-# ====================================================================
-
-WeaponDamageBonusPerLevel: 0.05
-WeaponBackstabBonusPerLevel: 0.05
-WeaponStaminaReductionPerLevel: 0.01
-WeaponEitrReductionPerLevel: 0.01
-
-MaxDurabilityBonusPerLevel: 0.05
-WeightReductionPerLevel: 0.015
-
-CarryWeightBonusPerLevel: 5.0
-";
-
-        private const string DefaultArmorYaml = @"# ====================================================================
-# VALHEIM ITEM ENHANCEMENTS - ARMOR & SHIELD ABILITIES CONFIGURATION
-# หมวดหมู่ชุดเกราะ, โล่ และความคล่องตัว (Mobility)
-# ====================================================================
-# หากต้องการปรับแต่งค่าโดยไม่ให้การอัปเดต Mod ส่งผลกระทบ
-# ให้สร้างไฟล์ ""Armor.override.yml"" ในโฟลเดอร์เดียวกันนี้
-# และใส่เฉพาะค่าที่ต้องการแก้ไข ระบบจะนำค่า override มาทับค่าเดิมอัตโนมัติ
-# ====================================================================
-
-ArmorFlatBonusPerLevel: 1.5
-ArmorPercentBonusPerLevel: 0.02
-ArmorMovementPenaltyReductionPerLevel: 0.05
-EitrRegenBonusPerLevel: 0.02
-
-ShieldBlockPowerBonusPerLevel: 0.05
-ShieldDeflectionBonusPerLevel: 0.05
-ShieldTimedBlockBonusPerLevel: 0.02
-ShieldBlockStaminaReductionPerLevel: 0.015
-
-DodgeStaminaReductionPerLevel: 0.01
-RunStaminaReductionPerLevel: 0.005
-JumpStaminaReductionPerLevel: 0.005
-";
-
-        private const string DefaultCheatYaml = @"# ====================================================================
-# VALHEIM ITEM ENHANCEMENTS - CHEAT ABILITIES CONFIGURATION (โหมดโกงเสริม)
-# หมวดหมู่ความสามารถพิเศษระดับโกง (เพิ่ม Capacity เลือด, สเตมินา, พลังเวท และรีเจนต่างๆ)
-# ====================================================================
-# หากต้องการปรับแต่งค่าโดยไม่ให้การอัปเดต Mod ส่งผลกระทบ
-# ให้สร้างไฟล์ ""Cheat.override.yml"" ในโฟลเดอร์เดียวกันนี้
-# และใส่เฉพาะค่าที่ต้องการแก้ไข ระบบจะนำค่า override มาทับค่าเดิมอัตโนมัติ
-# ====================================================================
-
-EnableCheatAbilities: false
-
-CheatMaxHealthPerLevel: 5.0
-CheatMaxStaminaPerLevel: 5.0
-CheatMaxEitrPerLevel: 5.0
-
-CheatHealthRegenPerLevel: 0.05
-CheatStaminaRegenPerLevel: 0.05
-CheatEitrRegenPerLevel: 0.05
-CheatHealingMultiplierPerLevel: 0.05
-";
-
-        private const string DefaultAbilitiesYaml = @"# ====================================================================
-# VALHEIM ITEM ENHANCEMENTS - ABILITIES BY LEVEL CONFIGURATION
-# กำหนด Abilities และเปอร์เซ็นต์/ค่าพลัง ที่จะได้รับในแต่ละระดับ (Level 1 - 20)
 # ====================================================================
 
 Levels:
@@ -479,71 +424,125 @@ Levels:
       Value: 2.0
     - Ability: MaxDurability
       Value: 5.0
-    - Ability: DodgeStaminaReduction
-      Value: 1.0
   2:
     - Ability: WeaponDamage
       Value: 5.0
-    - Ability: ArmorFlat
-      Value: 1.5
-    - Ability: ShieldBlockPower
-      Value: 5.0
   3:
     - Ability: WeaponAttackStamina
-      Value: 2.0
-    - Ability: RunStaminaReduction
-      Value: 1.0
-    - Ability: ShieldBlockStaminaReduction
       Value: 2.0
     - Ability: WeightReduction
       Value: 3.0
   4:
     - Ability: WeaponDamage
       Value: 5.0
-    - Ability: ArmorPercent
-      Value: 2.0
-    - Ability: JumpStaminaReduction
-      Value: 1.0
     - Ability: WeaponBackstab
       Value: 5.0
   5:
     - Ability: MaxDurability
       Value: 5.0
-    - Ability: ShieldDeflectionForce
-      Value: 5.0
-    - Ability: ShieldTimedBlock
-      Value: 2.0
     - Ability: CarryWeightBonus
-      Value: 10.0
-    - Ability: CheatMaxHealth
-      Value: 10.0
-    - Ability: CheatMaxStamina
-      Value: 10.0
-    - Ability: CheatMaxEitr
       Value: 10.0
   6:
     - Ability: WeaponDamage
-      Value: 5.0
-    - Ability: ArmorFlat
-      Value: 1.5
-    - Ability: ShieldBlockPower
       Value: 5.0
   7:
     - Ability: WeaponAttackStamina
       Value: 2.0
     - Ability: WeaponAttackEitr
       Value: 2.0
-    - Ability: DodgeStaminaReduction
-      Value: 1.0
     - Ability: WeightReduction
       Value: 3.0
   8:
     - Ability: WeaponDamage
       Value: 5.0
-    - Ability: ArmorPercent
-      Value: 2.0
     - Ability: WeaponBackstab
       Value: 5.0
+  10:
+    - Ability: MaxDurability
+      Value: 5.0
+    - Ability: CarryWeightBonus
+      Value: 15.0
+  11:
+    - Ability: WeaponDamage
+      Value: 5.0
+  12:
+    - Ability: WeaponAttackStamina
+      Value: 2.0
+    - Ability: WeightReduction
+      Value: 3.0
+  13:
+    - Ability: WeaponDamage
+      Value: 5.0
+  14:
+    - Ability: WeaponBackstab
+      Value: 5.0
+  15:
+    - Ability: MaxDurability
+      Value: 5.0
+    - Ability: CarryWeightBonus
+      Value: 25.0
+  16:
+    - Ability: WeaponDamage
+      Value: 5.0
+  17:
+    - Ability: WeaponAttackStamina
+      Value: 2.0
+    - Ability: WeightReduction
+      Value: 3.0
+  18:
+    - Ability: WeaponDamage
+      Value: 5.0
+  19:
+    - Ability: WeaponBackstab
+      Value: 5.0
+  20:
+    - Ability: WeaponDamage
+      Value: 10.0
+    - Ability: MaxDurability
+      Value: 10.0
+    - Ability: CarryWeightBonus
+      Value: 50.0
+";
+
+        private const string DefaultArmorYaml = @"# ====================================================================
+# VALHEIM ITEM ENHANCEMENTS - ARMOR & SHIELD ABILITIES CONFIGURATION
+# ====================================================================
+
+Levels:
+  1:
+    - Ability: DodgeStaminaReduction
+      Value: 1.0
+  2:
+    - Ability: ArmorFlat
+      Value: 1.5
+    - Ability: ShieldBlockPower
+      Value: 5.0
+  3:
+    - Ability: RunStaminaReduction
+      Value: 1.0
+    - Ability: ShieldBlockStaminaReduction
+      Value: 2.0
+  4:
+    - Ability: ArmorPercent
+      Value: 2.0
+    - Ability: JumpStaminaReduction
+      Value: 1.0
+  5:
+    - Ability: ShieldDeflectionForce
+      Value: 5.0
+    - Ability: ShieldTimedBlock
+      Value: 2.0
+  6:
+    - Ability: ArmorFlat
+      Value: 1.5
+    - Ability: ShieldBlockPower
+      Value: 5.0
+  7:
+    - Ability: DodgeStaminaReduction
+      Value: 1.0
+  8:
+    - Ability: ArmorPercent
+      Value: 2.0
   9:
     - Ability: ShieldBlockPower
       Value: 5.0
@@ -552,93 +551,77 @@ Levels:
     - Ability: RunStaminaReduction
       Value: 1.0
   10:
-    - Ability: MaxDurability
-      Value: 5.0
     - Ability: ArmorMovementPenaltyReduction
       Value: 15.0
     - Ability: EitrRegen
       Value: 10.0
-    - Ability: CarryWeightBonus
-      Value: 15.0
-    - Ability: CheatHealthRegen
-      Value: 10.0
-    - Ability: CheatStaminaRegen
-      Value: 10.0
-    - Ability: CheatEitrRegen
-      Value: 10.0
   11:
-    - Ability: WeaponDamage
-      Value: 5.0
     - Ability: ArmorFlat
       Value: 2.0
   12:
-    - Ability: WeaponAttackStamina
-      Value: 2.0
     - Ability: ShieldBlockPower
       Value: 5.0
-    - Ability: WeightReduction
-      Value: 3.0
   13:
-    - Ability: WeaponDamage
-      Value: 5.0
     - Ability: ArmorPercent
       Value: 2.0
     - Ability: JumpStaminaReduction
       Value: 1.0
   14:
-    - Ability: WeaponBackstab
-      Value: 5.0
     - Ability: ShieldTimedBlock
       Value: 2.0
     - Ability: DodgeStaminaReduction
       Value: 1.0
   15:
-    - Ability: MaxDurability
-      Value: 5.0
     - Ability: ArmorMovementPenaltyReduction
       Value: 20.0
     - Ability: ShieldDeflectionForce
       Value: 5.0
-    - Ability: CarryWeightBonus
-      Value: 25.0
-    - Ability: CheatHealingMultiplier
-      Value: 15.0
   16:
-    - Ability: WeaponDamage
-      Value: 5.0
     - Ability: ArmorFlat
       Value: 2.0
   17:
-    - Ability: WeaponAttackStamina
-      Value: 2.0
     - Ability: ShieldBlockPower
       Value: 5.0
-    - Ability: WeightReduction
-      Value: 3.0
   18:
-    - Ability: WeaponDamage
-      Value: 5.0
     - Ability: ArmorPercent
       Value: 2.0
   19:
-    - Ability: WeaponBackstab
-      Value: 5.0
     - Ability: ShieldTimedBlock
       Value: 2.0
     - Ability: EitrRegen
       Value: 10.0
   20:
-    - Ability: WeaponDamage
-      Value: 10.0
     - Ability: ArmorFlat
       Value: 3.0
-    - Ability: MaxDurability
-      Value: 10.0
     - Ability: ArmorMovementPenaltyReduction
       Value: 25.0
-    - Ability: CarryWeightBonus
-      Value: 50.0
 ";
+
+        private const string DefaultCheatYaml = @"# ====================================================================
+# VALHEIM ITEM ENHANCEMENTS - CHEAT ABILITIES CONFIGURATION (โหมดโกงเสริม)
+# ====================================================================
+
+EnableCheatAbilities: false
+
+Levels:
+  5:
+    - Ability: MaxHealth
+      Value: 10.0
+    - Ability: MaxStamina
+      Value: 10.0
+    - Ability: MaxEitr
+      Value: 10.0
+  10:
+    - Ability: HealthRegen
+      Value: 10.0
+    - Ability: StaminaRegen
+      Value: 10.0
+  15:
+    - Ability: HealingMultiplier
+      Value: 15.0
+";
+
+
 
         #endregion
     }
@@ -693,46 +676,18 @@ Levels:
 
     public class ItemConfigData
     {
-        public float WeaponDamageBonusPerLevel { get; set; } = 0.05f;
-        public float WeaponBackstabBonusPerLevel { get; set; } = 0.05f;
-        public float WeaponStaminaReductionPerLevel { get; set; } = 0.01f;
-        public float WeaponEitrReductionPerLevel { get; set; } = 0.01f;
-
-        public float MaxDurabilityBonusPerLevel { get; set; } = 0.05f;
-        public float WeightReductionPerLevel { get; set; } = 0.015f;
-
-        public float CarryWeightBonusPerLevel { get; set; } = 5.0f;
+        public Dictionary<int, List<AbilityEntry>> Levels { get; set; } = new Dictionary<int, List<AbilityEntry>>();
     }
 
     public class ArmorConfigData
     {
-        public float ArmorFlatBonusPerLevel { get; set; } = 1.5f;
-        public float ArmorPercentBonusPerLevel { get; set; } = 0.02f;
-        public float ArmorMovementPenaltyReductionPerLevel { get; set; } = 0.05f;
-        public float EitrRegenBonusPerLevel { get; set; } = 0.02f;
-
-        public float ShieldBlockPowerBonusPerLevel { get; set; } = 0.05f;
-        public float ShieldDeflectionBonusPerLevel { get; set; } = 0.05f;
-        public float ShieldTimedBlockBonusPerLevel { get; set; } = 0.02f;
-        public float ShieldBlockStaminaReductionPerLevel { get; set; } = 0.015f;
-
-        public float DodgeStaminaReductionPerLevel { get; set; } = 0.01f;
-        public float RunStaminaReductionPerLevel { get; set; } = 0.005f;
-        public float JumpStaminaReductionPerLevel { get; set; } = 0.005f;
+        public Dictionary<int, List<AbilityEntry>> Levels { get; set; } = new Dictionary<int, List<AbilityEntry>>();
     }
 
     public class CheatConfigData
     {
         public bool EnableCheatAbilities { get; set; } = false;
-
-        public float CheatMaxHealthPerLevel { get; set; } = 5.0f;
-        public float CheatMaxStaminaPerLevel { get; set; } = 5.0f;
-        public float CheatMaxEitrPerLevel { get; set; } = 5.0f;
-
-        public float CheatHealthRegenPerLevel { get; set; } = 0.05f;
-        public float CheatStaminaRegenPerLevel { get; set; } = 0.05f;
-        public float CheatEitrRegenPerLevel { get; set; } = 0.05f;
-        public float CheatHealingMultiplierPerLevel { get; set; } = 0.05f;
+        public Dictionary<int, List<AbilityEntry>> Levels { get; set; } = new Dictionary<int, List<AbilityEntry>>();
     }
 
     public class AbilityEntry
@@ -744,10 +699,7 @@ Levels:
         public float EffectiveValue => Math.Abs(Value) > 0.00001f ? Value : Percent;
     }
 
-    public class AbilitiesConfigData
-    {
-        public Dictionary<int, List<AbilityEntry>> Levels { get; set; } = new Dictionary<int, List<AbilityEntry>>();
-    }
+
 
     #endregion
 }
