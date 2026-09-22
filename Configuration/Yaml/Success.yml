@@ -43,19 +43,6 @@ CoinsPerLevelIncrement: 0.0       # ค่าธรรมเนียมทอ�
 RequireCraftingStation: true      # ต้องอยู่ใกล้โต๊ะคราฟต์หรือเตาตีเหล็กเพื่อเปิดหน้าต่างตีบวก
 CraftingStationRange: 5.0         # รัศมีระยะห่างจากโต๊ะคราฟต์ (เมตร) ที่อนุญาตให้เปิดได้ (เช่น 5.0m = ยืนหน้าโต๊ะ/ข้างโต๊ะ, 15.0m = ทั่วห้องช่าง)
 
-# ม้วนคัมภีร์ตีบวก (Enhancement Scrolls)
+# ม้วนคัมภีร์ตีบวก (Enhancement Scrolls Requirements)
 RequireScrolls: true              # ต้องใช้ม้วนคัมภีร์ตามระดับในการตีบวกหรือไม่
 ScrollsRequiredPerAttempt: 1      # จำนวนคัมภีร์ที่ใช้ต่อการกด 1 ครั้ง
-
-# การดรอปจากมอนสเตอร์ (Monster Drops)
-# หมายเหตุ: ระบบการตั้งค่าอัตราดรอปแบบละเอียดถูกแยกไปไว้ใน "Drops.yml" และรองรับ "Drops.override.yml"
-# สามารถกำหนดโอกาสดรอป (% Drop Chance) ของคัมภีร์ Tier 1 ถึง 4 แยกตาม Biome, Elite และ Boss ได้อย่างอิสระ
-EnableMonsterDrops: true          # เปิดใช้งานการดรอปม้วนคัมภีร์เมื่อสังหารมอนสเตอร์
-Tier1_DropChance: 15.0            # โอกาสดรอปคัมภีร์ระดับ 1 (%) (Fallback)
-Tier2_DropChance: 10.0            # โอกาสดรอปคัมภีร์ระดับ 2 (%) (Fallback)
-Tier3_DropChance: 6.0             # โอกาสดรอปคัมภีร์ระดับ 3 (%) (Fallback)
-Tier4_DropChance: 3.0             # โอกาสดรอปคัมภีร์ระดับ 4 (%) (Fallback)
-StarLevelMultiplier: 1.5          # ตัวคูณโอกาสดรอปต่อระดับดาวมอนสเตอร์ (1 ดาว = 1.5x, 2 ดาว = 2.0x)
-BossGuaranteedDrop: true          # บอสโลกการันตีการดรอปคัมภีร์ 100%
-BossMinDrop: 1                    # จำนวนคัมภีร์ขั้นต่ำที่บอสดรอป
-BossMaxDrop: 3                    # จำนวนคัมภีร์สูงสุดที่บอสดรอป

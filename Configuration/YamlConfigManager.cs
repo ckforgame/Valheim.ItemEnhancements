@@ -458,16 +458,6 @@ CraftingStationRange: 5.0
 
 RequireScrolls: true
 ScrollsRequiredPerAttempt: 1
-
-EnableMonsterDrops: true
-Tier1_DropChance: 15.0
-Tier2_DropChance: 10.0
-Tier3_DropChance: 6.0
-Tier4_DropChance: 3.0
-StarLevelMultiplier: 1.5
-BossGuaranteedDrop: true
-BossMinDrop: 1
-BossMaxDrop: 3
 ";
 
         private const string DefaultItemYaml = @"# ====================================================================
@@ -784,16 +774,6 @@ BossDrops:
 
         public bool RequireScrolls { get; set; } = true;
         public int ScrollsRequiredPerAttempt { get; set; } = 1;
-
-        public bool EnableMonsterDrops { get; set; } = true;
-        public float Tier1_DropChance { get; set; } = 15.0f;
-        public float Tier2_DropChance { get; set; } = 10.0f;
-        public float Tier3_DropChance { get; set; } = 6.0f;
-        public float Tier4_DropChance { get; set; } = 3.0f;
-        public float StarLevelMultiplier { get; set; } = 1.5f;
-        public bool BossGuaranteedDrop { get; set; } = true;
-        public int BossMinDrop { get; set; } = 1;
-        public int BossMaxDrop { get; set; } = 3;
 
         public float GetSuccessRate(int level)
         {
