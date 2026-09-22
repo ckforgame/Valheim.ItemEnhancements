@@ -107,13 +107,112 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// ตรวจสอบว่าผู้เล่นสามารถจ่ายค่าธรรมเนียมการตีบวกได้หรือไม่
+        /// กำหนด Tier ของคัมภีร์ที่ต้องใช้ตามระดับเป้าหมาย (1-20)
+        /// +1 ถึง +5: Tier 1
+        /// +6 ถึง +10: Tier 2
+        /// +11 ถึง +15: Tier 3
+        /// +16 ถึง +20: Tier 4
+        /// </summary>
+        public static int GetRequiredScrollTier(int targetLevel)
+        {
+            if (targetLevel <= 5) return 1;
+            if (targetLevel <= 10) return 2;
+            if (targetLevel <= 15) return 3;
+            return 4;
+        }
+
+        /// <summary>
+        /// ดึงจำนวนม้วนคัมภีร์ Tier นั้น ๆ ที่ผู้เล่นมีอยู่ในช่องเก็บของ
+        /// </summary>
+        public static int GetPlayerScrollCount(Player player, int tier)
+        {
+            if (player == null || player.GetInventory() == null) return 0;
+            string prefabName = ScrollItemManager.GetScrollPrefabName(tier);
+            string tokenName = $"$item_scroll_enhance_t{tier}";
+
+            int count = 0;
+            List<ItemDrop.ItemData> allItems = player.GetInventory().GetAllItems();
+            foreach (var item in allItems)
+            {
+                if (item == null) continue;
+                if ((item.m_dropPrefab != null && item.m_dropPrefab.name == prefabName) ||
+                    (item.m_shared != null && item.m_shared.m_name == tokenName))
+                {
+                    count += item.m_stack;
+                }
+            }
+            return count;
+        }
+
+        /// <summary>
+        /// หักม้วนคัมภีร์ออกจากช่องเก็บของของผู้เล่น
+        /// </summary>
+        public static bool DeductPlayerScrolls(Player player, int tier, int amount)
+        {
+            if (amount <= 0) return true;
+            if (player == null || player.GetInventory() == null) return false;
+
+            int current = GetPlayerScrollCount(player, tier);
+            if (current < amount) return false;
+
+            string prefabName = ScrollItemManager.GetScrollPrefabName(tier);
+            string tokenName = $"$item_scroll_enhance_t{tier}";
+
+            int remaining = amount;
+            List<ItemDrop.ItemData> allItems = new List<ItemDrop.ItemData>(player.GetInventory().GetAllItems());
+            foreach (var item in allItems)
+            {
+                if (item == null) continue;
+                if ((item.m_dropPrefab != null && item.m_dropPrefab.name == prefabName) ||
+                    (item.m_shared != null && item.m_shared.m_name == tokenName))
+                {
+                    if (item.m_stack <= remaining)
+                    {
+                        remaining -= item.m_stack;
+                        player.GetInventory().RemoveItem(item);
+                    }
+                    else
+                    {
+                        item.m_stack -= remaining;
+                        remaining = 0;
+                    }
+
+                    if (remaining <= 0) break;
+                }
+            }
+
+            return remaining <= 0;
+        }
+
+        /// <summary>
+        /// ตรวจสอบว่าผู้เล่นสามารถจ่ายค่าธรรมเนียมและมีวัตถุดิบเพียงพอหรือไม่
         /// </summary>
         public static bool CanAfford(Player player, int targetLevel)
         {
-            if (!ModConfig.RequireCoins.Value) return true;
-            int cost = ModConfig.GetCoinCost(targetLevel);
-            return GetPlayerCoins(player) >= cost;
+            if (player == null) return false;
+
+            // ตรวจสอบม้วนคัมภีร์
+            if (ModConfig.RequireScrolls.Value)
+            {
+                int tier = GetRequiredScrollTier(targetLevel);
+                int needed = ModConfig.ScrollsRequiredPerAttempt.Value;
+                if (GetPlayerScrollCount(player, tier) < needed)
+                {
+                    return false;
+                }
+            }
+
+            // ตรวจสอบเหรียญทอง (หากเปิดใช้งาน)
+            if (ModConfig.RequireCoins.Value)
+            {
+                int cost = ModConfig.GetCoinCost(targetLevel);
+                if (GetPlayerCoins(player) < cost)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -137,13 +236,21 @@ namespace Valheim.ItemEnhancements.Core
             int targetLevel = currentLevel + 1;
             int cost = ModConfig.GetCoinCost(targetLevel);
 
-            if (ModConfig.RequireCoins.Value && !CanAfford(player, targetLevel))
+            if (!CanAfford(player, targetLevel))
             {
                 newLevel = currentLevel;
                 return EnhanceResult.CannotAfford;
             }
 
-            // หักค่าธรรมเนียม
+            // หักม้วนคัมภีร์
+            if (ModConfig.RequireScrolls.Value)
+            {
+                int tier = GetRequiredScrollTier(targetLevel);
+                int scrollAmount = ModConfig.ScrollsRequiredPerAttempt.Value;
+                DeductPlayerScrolls(player, tier, scrollAmount);
+            }
+
+            // หักค่าธรรมเนียมเหรียญทอง (หากเปิดใช้งาน)
             if (ModConfig.RequireCoins.Value && cost > 0)
             {
                 DeductPlayerCoins(player, cost);

@@ -11,8 +11,8 @@ namespace Valheim.ItemEnhancements
     [BepInPlugin(ModGUID, ModName, ModVersion)]
     public class Plugin : BaseUnityPlugin
     {
-        public const string ModGUID = "com.customs.valheim.itemenhancements";
-        public const string ModName = "Valheim Item Enhancements (MMORPG Refinement)";
+        public const string ModGUID = "ckforgame.ItemEnhancements";
+        public const string ModName = "ItemEnhancements";
         public const string ModVersion = "1.0.0";
 
         public static ManualLogSource Log { get; private set; }
@@ -21,6 +21,23 @@ namespace Valheim.ItemEnhancements
         private void Awake()
         {
             Log = Logger;
+
+            // Migrate configuration from legacy GUID if needed
+            string oldConfigPath = System.IO.Path.Combine(Paths.ConfigPath, "com.customs.valheim.itemenhancements.cfg");
+            string newConfigPath = System.IO.Path.Combine(Paths.ConfigPath, $"{ModGUID}.cfg");
+            if (System.IO.File.Exists(oldConfigPath) && !System.IO.File.Exists(newConfigPath))
+            {
+                try
+                {
+                    System.IO.File.Copy(oldConfigPath, newConfigPath);
+                    Log.LogInfo($"Migrated old configuration from '{oldConfigPath}' to '{newConfigPath}'.");
+                    Config.Reload();
+                }
+                catch (Exception ex)
+                {
+                    Log.LogWarning($"Failed to migrate old configuration: {ex.Message}");
+                }
+            }
 
             // 1. โหลดการตั้งค่าทั้งหมด (Config 1-20 success rates, failure rules, costs, abilities)
             ModConfig.Initialize(Config);
@@ -45,6 +62,12 @@ namespace Valheim.ItemEnhancements
 
         private void Update()
         {
+            if (Player.m_localPlayer == null) return;
+
+            // ตรวจสอบว่าไม่ได้กำลังพิมพ์ใน Chat หรือกรอกข้อความใน UI
+            if (Chat.instance != null && Chat.instance.HasFocus()) return;
+            if (TextInput.IsVisible()) return;
+
             // ตรวจสอบปุ่มลัดเพื่อเปิด/ปิดหน้าต่างตีบวก
             if (Input.GetKeyDown(ModConfig.ToggleGuiKey.Value))
             {

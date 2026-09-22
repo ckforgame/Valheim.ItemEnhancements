@@ -24,6 +24,19 @@ namespace Valheim.ItemEnhancements.Configuration
         public static ConfigEntry<float> CoinsPerLevelIncrement { get; private set; }
         public static ConfigEntry<bool> RequireCraftingStation { get; private set; }
 
+        // Enhancement Scrolls & Monster Drops
+        public static ConfigEntry<bool> RequireScrolls { get; private set; }
+        public static ConfigEntry<int> ScrollsRequiredPerAttempt { get; private set; }
+        public static ConfigEntry<bool> EnableMonsterDrops { get; private set; }
+        public static ConfigEntry<float> Tier1_DropChance { get; private set; }
+        public static ConfigEntry<float> Tier2_DropChance { get; private set; }
+        public static ConfigEntry<float> Tier3_DropChance { get; private set; }
+        public static ConfigEntry<float> Tier4_DropChance { get; private set; }
+        public static ConfigEntry<float> StarLevelMultiplier { get; private set; }
+        public static ConfigEntry<bool> BossGuaranteedDrop { get; private set; }
+        public static ConfigEntry<int> BossMinDrop { get; private set; }
+        public static ConfigEntry<int> BossMaxDrop { get; private set; }
+
         // Stat Scaling: Weapons
         public static ConfigEntry<float> WeaponDamageBonusPerLevel { get; private set; }
         public static ConfigEntry<float> WeaponBackstabBonusPerLevel { get; private set; }
@@ -116,25 +129,25 @@ namespace Valheim.ItemEnhancements.Configuration
                 )
             );
 
-            // Costs
+            // Costs (Default false/free)
             RequireCoins = config.Bind(
                 "3. Costs & Requirements (ค่าธรรมเนียม)",
                 "RequireCoins",
-                true,
-                "ต้องใช้เหรียญทอง (Coins) ในการตีบวกหรือไม่ (Whether coins are required to enhance)"
+                false,
+                "ต้องใช้เหรียญทอง (Coins) ในการตีบวกหรือไม่ (Whether coins are required to enhance - default false for free fee)"
             );
 
             CoinsBaseCost = config.Bind(
                 "3. Costs & Requirements (ค่าธรรมเนียม)",
                 "CoinsBaseCost",
-                25,
+                0,
                 "ค่าธรรมเนียมเหรียญทองพื้นฐาน (Base coin cost for enhancement)"
             );
 
             CoinsPerLevelIncrement = config.Bind(
                 "3. Costs & Requirements (ค่าธรรมเนียม)",
                 "CoinsPerLevelIncrement",
-                20f,
+                0f,
                 "เหรียญทองที่ต้องใช้เพิ่มขึ้นต่อระดับ (Coin cost increment per target level)"
             );
 
@@ -143,6 +156,96 @@ namespace Valheim.ItemEnhancements.Configuration
                 "RequireCraftingStation",
                 true,
                 "ต้องอยู่ใกล้โต๊ะคราฟต์/เตาตีเหล็กเพื่อเปิดหน้าต่างตีบวก (Must be near a crafting station to enhance)"
+            );
+
+            // Enhancement Scrolls & Monster Drops
+            RequireScrolls = config.Bind(
+                "3.1 Enhancement Scrolls (ม้วนคัมภีร์ตีบวก)",
+                "RequireScrolls",
+                true,
+                "ต้องใช้ใบตีบวก/ม้วนคัมภีร์ตามระดับในการตีบวกหรือไม่ (Whether enhancement scrolls are required)"
+            );
+
+            ScrollsRequiredPerAttempt = config.Bind(
+                "3.1 Enhancement Scrolls (ม้วนคัมภีร์ตีบวก)",
+                "ScrollsRequiredPerAttempt",
+                1,
+                "จำนวนม้วนคัมภีร์ที่ใช้ต่อการกดตีบวก 1 ครั้ง (Number of scrolls consumed per enhancement attempt)"
+            );
+
+            EnableMonsterDrops = config.Bind(
+                "3.2 Monster Drops (การดรอปจากมอนสเตอร์)",
+                "EnableMonsterDrops",
+                true,
+                "เปิดใช้งานการดรอปม้วนคัมภีร์เมื่อสังหารมอนสเตอร์ (Enable enhancement scroll drops from monsters)"
+            );
+
+            Tier1_DropChance = config.Bind(
+                "3.2 Monster Drops (การดรอปจากมอนสเตอร์)",
+                "Tier1_DropChance",
+                15.0f,
+                new ConfigDescription(
+                    "โอกาสดรอปคัมภีร์ระดับ 1 (%) จากมอนสเตอร์ Meadows / Black Forest สำหรับ +1 ถึง +5",
+                    new AcceptableValueRange<float>(0f, 100f)
+                )
+            );
+
+            Tier2_DropChance = config.Bind(
+                "3.2 Monster Drops (การดรอปจากมอนสเตอร์)",
+                "Tier2_DropChance",
+                10.0f,
+                new ConfigDescription(
+                    "โอกาสดรอปคัมภีร์ระดับ 2 (%) จากมอนสเตอร์ Swamp / Mountain สำหรับ +6 ถึง +10",
+                    new AcceptableValueRange<float>(0f, 100f)
+                )
+            );
+
+            Tier3_DropChance = config.Bind(
+                "3.2 Monster Drops (การดรอปจากมอนสเตอร์)",
+                "Tier3_DropChance",
+                6.0f,
+                new ConfigDescription(
+                    "โอกาสดรอปคัมภีร์ระดับ 3 (%) จากมอนสเตอร์ Plains / Mistlands สำหรับ +11 ถึง +15",
+                    new AcceptableValueRange<float>(0f, 100f)
+                )
+            );
+
+            Tier4_DropChance = config.Bind(
+                "3.2 Monster Drops (การดรอปจากมอนสเตอร์)",
+                "Tier4_DropChance",
+                3.0f,
+                new ConfigDescription(
+                    "โอกาสดรอปคัมภีร์ระดับ 4 (%) จากมอนสเตอร์ Ashlands / Bosses สำหรับ +16 ถึง +20",
+                    new AcceptableValueRange<float>(0f, 100f)
+                )
+            );
+
+            StarLevelMultiplier = config.Bind(
+                "3.2 Monster Drops (การดรอปจากมอนสเตอร์)",
+                "StarLevelMultiplier",
+                1.5f,
+                "ตัวคูณโอกาสดรอปต่อระดับดาวของมอนสเตอร์ (Drop rate multiplier per star level: 1-star = 1.5x, 2-star = 2.0x)"
+            );
+
+            BossGuaranteedDrop = config.Bind(
+                "3.2 Monster Drops (การดรอปจากมอนสเตอร์)",
+                "BossGuaranteedDrop",
+                true,
+                "บอสโลกการันตีการดรอปคัมภีร์ 100% เสมอ (World bosses are guaranteed to drop scrolls)"
+            );
+
+            BossMinDrop = config.Bind(
+                "3.2 Monster Drops (การดรอปจากมอนสเตอร์)",
+                "BossMinDrop",
+                1,
+                "จำนวนคัมภีร์ขั้นต่ำที่บอสจะดรอป (Minimum scrolls dropped by bosses)"
+            );
+
+            BossMaxDrop = config.Bind(
+                "3.2 Monster Drops (การดรอปจากมอนสเตอร์)",
+                "BossMaxDrop",
+                3,
+                "จำนวนคัมภีร์สูงสุดที่บอสจะดรอป (Maximum scrolls dropped by bosses)"
             );
 
             // Stat Scaling: Weapons
@@ -302,6 +405,18 @@ namespace Valheim.ItemEnhancements.Configuration
         {
             if (!RequireCoins.Value || targetLevel < 1) return 0;
             return CoinsBaseCost.Value + Mathf.RoundToInt((targetLevel - 1) * CoinsPerLevelIncrement.Value);
+        }
+
+        public static float GetTierDropChance(int tier)
+        {
+            switch (tier)
+            {
+                case 1: return Tier1_DropChance != null ? Tier1_DropChance.Value : 15.0f;
+                case 2: return Tier2_DropChance != null ? Tier2_DropChance.Value : 10.0f;
+                case 3: return Tier3_DropChance != null ? Tier3_DropChance.Value : 6.0f;
+                case 4: return Tier4_DropChance != null ? Tier4_DropChance.Value : 3.0f;
+                default: return 0f;
+            }
         }
     }
 

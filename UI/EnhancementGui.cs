@@ -374,13 +374,33 @@ namespace Valheim.ItemEnhancements.UI
                 }
             }
 
-            // Fee
-            int cost = ModConfig.GetCoinCost(nextLvl);
-            int playerCoins = EnhancementManager.GetPlayerCoins(Player.m_localPlayer);
-            bool canAfford = playerCoins >= cost;
-            string coinColor = canAfford ? "#ffd700" : "#ef4444";
+            // Materials & Fee
+            if (ModConfig.RequireScrolls.Value)
+            {
+                int scrollTier = EnhancementManager.GetRequiredScrollTier(nextLvl);
+                string scrollName = ScrollItemManager.GetScrollDisplayName(scrollTier);
+                int neededScrolls = ModConfig.ScrollsRequiredPerAttempt.Value;
+                int playerScrolls = EnhancementManager.GetPlayerScrollCount(Player.m_localPlayer, scrollTier);
+                bool hasScrolls = playerScrolls >= neededScrolls;
+                string scrollColor = hasScrolls ? "#4ade80" : "#ef4444";
+                string tierHex = EnhancementManager.GetTierHex(nextLvl);
 
-            GUILayout.Label($"<b>ค่าธรรมเนียม:</b> <color={coinColor}>{cost} เหรียญทอง</color> <color=#94a3b8>(คุณมี: {playerCoins})</color>", _statLabelStyle);
+                GUILayout.Label($"<b>วัตถุดิบที่ต้องใช้:</b> <color={tierHex}>{scrollName}</color> x{neededScrolls}", _statLabelStyle);
+                GUILayout.Label($"<b>จำนวนที่คุณมี:</b> <color={scrollColor}><b>{playerScrolls} ใบ</b></color>" + (hasScrolls ? "" : " <color=#ef4444>(ไม่เพียงพอ)</color>"), _statLabelStyle);
+            }
+
+            if (ModConfig.RequireCoins.Value)
+            {
+                int cost = ModConfig.GetCoinCost(nextLvl);
+                int playerCoins = EnhancementManager.GetPlayerCoins(Player.m_localPlayer);
+                bool canAffordCoins = playerCoins >= cost;
+                string coinColor = canAffordCoins ? "#ffd700" : "#ef4444";
+                GUILayout.Label($"<b>ค่าธรรมเนียม:</b> <color={coinColor}>{cost} เหรียญทอง</color> <color=#94a3b8>(คุณมี: {playerCoins})</color>", _statLabelStyle);
+            }
+            else
+            {
+                GUILayout.Label("<b>ค่าธรรมเนียม:</b> <color=#4ade80>ฟรี (ไม่มีค่าธรรมเนียมเหรียญ)</color>", _statLabelStyle);
+            }
             GUILayout.EndVertical();
 
             GUILayout.EndHorizontal();
@@ -392,8 +412,12 @@ namespace Valheim.ItemEnhancements.UI
             int currentLvl = EnhancementManager.GetEnhancementLevel(_selectedItem);
             int nextLvl = currentLvl + 1;
             bool isMax = currentLvl >= ModConfig.MaxLevel;
+            int scrollTier = EnhancementManager.GetRequiredScrollTier(nextLvl);
+            int neededScrolls = ModConfig.ScrollsRequiredPerAttempt.Value;
+            int playerScrolls = EnhancementManager.GetPlayerScrollCount(Player.m_localPlayer, scrollTier);
+            bool hasScrolls = !ModConfig.RequireScrolls.Value || (playerScrolls >= neededScrolls);
             int cost = ModConfig.GetCoinCost(nextLvl);
-            bool canAfford = EnhancementManager.CanAfford(Player.m_localPlayer, nextLvl);
+            bool hasCoins = !ModConfig.RequireCoins.Value || (EnhancementManager.GetPlayerCoins(Player.m_localPlayer) >= cost);
 
             GUILayout.BeginVertical();
 
@@ -409,10 +433,16 @@ namespace Valheim.ItemEnhancements.UI
                 GUILayout.Button("★  ระดับสูงสุดแล้ว (MAX LEVEL +20)  ★", _actionButtonStyle, GUILayout.Height(48f));
                 GUI.enabled = true;
             }
-            else if (!canAfford)
+            else if (!hasScrolls)
             {
                 GUI.enabled = false;
-                GUILayout.Button($"เหรียญทองไม่เพียงพอ (ต้องการ {cost} Coins)", _actionButtonStyle, GUILayout.Height(48f));
+                GUILayout.Button($"❌  ต้องการ [ใบตีบวกระดับ {scrollTier}] (คุณมี {playerScrolls}/{neededScrolls} ใบ)  ❌", _actionButtonStyle, GUILayout.Height(48f));
+                GUI.enabled = true;
+            }
+            else if (!hasCoins)
+            {
+                GUI.enabled = false;
+                GUILayout.Button($"❌  เหรียญทองไม่เพียงพอ (ต้องการ {cost} Coins)  ❌", _actionButtonStyle, GUILayout.Height(48f));
                 GUI.enabled = true;
             }
             else
@@ -488,7 +518,7 @@ namespace Valheim.ItemEnhancements.UI
 
                 case EnhanceResult.CannotAfford:
                     _lastResultColor = "#ef4444";
-                    _lastResultMessage = "เหรียญทองไม่เพียงพอ!";
+                    _lastResultMessage = "วัตถุดิบคัมภีร์ตีบวกไม่เพียงพอ!";
                     break;
             }
 
