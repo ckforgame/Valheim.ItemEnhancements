@@ -58,6 +58,110 @@ namespace Valheim.ItemEnhancements.Patches
             public static void Postfix(ZNetScene __instance)
             {
                 ScrollItemManager.RegisterZNetScenePrefabs(__instance);
+                ScrollItemManager.CleanupOrphanScrolls();
+            }
+        }
+
+        /// <summary>
+        /// Harmony Patch ป้องกันไม่ให้ ZNetView ถูกทำลายหรือลงทะเบียน ZDO ในขณะโคลน Prefab ต้นแบบ
+        /// </summary>
+        [HarmonyPatch(typeof(ZNetView), "Awake")]
+        public static class ZNetView_Awake_PrefabGuard_Patch
+        {
+            public static bool Prefix(ZNetView __instance)
+            {
+                if (ScrollItemManager.IsCloningCustomPrefab)
+                {
+                    return false; // ข้าม Awake ชั่วคราวเพื่อให้ ZNetView คงอยู่บน Prefab โดยไม่สร้าง ZDO
+                }
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Harmony Patch ป้องกันไม่ให้ ItemDrop ลงทะเบียนเข้า s_instances ในขณะโคลน Prefab ต้นแบบ
+        /// </summary>
+        [HarmonyPatch(typeof(ItemDrop), "Awake")]
+        public static class ItemDrop_Awake_PrefabGuard_Patch
+        {
+            public static bool Prefix(ItemDrop __instance)
+            {
+                if (ScrollItemManager.IsCloningCustomPrefab)
+                {
+                    return false; // ข้าม Awake ชั่วคราวไม่ให้ Prefab เข้าไปอยู่ในรายการไอเทมในโลก
+                }
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Harmony Patch ป้องกันไม่ให้ Floating ทำงานในขณะโคลน Prefab ต้นแบบ
+        /// </summary>
+        [HarmonyPatch(typeof(Floating), "Awake")]
+        public static class Floating_Awake_PrefabGuard_Patch
+        {
+            public static bool Prefix(Floating __instance)
+            {
+                if (ScrollItemManager.IsCloningCustomPrefab)
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Harmony Patch ป้องกัน NullReferenceException ใน Floating.CustomFixedUpdate
+        /// หาก m_nview เป็น null หรือยังไม่ IsValid
+        /// </summary>
+        [HarmonyPatch(typeof(Floating), nameof(Floating.CustomFixedUpdate))]
+        public static class Floating_CustomFixedUpdate_Patch
+        {
+            private static readonly AccessTools.FieldRef<Floating, ZNetView> _nviewRef =
+                AccessTools.FieldRefAccess<Floating, ZNetView>("m_nview");
+
+            public static bool Prefix(Floating __instance)
+            {
+                if (__instance == null) return false;
+                try
+                {
+                    ZNetView nview = _nviewRef != null ? _nviewRef(__instance) : __instance.GetComponent<ZNetView>();
+                    if (nview == null || !nview.IsValid())
+                    {
+                        return false; // ข้ามการคำนวณฟิสิกส์ลอยน้ำหาก ZNetView ไม่สมบูรณ์
+                    }
+                }
+                catch
+                {
+                    return false;
+                }
+                return true;
+            }
+
+            public static Exception Finalizer(Exception __exception)
+            {
+                if (__exception is NullReferenceException)
+                {
+                    return null;
+                }
+                return __exception;
+            }
+        }
+
+        /// <summary>
+        /// Harmony Patch ดักจับ NullReferenceException ใน Player.AutoPickup
+        /// เผื่อมีไอเทมผิดปกติหรือไม่มี ZNetView ตกอยู่ในระยะเก็บของ
+        /// </summary>
+        [HarmonyPatch(typeof(Player), "AutoPickup")]
+        public static class Player_AutoPickup_Patch
+        {
+            public static Exception Finalizer(Exception __exception)
+            {
+                if (__exception is NullReferenceException)
+                {
+                    return null; // ระงับข้อผิดพลาดและปล่อยให้เกมดำเนินต่อไป
+                }
+                return __exception;
             }
         }
 

@@ -15,6 +15,62 @@ namespace Valheim.ItemEnhancements.Core
         private static readonly Dictionary<int, GameObject> _scrollPrefabs = new Dictionary<int, GameObject>();
         private static readonly Dictionary<int, Sprite> _scrollSprites = new Dictionary<int, Sprite>();
 
+        public static bool IsCloningCustomPrefab { get; private set; }
+        private static GameObject _prefabContainer;
+
+        public static GameObject GetPrefabContainer()
+        {
+            if (_prefabContainer == null)
+            {
+                _prefabContainer = new GameObject("_ItemEnhancements_PrefabContainer");
+                _prefabContainer.SetActive(false);
+                UnityEngine.Object.DontDestroyOnLoad(_prefabContainer);
+            }
+            return _prefabContainer;
+        }
+
+        /// <summary>
+        /// ลบ instance คัมภีร์ที่อาจตกค้างหรือหลงเหลืออยู่ในฉากโดยไม่มี ZDO/ZNetView สมบูรณ์
+        /// </summary>
+        public static void CleanupOrphanScrolls()
+        {
+            try
+            {
+                var items = UnityEngine.Object.FindObjectsByType<ItemDrop>(FindObjectsSortMode.None);
+                if (items == null) return;
+
+                foreach (var item in items)
+                {
+                    if (item == null || item.gameObject == null) continue;
+
+                    string name = item.gameObject.name;
+                    if (!name.StartsWith(PrefabTier1) && !name.StartsWith(PrefabTier2) && 
+                        !name.StartsWith(PrefabTier3) && !name.StartsWith(PrefabTier4))
+                    {
+                        continue;
+                    }
+
+                    // ปล่อยให้ prefab template ใน container อยู่รอดปลอดภัย
+                    if (_prefabContainer != null && item.transform.IsChildOf(_prefabContainer.transform))
+                    {
+                        continue;
+                    }
+
+                    // หากเป็น instance ในฉากที่ไม่มี ZNetView หรือ ZDO ให้กำจัดทิ้งเพื่อป้องกัน NRE
+                    ZNetView znv = item.GetComponent<ZNetView>();
+                    if (znv == null || znv.GetZDO() == null)
+                    {
+                        Plugin.Log.LogWarning($"[ScrollItemManager] Cleaning up orphaned/corrupted scroll instance '{name}' from scene.");
+                        UnityEngine.Object.Destroy(item.gameObject);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogWarning($"[ScrollItemManager] Error during CleanupOrphanScrolls: {ex.Message}");
+            }
+        }
+
         public static GameObject GetScrollPrefab(int tier)
         {
             if (_scrollPrefabs.TryGetValue(tier, out GameObject prefab) && prefab != null)
@@ -97,6 +153,8 @@ namespace Valheim.ItemEnhancements.Core
                 return;
             }
 
+            var container = GetPrefabContainer();
+
             for (int tier = 1; tier <= 4; tier++)
             {
                 string prefabName = GetScrollPrefabName(tier);
@@ -108,25 +166,40 @@ namespace Valheim.ItemEnhancements.Core
                     continue;
                 }
 
+                if (_scrollPrefabs.TryGetValue(tier, out GameObject cached) && cached != null)
+                {
+                    if (!objectDb.m_items.Contains(cached))
+                    {
+                        objectDb.m_items.Add(cached);
+                        int h = prefabName.GetStableHashCode();
+                        try
+                        {
+                            var itemByHash = HarmonyLib.AccessTools.FieldRefAccess<ObjectDB, Dictionary<int, GameObject>>("m_itemByHash")(objectDb);
+                            if (itemByHash != null) itemByHash[h] = cached;
+                        }
+                        catch { }
+                    }
+                    continue;
+                }
+
                 GameObject scrollObj;
-                bool prevDisableInit = ZNetView.m_forceDisableInit;
+                IsCloningCustomPrefab = true;
                 try
                 {
-                    ZNetView.m_forceDisableInit = true;
-                    scrollObj = UnityEngine.Object.Instantiate(baseItem);
+                    scrollObj = UnityEngine.Object.Instantiate(baseItem, container.transform);
+                    scrollObj.name = prefabName;
+                    scrollObj.SetActive(false);
                 }
                 finally
                 {
-                    ZNetView.m_forceDisableInit = prevDisableInit;
+                    IsCloningCustomPrefab = false;
                 }
-
-                scrollObj.name = prefabName;
-                UnityEngine.Object.DontDestroyOnLoad(scrollObj);
-
 
                 ItemDrop itemDrop = scrollObj.GetComponent<ItemDrop>();
                 if (itemDrop != null)
                 {
+                    itemDrop.m_itemData.m_dropPrefab = scrollObj;
+
                     ItemDrop.ItemData.SharedData shared = itemDrop.m_itemData.m_shared;
                     shared.m_name = $"$item_scroll_enhance_t{tier}";
                     shared.m_description = $"$item_scroll_enhance_t{tier}_desc";
@@ -172,6 +245,7 @@ namespace Valheim.ItemEnhancements.Core
             if (ZNetScene.instance != null)
             {
                 RegisterZNetScenePrefabs(ZNetScene.instance);
+                CleanupOrphanScrolls();
             }
 
             Plugin.Log.LogInfo("[ScrollItemManager] Successfully registered 4 Tiers of Enhancement Scrolls into ObjectDB!");
