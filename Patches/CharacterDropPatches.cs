@@ -64,28 +64,36 @@ namespace Valheim.ItemEnhancements.Patches
         /// <summary>
         /// Harmony Patch ป้องกัน NullReferenceException ใน ZNetScene.RemoveObjects
         /// หากมี GameObject ที่ถูกทำลายหรือ ZDO สูญหายหลงเหลืออยู่ใน m_instances
+        /// รองรับทั้งโครงสร้าง ZDO (Valheim เวอร์ชั่นใหม่) และ ZDOID ผ่าน IDictionary อย่างปลอดภัย
         /// </summary>
         [HarmonyPatch(typeof(ZNetScene), "RemoveObjects")]
         public static class ZNetScene_RemoveObjects_Patch
         {
-            private static readonly AccessTools.FieldRef<ZNetScene, Dictionary<ZDOID, ZNetView>> _instancesRef =
-                AccessTools.FieldRefAccess<ZNetScene, Dictionary<ZDOID, ZNetView>>("m_instances");
+            private static readonly System.Reflection.FieldInfo _instancesField =
+                AccessTools.Field(typeof(ZNetScene), "m_instances");
 
             public static void Prefix(ZNetScene __instance)
             {
-                if (__instance == null) return;
+                if (__instance == null || _instancesField == null) return;
                 try
                 {
-                    var instances = _instancesRef(__instance);
-                    if (instances == null || instances.Count == 0) return;
+                    if (!(_instancesField.GetValue(__instance) is System.Collections.IDictionary dict) || dict.Count == 0) return;
 
-                    List<ZDOID> deadKeys = null;
-                    foreach (var kvp in instances)
+                    List<object> deadKeys = null;
+                    foreach (System.Collections.DictionaryEntry entry in dict)
                     {
-                        if (kvp.Value == null || kvp.Value.GetZDO() == null)
+                        if (entry.Value is ZNetView znv)
                         {
-                            if (deadKeys == null) deadKeys = new List<ZDOID>();
-                            deadKeys.Add(kvp.Key);
+                            if (znv == null || znv.GetZDO() == null)
+                            {
+                                if (deadKeys == null) deadKeys = new List<object>();
+                                deadKeys.Add(entry.Key);
+                            }
+                        }
+                        else if (entry.Value == null)
+                        {
+                            if (deadKeys == null) deadKeys = new List<object>();
+                            deadKeys.Add(entry.Key);
                         }
                     }
 
@@ -93,7 +101,7 @@ namespace Valheim.ItemEnhancements.Patches
                     {
                         for (int i = 0; i < deadKeys.Count; i++)
                         {
-                            instances.Remove(deadKeys[i]);
+                            dict.Remove(deadKeys[i]);
                         }
                     }
                 }
