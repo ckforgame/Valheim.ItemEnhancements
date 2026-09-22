@@ -26,6 +26,27 @@ namespace Valheim.ItemEnhancements.Patches
         }
 
         /// <summary>
+        /// Harmony Patch สำหรับ CharacterDrop.DropItems เพื่อรับประกันว่า Prefab ไอเทมที่กำลังจะดรอปทุกชิ้นมีสถานะ Active
+        /// เพื่อให้ Object.Instantiate สร้าง GameObject ที่มองเห็นได้และสามารถเก็บขึ้นมาได้
+        /// </summary>
+        [HarmonyPatch(typeof(CharacterDrop), nameof(CharacterDrop.DropItems))]
+        public static class CharacterDrop_DropItems_Patch
+        {
+            public static void Prefix(List<KeyValuePair<GameObject, int>> drops)
+            {
+                if (drops == null) return;
+                for (int i = 0; i < drops.Count; i++)
+                {
+                    GameObject prefab = drops[i].Key;
+                    if (prefab != null && !prefab.activeSelf)
+                    {
+                        prefab.SetActive(true);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Harmony Patch เมื่อ ObjectDB ตื่นตัว ให้ลงทะเบียน Prefabs ม้วนคัมภีร์และสูตรคราฟต์
         /// </summary>
         [HarmonyPatch(typeof(ObjectDB), "Awake")]

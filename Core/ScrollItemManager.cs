@@ -75,6 +75,7 @@ namespace Valheim.ItemEnhancements.Core
         {
             if (_scrollPrefabs.TryGetValue(tier, out GameObject prefab) && prefab != null)
             {
+                if (!prefab.activeSelf) prefab.SetActive(true);
                 return prefab;
             }
 
@@ -84,6 +85,7 @@ namespace Valheim.ItemEnhancements.Core
                 GameObject existing = ObjectDB.instance.GetItemPrefab(prefabName);
                 if (existing != null)
                 {
+                    if (!existing.activeSelf) existing.SetActive(true);
                     _scrollPrefabs[tier] = existing;
                     return existing;
                 }
@@ -94,6 +96,7 @@ namespace Valheim.ItemEnhancements.Core
                 GameObject existing = ZNetScene.instance.GetPrefab(prefabName);
                 if (existing != null)
                 {
+                    if (!existing.activeSelf) existing.SetActive(true);
                     _scrollPrefabs[tier] = existing;
                     return existing;
                 }
@@ -162,12 +165,14 @@ namespace Valheim.ItemEnhancements.Core
 
                 if (existing != null)
                 {
+                    if (!existing.activeSelf) existing.SetActive(true);
                     _scrollPrefabs[tier] = existing;
                     continue;
                 }
 
                 if (_scrollPrefabs.TryGetValue(tier, out GameObject cached) && cached != null)
                 {
+                    if (!cached.activeSelf) cached.SetActive(true);
                     if (!objectDb.m_items.Contains(cached))
                     {
                         objectDb.m_items.Add(cached);
@@ -188,7 +193,8 @@ namespace Valheim.ItemEnhancements.Core
                 {
                     scrollObj = UnityEngine.Object.Instantiate(baseItem, container.transform);
                     scrollObj.name = prefabName;
-                    scrollObj.SetActive(false);
+                    // ให้ activeSelf เป็น true เพื่อให้ Object.Instantiate ในเกมสร้าง instance ที่ active บนพื้นโลก
+                    scrollObj.SetActive(true);
                 }
                 finally
                 {
@@ -198,6 +204,7 @@ namespace Valheim.ItemEnhancements.Core
                 ItemDrop itemDrop = scrollObj.GetComponent<ItemDrop>();
                 if (itemDrop != null)
                 {
+                    itemDrop.m_autoPickup = true;
                     itemDrop.m_itemData.m_dropPrefab = scrollObj;
 
                     ItemDrop.ItemData.SharedData shared = itemDrop.m_itemData.m_shared;

@@ -131,6 +131,45 @@ namespace Valheim.ItemEnhancements.Configuration
             try { Debug.LogError(msg); } catch { System.Console.WriteLine(msg); }
         }
 
+        private static string ReadAllTextSafe(string path)
+        {
+            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var reader = new StreamReader(stream))
+            {
+                return reader.ReadToEnd();
+            }
+        }
+
+        private static bool TryParseFloat(object value, out float result)
+        {
+            result = 0f;
+            if (value == null) return false;
+            try
+            {
+                result = Convert.ToSingle(value, CultureInfo.InvariantCulture);
+                return true;
+            }
+            catch
+            {
+                return float.TryParse(value.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out result);
+            }
+        }
+
+        private static bool TryParseInt(object value, out int result)
+        {
+            result = 0;
+            if (value == null) return false;
+            try
+            {
+                result = Convert.ToInt32(value, CultureInfo.InvariantCulture);
+                return true;
+            }
+            catch
+            {
+                return int.TryParse(value.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out result);
+            }
+        }
+
         private static T LoadWithOverride<T>(string baseFileName, string overrideFileName) where T : new()
         {
             T result = new T();
@@ -142,7 +181,7 @@ namespace Valheim.ItemEnhancements.Configuration
             {
                 try
                 {
-                    string baseYaml = File.ReadAllText(basePath);
+                    string baseYaml = ReadAllTextSafe(basePath);
                     var loadedBase = _deserializer.Deserialize<T>(baseYaml);
                     if (loadedBase != null)
                     {
@@ -160,7 +199,7 @@ namespace Valheim.ItemEnhancements.Configuration
             {
                 try
                 {
-                    string overrideYaml = File.ReadAllText(overridePath);
+                    string overrideYaml = ReadAllTextSafe(overridePath);
                     var rawDict = _deserializer.Deserialize<Dictionary<string, object>>(overrideYaml);
                     if (rawDict != null)
                     {
@@ -177,45 +216,48 @@ namespace Valheim.ItemEnhancements.Configuration
             return result;
         }
 
-        private static void ApplyOverrides<T>(T target, Dictionary<string, object> overrides)
+        private static void ApplyOverrides(object target, System.Collections.IDictionary overrides)
         {
             if (target == null || overrides == null) return;
 
-            PropertyInfo[] props = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            PropertyInfo[] props = target.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
             foreach (var prop in props)
             {
                 if (!prop.CanWrite) continue;
 
                 // Case-insensitive lookup in dictionary
-                foreach (var kvp in overrides)
+                foreach (System.Collections.DictionaryEntry kvp in overrides)
                 {
-                    if (string.Equals(kvp.Key, prop.Name, StringComparison.OrdinalIgnoreCase))
+                    string keyStr = kvp.Key?.ToString();
+                    if (string.IsNullOrEmpty(keyStr)) continue;
+
+                    if (string.Equals(keyStr, prop.Name, StringComparison.OrdinalIgnoreCase))
                     {
                         try
                         {
-                            if (prop.PropertyType == typeof(Dictionary<int, List<AbilityEntry>>) && kvp.Value is Dictionary<object, object> levelsDict)
+                            if (prop.PropertyType == typeof(Dictionary<int, List<AbilityEntry>>) && kvp.Value is System.Collections.IDictionary levelsDict)
                             {
                                 var currentLevels = prop.GetValue(target) as Dictionary<int, List<AbilityEntry>> ?? new Dictionary<int, List<AbilityEntry>>();
-                                foreach (var lvlEntry in levelsDict)
+                                foreach (System.Collections.DictionaryEntry lvlEntry in levelsDict)
                                 {
                                     if (int.TryParse(lvlEntry.Key?.ToString(), out int lvlNum))
                                     {
-                                        if (lvlEntry.Value is List<object> entryList)
+                                        if (lvlEntry.Value is System.Collections.IEnumerable entryList)
                                         {
                                             var newAbilityList = new List<AbilityEntry>();
                                             foreach (var itemObj in entryList)
                                             {
-                                                if (itemObj is Dictionary<object, object> itemDict)
+                                                if (itemObj is System.Collections.IDictionary itemDict)
                                                 {
                                                     var entry = new AbilityEntry();
-                                                    foreach (var f in itemDict)
+                                                    foreach (System.Collections.DictionaryEntry f in itemDict)
                                                     {
                                                         string fName = f.Key?.ToString();
                                                         if (string.Equals(fName, "Ability", StringComparison.OrdinalIgnoreCase))
                                                             entry.Ability = f.Value?.ToString();
-                                                        else if (string.Equals(fName, "Value", StringComparison.OrdinalIgnoreCase) && float.TryParse(f.Value?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out float v))
+                                                        else if (string.Equals(fName, "Value", StringComparison.OrdinalIgnoreCase) && TryParseFloat(f.Value, out float v))
                                                             entry.Value = v;
-                                                        else if (string.Equals(fName, "Percent", StringComparison.OrdinalIgnoreCase) && float.TryParse(f.Value?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out float p))
+                                                        else if (string.Equals(fName, "Percent", StringComparison.OrdinalIgnoreCase) && TryParseFloat(f.Value, out float p))
                                                             entry.Percent = p;
                                                     }
                                                     newAbilityList.Add(entry);
@@ -227,60 +269,84 @@ namespace Valheim.ItemEnhancements.Configuration
                                 }
                                 prop.SetValue(target, currentLevels);
                             }
-                            else if (prop.PropertyType == typeof(Dictionary<string, float>) && kvp.Value is Dictionary<object, object> dictObj)
+                            else if (prop.PropertyType == typeof(Dictionary<string, float>) && kvp.Value is System.Collections.IDictionary dictObj)
                             {
-                                var currentDict = prop.GetValue(target) as Dictionary<string, float> ?? new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase);
-                                foreach (var entry in dictObj)
+                                var currentDict = prop.GetValue(target) as Dictionary<string, float>;
+                                var newDict = new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase);
+                                if (currentDict != null)
+                                {
+                                    foreach (var kv in currentDict) newDict[kv.Key] = kv.Value;
+                                }
+                                foreach (System.Collections.DictionaryEntry entry in dictObj)
                                 {
                                     string key = entry.Key?.ToString();
-                                    if (!string.IsNullOrEmpty(key) && float.TryParse(entry.Value?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out float val))
+                                    if (!string.IsNullOrEmpty(key) && TryParseFloat(entry.Value, out float val))
                                     {
-                                        currentDict[key] = val;
+                                        newDict[key] = val;
                                     }
                                 }
-                                prop.SetValue(target, currentDict);
+                                prop.SetValue(target, newDict);
                             }
-                            else if (prop.PropertyType == typeof(Dictionary<string, Dictionary<string, float>>) && kvp.Value is Dictionary<object, object> outerDict)
+                            else if (prop.PropertyType == typeof(Dictionary<string, Dictionary<string, float>>) && kvp.Value is System.Collections.IDictionary outerDict)
                             {
-                                var currentOuter = prop.GetValue(target) as Dictionary<string, Dictionary<string, float>> ?? new Dictionary<string, Dictionary<string, float>>(StringComparer.OrdinalIgnoreCase);
-                                foreach (var outerEntry in outerDict)
+                                var currentOuter = prop.GetValue(target) as Dictionary<string, Dictionary<string, float>>;
+                                var newOuter = new Dictionary<string, Dictionary<string, float>>(StringComparer.OrdinalIgnoreCase);
+                                if (currentOuter != null)
+                                {
+                                    foreach (var okv in currentOuter)
+                                    {
+                                        var innerCopy = new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase);
+                                        if (okv.Value != null)
+                                        {
+                                            foreach (var ikv in okv.Value) innerCopy[ikv.Key] = ikv.Value;
+                                        }
+                                        newOuter[okv.Key] = innerCopy;
+                                    }
+                                }
+
+                                foreach (System.Collections.DictionaryEntry outerEntry in outerDict)
                                 {
                                     string outerKey = outerEntry.Key?.ToString();
                                     if (string.IsNullOrEmpty(outerKey)) continue;
 
-                                    if (outerEntry.Value is Dictionary<object, object> innerDict)
+                                    if (outerEntry.Value is System.Collections.IDictionary innerDict)
                                     {
-                                        if (!currentOuter.TryGetValue(outerKey, out var currentInner) || currentInner == null)
+                                        if (!newOuter.TryGetValue(outerKey, out var currentInner) || currentInner == null)
                                         {
                                             currentInner = new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase);
-                                            currentOuter[outerKey] = currentInner;
+                                            newOuter[outerKey] = currentInner;
                                         }
-                                        foreach (var innerEntry in innerDict)
+                                        foreach (System.Collections.DictionaryEntry innerEntry in innerDict)
                                         {
                                             string innerKey = innerEntry.Key?.ToString();
-                                            if (!string.IsNullOrEmpty(innerKey) && float.TryParse(innerEntry.Value?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out float val))
+                                            if (!string.IsNullOrEmpty(innerKey) && TryParseFloat(innerEntry.Value, out float val))
                                             {
                                                 currentInner[innerKey] = val;
                                             }
                                         }
                                     }
                                 }
-                                prop.SetValue(target, currentOuter);
+                                prop.SetValue(target, newOuter);
                             }
-                            else if (prop.PropertyType == typeof(Dictionary<string, int>) && kvp.Value is Dictionary<object, object> dictIntObj)
+                            else if (prop.PropertyType == typeof(Dictionary<string, int>) && kvp.Value is System.Collections.IDictionary dictIntObj)
                             {
-                                var currentDict = prop.GetValue(target) as Dictionary<string, int> ?? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-                                foreach (var entry in dictIntObj)
+                                var currentDict = prop.GetValue(target) as Dictionary<string, int>;
+                                var newDict = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                                if (currentDict != null)
+                                {
+                                    foreach (var kv in currentDict) newDict[kv.Key] = kv.Value;
+                                }
+                                foreach (System.Collections.DictionaryEntry entry in dictIntObj)
                                 {
                                     string key = entry.Key?.ToString();
-                                    if (!string.IsNullOrEmpty(key) && int.TryParse(entry.Value?.ToString(), out int val))
+                                    if (!string.IsNullOrEmpty(key) && TryParseInt(entry.Value, out int val))
                                     {
-                                        currentDict[key] = val;
+                                        newDict[key] = val;
                                     }
                                 }
-                                prop.SetValue(target, currentDict);
+                                prop.SetValue(target, newDict);
                             }
-                            else if (kvp.Value is Dictionary<object, object> childDict && !prop.PropertyType.IsPrimitive && prop.PropertyType != typeof(string) && !prop.PropertyType.IsEnum)
+                            else if (kvp.Value is System.Collections.IDictionary childDict && !prop.PropertyType.IsPrimitive && prop.PropertyType != typeof(string) && !prop.PropertyType.IsEnum)
                             {
                                 object childTarget = prop.GetValue(target);
                                 if (childTarget == null)
@@ -288,12 +354,7 @@ namespace Valheim.ItemEnhancements.Configuration
                                     childTarget = Activator.CreateInstance(prop.PropertyType);
                                     prop.SetValue(target, childTarget);
                                 }
-                                var childOverrides = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-                                foreach (var cEntry in childDict)
-                                {
-                                    if (cEntry.Key != null) childOverrides[cEntry.Key.ToString()] = cEntry.Value;
-                                }
-                                ApplyOverrides(childTarget, childOverrides);
+                                ApplyOverrides(childTarget, childDict);
                             }
                             else
                             {
@@ -319,22 +380,22 @@ namespace Valheim.ItemEnhancements.Configuration
             if (value == null) return null;
             if (targetType.IsAssignableFrom(value.GetType())) return value;
 
-            string strVal = value.ToString();
             if (targetType == typeof(float))
             {
-                return float.TryParse(strVal, NumberStyles.Any, CultureInfo.InvariantCulture, out float f) ? f : 0f;
+                return TryParseFloat(value, out float f) ? f : 0f;
             }
             if (targetType == typeof(int))
             {
-                return int.TryParse(strVal, NumberStyles.Any, CultureInfo.InvariantCulture, out int i) ? i : 0;
+                return TryParseInt(value, out int i) ? i : 0;
             }
             if (targetType == typeof(bool))
             {
-                return bool.TryParse(strVal, out bool b) ? b : false;
+                if (value is bool b) return b;
+                return bool.TryParse(value.ToString(), out bool pb) ? pb : false;
             }
             if (targetType.IsEnum)
             {
-                return Enum.Parse(targetType, strVal, true);
+                return Enum.Parse(targetType, value.ToString(), true);
             }
 
             return Convert.ChangeType(value, targetType, CultureInfo.InvariantCulture);
@@ -753,7 +814,7 @@ BossDrops:
 
     public class SuccessConfigData
     {
-        public Dictionary<string, float> SuccessRates { get; set; } = new Dictionary<string, float>
+        public Dictionary<string, float> SuccessRates { get; set; } = new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase)
         {
             { "Level_01", 100f }, { "Level_02", 100f }, { "Level_03", 95f }, { "Level_04", 90f }, { "Level_05", 80f },
             { "Level_06", 70f },  { "Level_07", 60f },  { "Level_08", 50f }, { "Level_09", 40f }, { "Level_10", 35f },
