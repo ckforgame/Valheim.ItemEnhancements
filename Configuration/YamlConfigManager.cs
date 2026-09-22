@@ -397,6 +397,7 @@ RequireCoins: false
 CoinsBaseCost: 0
 CoinsPerLevelIncrement: 0.0
 RequireCraftingStation: true
+CraftingStationRange: 5.0
 
 RequireScrolls: true
 ScrollsRequiredPerAttempt: 1
@@ -647,6 +648,7 @@ Levels:
         public int CoinsBaseCost { get; set; } = 0;
         public float CoinsPerLevelIncrement { get; set; } = 0.0f;
         public bool RequireCraftingStation { get; set; } = true;
+        public float CraftingStationRange { get; set; } = 5.0f;
 
         public bool RequireScrolls { get; set; } = true;
         public int ScrollsRequiredPerAttempt { get; set; } = 1;

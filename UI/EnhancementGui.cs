@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
+using HarmonyLib;
 using UnityEngine;
 using Valheim.ItemEnhancements.Configuration;
 using Valheim.ItemEnhancements.Core;
@@ -11,6 +13,9 @@ namespace Valheim.ItemEnhancements.UI
     {
         public static EnhancementGui Instance { get; private set; }
         public static bool IsOpen { get; set; } = false;
+
+        private static readonly FieldInfo s_allStationsField =
+            AccessTools.Field(typeof(CraftingStation), "m_allStations");
 
         private Rect _windowRect = new Rect(Screen.width / 2f - 340f, Screen.height / 2f - 310f, 680f, 620f);
         private ItemDrop.ItemData _selectedItem;
@@ -67,8 +72,31 @@ namespace Valheim.ItemEnhancements.UI
 
             if (ModConfig.RequireCraftingStation.Value)
             {
-                CraftingStation station = Player.m_localPlayer.GetCurrentCraftingStation();
-                if (station == null)
+                bool nearStation = false;
+                if (Player.m_localPlayer.GetCurrentCraftingStation() != null)
+                {
+                    nearStation = true;
+                }
+                else
+                {
+                    var stations = s_allStationsField?.GetValue(null) as List<CraftingStation>;
+                    if (stations != null)
+                    {
+                        Vector3 playerPos = Player.m_localPlayer.transform.position;
+                        float maxRange = ModConfig.CraftingStationRange.Value;
+                        for (int i = 0; i < stations.Count; i++)
+                        {
+                            CraftingStation station = stations[i];
+                            if (station != null && Vector3.Distance(station.transform.position, playerPos) <= maxRange)
+                            {
+                                nearStation = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (!nearStation)
                 {
                     Player.m_localPlayer.Message(MessageHud.MessageType.Center, "<color=#f59e0b>ต้องอยู่ใกล้โต๊ะคราฟต์หรือเตาตีเหล็กเพื่อตีบวก! (Must be near a crafting station)</color>");
                     return;

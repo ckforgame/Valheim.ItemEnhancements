@@ -26,6 +26,7 @@ namespace Valheim.ItemEnhancements.Configuration
         public static ConfigValue<int> CoinsBaseCost => new(() => YamlConfigManager.Success.CoinsBaseCost);
         public static ConfigValue<float> CoinsPerLevelIncrement => new(() => YamlConfigManager.Success.CoinsPerLevelIncrement);
         public static ConfigValue<bool> RequireCraftingStation => new(() => YamlConfigManager.Success.RequireCraftingStation);
+        public static ConfigValue<float> CraftingStationRange => new(() => YamlConfigManager.Success.CraftingStationRange);
 
         // Enhancement Scrolls & Monster Drops
         public static ConfigValue<bool> RequireScrolls => new(() => YamlConfigManager.Success.RequireScrolls);
