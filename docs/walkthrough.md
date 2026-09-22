@@ -79,8 +79,8 @@ Build succeeded.
 Time Elapsed 00:00:03.60
 ```
 - ไฟล์ DLL บิลด์และถูกส่งไปติดตั้งอัตโนมัติที่:
-  - `%APPDATA%\r2modmanPlus-local\Valheim\profiles\Sep2026\BepInEx\plugins\Valheim.ItemEnhancements`
-  - `C:\Program Files (x86)\Steam\steamapps\common\Valheim\BepInEx\plugins\Valheim.ItemEnhancements`
+  - `%APPDATA%\r2modmanPlus-local\Valheim\profiles\<Profile>\BepInEx\plugins\Valheim.ItemEnhancements`
+  - `<ValheimPath>\BepInEx\plugins\Valheim.ItemEnhancements`
 
 ---
 

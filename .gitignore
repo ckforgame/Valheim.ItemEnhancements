@@ -1,4 +1,4 @@
-﻿# Build results
+# Build results
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
@@ -21,6 +21,10 @@ bld/
 *.userosscache
 *.sln.docstates
 
+# Local environment configuration
+Environment.props
+
+
 # Rider
 .idea/
 *.sln.iml
@@ -28,6 +32,3 @@ bld/
 # OS generated files
 .DS_Store
 Thumbs.db
-
-# Local environment configuration
-Environment.props

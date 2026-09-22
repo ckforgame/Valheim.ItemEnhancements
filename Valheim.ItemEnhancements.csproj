@@ -1,5 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- Import local user environment settings if exists (git ignored) -->
+  <Import Project="$(ProjectDir)Environment.props" Condition="Exists('$(ProjectDir)Environment.props')" />
+  <Import Project="$(MSBuildProjectFullPath).user" Condition="Exists('$(MSBuildProjectFullPath).user')" />
+
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
     <AssemblyName>Valheim.ItemEnhancements</AssemblyName>
@@ -10,12 +14,22 @@
     <Nullable>disable</Nullable>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     
-    <!-- Valheim Game Paths -->
+    <!-- Valheim Game & Modding Paths (defaults fallback if not defined in Environment.props) -->
     <ValheimPath Condition="'$(ValheimPath)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Valheim</ValheimPath>
-    <ValheimManaged>$(ValheimPath)\valheim_Data\Managed</ValheimManaged>
-    <BepInExCore Condition="'$(BepInExCore)' == ''">$(AppData)\r2modmanPlus-local\Valheim\profiles\Sep2026\BepInEx\core</BepInExCore>
-    <R2ModmanPluginDir>$(AppData)\r2modmanPlus-local\Valheim\profiles\Sep2026\BepInEx\plugins\Valheim.ItemEnhancements</R2ModmanPluginDir>
-    <SteamPluginDir>$(ValheimPath)\BepInEx\plugins\Valheim.ItemEnhancements</SteamPluginDir>
+    <ValheimManaged Condition="'$(ValheimManaged)' == ''">$(ValheimPath)\valheim_Data\Managed</ValheimManaged>
+
+    <!-- Optional r2modman Profile Directory -->
+    <R2ModmanProfileDir Condition="'$(R2ModmanProfileDir)' == ''"></R2ModmanProfileDir>
+
+    <!-- BepInEx Core Path -->
+    <BepInExCore Condition="'$(BepInExCore)' == '' and '$(R2ModmanProfileDir)' != ''">$(R2ModmanProfileDir)\BepInEx\core</BepInExCore>
+    <BepInExCore Condition="'$(BepInExCore)' == ''">$(ValheimPath)\BepInEx\core</BepInExCore>
+
+    <!-- Plugin & Config Output Directories -->
+    <R2ModmanPluginDir Condition="'$(R2ModmanPluginDir)' == '' and '$(R2ModmanProfileDir)' != ''">$(R2ModmanProfileDir)\BepInEx\plugins\$(AssemblyName)</R2ModmanPluginDir>
+    <R2ModmanConfigDir Condition="'$(R2ModmanConfigDir)' == '' and '$(R2ModmanProfileDir)' != ''">$(R2ModmanProfileDir)\BepInEx\config</R2ModmanConfigDir>
+    <SteamPluginDir Condition="'$(SteamPluginDir)' == ''">$(ValheimPath)\BepInEx\plugins\$(AssemblyName)</SteamPluginDir>
+    <SteamConfigDir Condition="'$(SteamConfigDir)' == ''">$(ValheimPath)\BepInEx\config</SteamConfigDir>
   </PropertyGroup>
 
   <ItemGroup>
@@ -89,16 +103,20 @@
       <ConfigFiles Include="$(ProjectDir)Configuration\*.cfg" />
       <YamlFiles Include="$(ProjectDir)Configuration\Yaml\*.yml;$(ProjectDir)Configuration\Yaml\*.txt" />
     </ItemGroup>
-    <MakeDir Directories="$(R2ModmanPluginDir)" Condition="Exists('$(BepInExCore)')" />
-    <Copy SourceFiles="@(PluginFiles)" DestinationFolder="$(R2ModmanPluginDir)" Condition="Exists('$(BepInExCore)')" />
-    <Copy SourceFiles="@(ConfigFiles)" DestinationFolder="$(AppData)\r2modmanPlus-local\Valheim\profiles\Sep2026\BepInEx\config" Condition="Exists('$(BepInExCore)')" />
-    <MakeDir Directories="$(AppData)\r2modmanPlus-local\Valheim\profiles\Sep2026\BepInEx\config\ckforgame.ItemEnhancements" Condition="Exists('$(BepInExCore)')" />
-    <Copy SourceFiles="@(YamlFiles)" DestinationFolder="$(AppData)\r2modmanPlus-local\Valheim\profiles\Sep2026\BepInEx\config\ckforgame.ItemEnhancements" Condition="Exists('$(BepInExCore)')" />
+
+    <!-- Deploy to r2modman if configured and profile exists -->
+    <MakeDir Directories="$(R2ModmanPluginDir)" Condition="'$(R2ModmanProfileDir)' != '' and Exists('$(R2ModmanProfileDir)')" />
+    <Copy SourceFiles="@(PluginFiles)" DestinationFolder="$(R2ModmanPluginDir)" Condition="'$(R2ModmanProfileDir)' != '' and Exists('$(R2ModmanProfileDir)')" />
+    <Copy SourceFiles="@(ConfigFiles)" DestinationFolder="$(R2ModmanConfigDir)" Condition="'$(R2ModmanProfileDir)' != '' and Exists('$(R2ModmanProfileDir)')" />
+    <MakeDir Directories="$(R2ModmanConfigDir)\ckforgame.ItemEnhancements" Condition="'$(R2ModmanProfileDir)' != '' and Exists('$(R2ModmanProfileDir)')" />
+    <Copy SourceFiles="@(YamlFiles)" DestinationFolder="$(R2ModmanConfigDir)\ckforgame.ItemEnhancements" Condition="'$(R2ModmanProfileDir)' != '' and Exists('$(R2ModmanProfileDir)')" />
+
+    <!-- Deploy to Steam BepInEx if plugins folder exists -->
     <MakeDir Directories="$(SteamPluginDir)" Condition="Exists('$(ValheimPath)\BepInEx\plugins')" />
     <Copy SourceFiles="@(PluginFiles)" DestinationFolder="$(SteamPluginDir)" Condition="Exists('$(ValheimPath)\BepInEx\plugins')" />
-    <Copy SourceFiles="@(ConfigFiles)" DestinationFolder="$(ValheimPath)\BepInEx\config" Condition="Exists('$(ValheimPath)\BepInEx\plugins')" />
-    <MakeDir Directories="$(ValheimPath)\BepInEx\config\ckforgame.ItemEnhancements" Condition="Exists('$(ValheimPath)\BepInEx\plugins')" />
-    <Copy SourceFiles="@(YamlFiles)" DestinationFolder="$(ValheimPath)\BepInEx\config\ckforgame.ItemEnhancements" Condition="Exists('$(ValheimPath)\BepInEx\plugins')" />
+    <Copy SourceFiles="@(ConfigFiles)" DestinationFolder="$(SteamConfigDir)" Condition="Exists('$(ValheimPath)\BepInEx\plugins')" />
+    <MakeDir Directories="$(SteamConfigDir)\ckforgame.ItemEnhancements" Condition="Exists('$(ValheimPath)\BepInEx\plugins')" />
+    <Copy SourceFiles="@(YamlFiles)" DestinationFolder="$(SteamConfigDir)\ckforgame.ItemEnhancements" Condition="Exists('$(ValheimPath)\BepInEx\plugins')" />
   </Target>
 
 </Project>
