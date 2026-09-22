@@ -187,6 +187,20 @@ Time Elapsed 00:00:03.60
 5. **การทำงานร่วมกับระบบเดิม (Backwards Compatibility)**:
    - หากไม่มีไฟล์ `Drops.yml` หรือมีค่าบางส่วนไม่ได้กำหนด ระบบจะใช้ค่า Default fallback ที่กำหนดไว้ เพื่อให้เซฟและคอนฟิกเดิมทำงานได้ต่อเนื่อง 100%
 
+---
 
+## 9. การแก้ไขปัญหา ZNetScene NullReferenceException และไอเทมคัมภีร์ไม่ดรอป (Prefab Instantiation & Drop Fix)
 
+1. **สาเหตุของปัญหา (Root Cause)**:
+   - ตอนสร้าง Prefab แม่แบบของม้วนคัมภีร์ใน [ScrollItemManager.cs](../Core/ScrollItemManager.cs) มีการเรียก `UnityEngine.Object.Instantiate(baseItem)` โดยไม่ได้ตั้งค่า `ZNetView.m_forceDisableInit = true`
+   - ส่งผลให้ `ZNetView.Awake()` ทำงานบน Prefab แม่แบบทันที และลงทะเบียนตัวมันเองเข้าไปใน `ZNetScene.m_instances` เสมือนเป็นวัตถุในโลกเกม
+   - เมื่อเข้าเกม `ZNetScene.RemoveObjects` ตรวจพบว่าวัตถุแม่แบบนี้อยู่นอก Sector จึงสั่งทำลาย (`Destroy`) ตัว Prefab แม่แบบทิ้ง
+   - ทำให้เกิดข้อผิดพลาด 2 อย่าง:
+     1. `ZNetScene.RemoveObjects` วนลูปตรวจเช็ก `m_instances.Values` แล้วพบ `ZNetView` ที่ถูกทำลายไปแล้ว จึงโยนข้อผิดพลาด `NullReferenceException: Object reference not set to an instance of an object`
+     2. เมื่อมอนสเตอร์ตายและสุ่มผ่านเกณฑ์ดรอป 100% `ScrollItemManager.GetScrollPrefab(tier)` ได้รับอ็อบเจกต์ที่ถูกทำลายไปแล้ว ทำให้ไม่มีของดรอปตกสู่พื้นโลกเลย
 
+2. **การแก้ไข (Resolution)**:
+   - **ป้องกันการตื่นตัวของ ZNetView ขณะโคลนแม่แบบ**: หุ้ม `Instantiate(baseItem)` ด้วย `ZNetView.m_forceDisableInit = true` ภายในบล็อก `try ... finally` โดยไม่เรียก `ResetZDO()` เพื่อป้องกันข้อผิดพลาด NullReferenceException ในหน้าเมนูเกม (`FejdStartup`) เนื่องจากยังไม่มีการจัดสรร `m_zdo`
+   - **ระบบดึง Prefab สำรอง (Lazy Fallback)**: ใน `GetScrollPrefab(tier)` หากพบว่า Cache ว่างหรืออ็อบเจกต์เสียหาย จะค้นหาซ้ำจาก `ObjectDB.instance` หรือ `ZNetScene.instance` อัตโนมัติ
+   - **เกราะป้องกันบั๊ก ZNetScene.RemoveObjects (Safety Prefix Patch)**: เพิ่ม Harmony Prefix ใน [CharacterDropPatches.cs](../Patches/CharacterDropPatches.cs) คอยล้าง Instance ที่เป็น Null หรือ ZDO หายออกจาก `m_instances` ก่อนที่ `RemoveObjects` จะเริ่มทำงาน
+   - **เพิ่มความยืดหยุ่นและการบันทึก Log**: ปรับปรุง `GetBiomeTierChance` ให้รองรับกรณี Biome Flag ซ้อนทับ และเพิ่ม Log ข้อมูลการดรอปใน [ScrollDropManager.cs](../Core/ScrollDropManager.cs) เมื่อมอนสเตอร์/บอสทำคัมภีร์ตกสู่พื้นโลก

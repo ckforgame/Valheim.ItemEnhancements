@@ -16,7 +16,7 @@ namespace Valheim.ItemEnhancements.Core
             if (character == null || character.IsPlayer() || character.IsTamed()) return;
 
             bool isBoss = character.IsBoss();
-            Vector3 pos = dropComponent.transform.position;
+            Vector3 pos = dropComponent != null ? dropComponent.transform.position : character.transform.position;
             Heightmap.Biome biome = Heightmap.FindBiome(pos);
             string name = character.gameObject.name.ToLower();
 
@@ -44,6 +44,11 @@ namespace Valheim.ItemEnhancements.Core
                     if (prefab != null && amount > 0)
                     {
                         dropsList.Add(new KeyValuePair<GameObject, int>(prefab, amount));
+                        Plugin.Log.LogInfo($"[ScrollDrop] Boss '{character.m_name}' dropped {prefab.name} x{amount} (Tier {bossTier}) at {pos}");
+                    }
+                    else if (prefab == null)
+                    {
+                        Plugin.Log.LogWarning($"[ScrollDrop] Boss drop succeeded for Tier {bossTier} but prefab was null!");
                     }
                 }
                 return;
@@ -88,6 +93,11 @@ namespace Valheim.ItemEnhancements.Core
                     if (prefab != null)
                     {
                         dropsList.Add(new KeyValuePair<GameObject, int>(prefab, 1));
+                        Plugin.Log.LogInfo($"[ScrollDrop] Monster '{character.m_name}' dropped {prefab.name} (Tier {dropTier}) at {pos} (Biome: {biome}, Roll: {roll:F1}/{finalChance:F1}%)");
+                    }
+                    else
+                    {
+                        Plugin.Log.LogWarning($"[ScrollDrop] Roll succeeded for Tier {dropTier} ({roll:F1}/{finalChance:F1}%) but prefab was null!");
                     }
 
                     // ดรอป 1 ม้วนต่อมอนสเตอร์ 1 ตัว

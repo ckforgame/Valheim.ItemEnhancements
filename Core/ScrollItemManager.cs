@@ -17,8 +17,33 @@ namespace Valheim.ItemEnhancements.Core
 
         public static GameObject GetScrollPrefab(int tier)
         {
-            _scrollPrefabs.TryGetValue(tier, out GameObject prefab);
-            return prefab;
+            if (_scrollPrefabs.TryGetValue(tier, out GameObject prefab) && prefab != null)
+            {
+                return prefab;
+            }
+
+            string prefabName = GetScrollPrefabName(tier);
+            if (ObjectDB.instance != null)
+            {
+                GameObject existing = ObjectDB.instance.GetItemPrefab(prefabName);
+                if (existing != null)
+                {
+                    _scrollPrefabs[tier] = existing;
+                    return existing;
+                }
+            }
+
+            if (ZNetScene.instance != null)
+            {
+                GameObject existing = ZNetScene.instance.GetPrefab(prefabName);
+                if (existing != null)
+                {
+                    _scrollPrefabs[tier] = existing;
+                    return existing;
+                }
+            }
+
+            return null;
         }
 
         public static string GetScrollPrefabName(int tier)
@@ -83,9 +108,21 @@ namespace Valheim.ItemEnhancements.Core
                     continue;
                 }
 
-                GameObject scrollObj = UnityEngine.Object.Instantiate(baseItem);
+                GameObject scrollObj;
+                bool prevDisableInit = ZNetView.m_forceDisableInit;
+                try
+                {
+                    ZNetView.m_forceDisableInit = true;
+                    scrollObj = UnityEngine.Object.Instantiate(baseItem);
+                }
+                finally
+                {
+                    ZNetView.m_forceDisableInit = prevDisableInit;
+                }
+
                 scrollObj.name = prefabName;
                 UnityEngine.Object.DontDestroyOnLoad(scrollObj);
+
 
                 ItemDrop itemDrop = scrollObj.GetComponent<ItemDrop>();
                 if (itemDrop != null)
@@ -132,6 +169,11 @@ namespace Valheim.ItemEnhancements.Core
             RegisterLocalization();
             RegisterFusionRecipes(objectDb);
 
+            if (ZNetScene.instance != null)
+            {
+                RegisterZNetScenePrefabs(ZNetScene.instance);
+            }
+
             Plugin.Log.LogInfo("[ScrollItemManager] Successfully registered 4 Tiers of Enhancement Scrolls into ObjectDB!");
         }
 
@@ -154,14 +196,15 @@ namespace Valheim.ItemEnhancements.Core
 
             for (int tier = 1; tier <= 4; tier++)
             {
-                if (_scrollPrefabs.TryGetValue(tier, out GameObject scrollObj) && scrollObj != null)
+                GameObject scrollObj = GetScrollPrefab(tier);
+                if (scrollObj != null)
                 {
                     int hash = scrollObj.name.GetStableHashCode();
                     if (!znetScene.m_prefabs.Contains(scrollObj))
                     {
                         znetScene.m_prefabs.Add(scrollObj);
                     }
-                    if (namedPrefabs != null && !namedPrefabs.ContainsKey(hash))
+                    if (namedPrefabs != null)
                     {
                         namedPrefabs[hash] = scrollObj;
                     }

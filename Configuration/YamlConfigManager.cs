@@ -836,15 +836,34 @@ BossDrops:
 
         public float GetBiomeTierChance(Heightmap.Biome biome, int tier)
         {
+            if (BiomeDrops == null) return 0f;
+
+            string tierKey = $"Tier{tier}";
             string biomeKey = biome.ToString();
-            if (BiomeDrops != null && BiomeDrops.TryGetValue(biomeKey, out var tierRates) && tierRates != null)
+
+            if (BiomeDrops.TryGetValue(biomeKey, out var tierRates) && tierRates != null)
             {
-                string tierKey = $"Tier{tier}";
                 if (tierRates.TryGetValue(tierKey, out float chance))
                 {
                     return chance;
                 }
             }
+
+            // Fallback for flag masks or biome variations
+            foreach (var kvp in BiomeDrops)
+            {
+                if (Enum.TryParse<Heightmap.Biome>(kvp.Key, true, out var parsedBiome))
+                {
+                    if ((biome & parsedBiome) != 0 && kvp.Value != null)
+                    {
+                        if (kvp.Value.TryGetValue(tierKey, out float chance))
+                        {
+                            return chance;
+                        }
+                    }
+                }
+            }
+
             return 0f;
         }
     }

@@ -60,5 +60,48 @@ namespace Valheim.ItemEnhancements.Patches
                 ScrollItemManager.RegisterZNetScenePrefabs(__instance);
             }
         }
+
+        /// <summary>
+        /// Harmony Patch ป้องกัน NullReferenceException ใน ZNetScene.RemoveObjects
+        /// หากมี GameObject ที่ถูกทำลายหรือ ZDO สูญหายหลงเหลืออยู่ใน m_instances
+        /// </summary>
+        [HarmonyPatch(typeof(ZNetScene), "RemoveObjects")]
+        public static class ZNetScene_RemoveObjects_Patch
+        {
+            private static readonly AccessTools.FieldRef<ZNetScene, Dictionary<ZDOID, ZNetView>> _instancesRef =
+                AccessTools.FieldRefAccess<ZNetScene, Dictionary<ZDOID, ZNetView>>("m_instances");
+
+            public static void Prefix(ZNetScene __instance)
+            {
+                if (__instance == null) return;
+                try
+                {
+                    var instances = _instancesRef(__instance);
+                    if (instances == null || instances.Count == 0) return;
+
+                    List<ZDOID> deadKeys = null;
+                    foreach (var kvp in instances)
+                    {
+                        if (kvp.Value == null || kvp.Value.GetZDO() == null)
+                        {
+                            if (deadKeys == null) deadKeys = new List<ZDOID>();
+                            deadKeys.Add(kvp.Key);
+                        }
+                    }
+
+                    if (deadKeys != null)
+                    {
+                        for (int i = 0; i < deadKeys.Count; i++)
+                        {
+                            instances.Remove(deadKeys[i]);
+                        }
+                    }
+                }
+                catch
+                {
+                    // Ignore safety errors
+                }
+            }
+        }
     }
 }
