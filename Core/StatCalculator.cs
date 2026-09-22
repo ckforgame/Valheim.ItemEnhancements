@@ -187,7 +187,7 @@ namespace Valheim.ItemEnhancements.Core
 
         #region Cheat Abilities Calculations
 
-        public static bool IsCheatEnabled => ModConfig.EnableCheatAbilities != null && ModConfig.EnableCheatAbilities.Value;
+        public static bool IsCheatEnabled => ModConfig.EnableCheatAbilities.Value;
 
         public static bool IsArmor(ItemDrop.ItemData item)
         {

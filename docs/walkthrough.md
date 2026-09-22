@@ -126,3 +126,20 @@ Time Elapsed 00:00:03.60
   - เสริมกำลังการฟื้นฟูใน `SEMan.ModifyHealthRegen`, `ModifyStaminaRegen`, และ `ModifyEitrRegen`
   - ขยายผลการฮีลที่ได้รับใน `Character.Heal`
   - แสดงรายละเอียดชัดเจนใน Tooltip ของไอเทมและหน้าต่าง GUI ตีบวกเมื่อเปิดใช้งาน
+
+---
+
+## 5. รายละเอียดระบบแยกไฟล์ YAML และการทำงานของ *.override.yml
+
+- **ไฟล์จัดเก็บ**: อยู่ในโฟลเดอร์ `BepInEx/config/ckforgame.ItemEnhancements/`:
+  - `Success.yml`: อัตราสำเร็จ +1 ถึง +20, SafeLevel, กฎล้มเหลว, ค่าธรรมเนียม, การดรอปคัมภีร์
+  - `Item.yml`: อาวุธ (Damage, Stamina, Eitr, Backstab), ความทนทาน, น้ำหนัก, เครื่องประดับ
+  - `Armor.yml`: พลังป้องกันเกราะ, โล่ (Block, Deflection, Parry), ลด Stamina กลิ้ง/วิ่ง/กระโดด
+  - `Cheat.yml`: โหมดโกง Capacity เลือด/สเตมินา/พลังเวท และรีเจนต่างๆ
+- **กลไก Override ที่ปลอดภัยต่อการอัปเดต (Safe Overrides)**:
+  - ผู้เล่นสามารถสร้างไฟล์ เช่น `Item.override.yml`, `Success.override.yml` แล้วใส่เฉพาะฟิลด์ที่ต้องการแก้
+  - ระบบจะทำ Partial Merge นำค่าจาก override มาทับค่าฐานเฉพาะคีย์ที่ระบุ โดยค่าที่เหลือยังคงอ่านจากไฟล์หลักอย่างถูกต้อง
+  - เมื่อ Mod ได้รับการอัปเดต ตัวติดตั้งจะอัปเดตเฉพาะไฟล์ `.yml` หลัก แต่จะไม่แตะต้องไฟล์ `*.override.yml` ของผู้เล่น
+- **Hot-Reload ในตัว**:
+  - มี `FileSystemWatcher` คอยตรวจจับการเปลี่ยนแปลงไฟล์ในโฟลเดอร์ YAML แบบ Real-time ทันทีที่เซฟไฟล์ ไม่ต้องรีสตาร์ตเกม
+

@@ -9,455 +9,95 @@ namespace Valheim.ItemEnhancements.Configuration
     {
         public const int MaxLevel = 20;
 
-        // Success Rates for Levels 1 to 20
-        public static ConfigEntry<float>[] SuccessRates = new ConfigEntry<float>[MaxLevel + 1];
-
-        // Failure Mechanics
-        public static ConfigEntry<int> SafeLevel { get; private set; }
-        public static ConfigEntry<bool> DowngradeOnFail { get; private set; }
-        public static ConfigEntry<bool> BreakOnFail { get; private set; }
-        public static ConfigEntry<float> BreakChanceAboveSafeLevel { get; private set; }
-
-        // Costs & Requirements
-        public static ConfigEntry<bool> RequireCoins { get; private set; }
-        public static ConfigEntry<int> CoinsBaseCost { get; private set; }
-        public static ConfigEntry<float> CoinsPerLevelIncrement { get; private set; }
-        public static ConfigEntry<bool> RequireCraftingStation { get; private set; }
-
-        // Enhancement Scrolls & Monster Drops
-        public static ConfigEntry<bool> RequireScrolls { get; private set; }
-        public static ConfigEntry<int> ScrollsRequiredPerAttempt { get; private set; }
-        public static ConfigEntry<bool> EnableMonsterDrops { get; private set; }
-        public static ConfigEntry<float> Tier1_DropChance { get; private set; }
-        public static ConfigEntry<float> Tier2_DropChance { get; private set; }
-        public static ConfigEntry<float> Tier3_DropChance { get; private set; }
-        public static ConfigEntry<float> Tier4_DropChance { get; private set; }
-        public static ConfigEntry<float> StarLevelMultiplier { get; private set; }
-        public static ConfigEntry<bool> BossGuaranteedDrop { get; private set; }
-        public static ConfigEntry<int> BossMinDrop { get; private set; }
-        public static ConfigEntry<int> BossMaxDrop { get; private set; }
-
-        // Stat Scaling: Weapons
-        public static ConfigEntry<float> WeaponDamageBonusPerLevel { get; private set; }
-        public static ConfigEntry<float> WeaponBackstabBonusPerLevel { get; private set; }
-        public static ConfigEntry<float> WeaponStaminaReductionPerLevel { get; private set; }
-        public static ConfigEntry<float> WeaponEitrReductionPerLevel { get; private set; }
-
-        // Stat Scaling: Armor & Defense
-        public static ConfigEntry<float> ArmorFlatBonusPerLevel { get; private set; }
-        public static ConfigEntry<float> ArmorPercentBonusPerLevel { get; private set; }
-        public static ConfigEntry<float> ArmorMovementPenaltyReductionPerLevel { get; private set; }
-        public static ConfigEntry<float> EitrRegenBonusPerLevel { get; private set; }
-
-        // Stat Scaling: Shields
-        public static ConfigEntry<float> ShieldBlockPowerBonusPerLevel { get; private set; }
-        public static ConfigEntry<float> ShieldDeflectionBonusPerLevel { get; private set; }
-        public static ConfigEntry<float> ShieldTimedBlockBonusPerLevel { get; private set; }
-        public static ConfigEntry<float> ShieldBlockStaminaReductionPerLevel { get; private set; }
-
-        // Stat Scaling: Player Mobility & Utilities
-        public static ConfigEntry<float> DodgeStaminaReductionPerLevel { get; private set; }
-        public static ConfigEntry<float> RunStaminaReductionPerLevel { get; private set; }
-        public static ConfigEntry<float> JumpStaminaReductionPerLevel { get; private set; }
-        public static ConfigEntry<float> CarryWeightBonusPerLevel { get; private set; }
-
-        // General Stat Scaling
-        public static ConfigEntry<float> MaxDurabilityBonusPerLevel { get; private set; }
-        public static ConfigEntry<float> WeightReductionPerLevel { get; private set; }
-
-        // Cheat Abilities (ความสามารถพิเศษเสริม / โหมดโกง)
-        public static ConfigEntry<bool> EnableCheatAbilities { get; private set; }
-        public static ConfigEntry<float> CheatMaxHealthPerLevel { get; private set; }
-        public static ConfigEntry<float> CheatMaxStaminaPerLevel { get; private set; }
-        public static ConfigEntry<float> CheatMaxEitrPerLevel { get; private set; }
-        public static ConfigEntry<float> CheatHealthRegenPerLevel { get; private set; }
-        public static ConfigEntry<float> CheatStaminaRegenPerLevel { get; private set; }
-        public static ConfigEntry<float> CheatEitrRegenPerLevel { get; private set; }
-        public static ConfigEntry<float> CheatHealingMultiplierPerLevel { get; private set; }
-
-        // UI & Keybindings
+        // UI & Keybindings (BepInEx Config)
         public static ConfigEntry<KeyCode> ToggleGuiKey { get; private set; }
         public static ConfigEntry<bool> ShowInventoryBadges { get; private set; }
 
+        #region YAML-backed Configuration Properties
+
+        // Failure Mechanics
+        public static ConfigValue<int> SafeLevel => new(() => YamlConfigManager.Success.SafeLevel);
+        public static ConfigValue<bool> DowngradeOnFail => new(() => YamlConfigManager.Success.DowngradeOnFail);
+        public static ConfigValue<bool> BreakOnFail => new(() => YamlConfigManager.Success.BreakOnFail);
+        public static ConfigValue<float> BreakChanceAboveSafeLevel => new(() => YamlConfigManager.Success.BreakChanceAboveSafeLevel);
+
+        // Costs & Requirements
+        public static ConfigValue<bool> RequireCoins => new(() => YamlConfigManager.Success.RequireCoins);
+        public static ConfigValue<int> CoinsBaseCost => new(() => YamlConfigManager.Success.CoinsBaseCost);
+        public static ConfigValue<float> CoinsPerLevelIncrement => new(() => YamlConfigManager.Success.CoinsPerLevelIncrement);
+        public static ConfigValue<bool> RequireCraftingStation => new(() => YamlConfigManager.Success.RequireCraftingStation);
+
+        // Enhancement Scrolls & Monster Drops
+        public static ConfigValue<bool> RequireScrolls => new(() => YamlConfigManager.Success.RequireScrolls);
+        public static ConfigValue<int> ScrollsRequiredPerAttempt => new(() => YamlConfigManager.Success.ScrollsRequiredPerAttempt);
+        public static ConfigValue<bool> EnableMonsterDrops => new(() => YamlConfigManager.Success.EnableMonsterDrops);
+        public static ConfigValue<float> Tier1_DropChance => new(() => YamlConfigManager.Success.Tier1_DropChance);
+        public static ConfigValue<float> Tier2_DropChance => new(() => YamlConfigManager.Success.Tier2_DropChance);
+        public static ConfigValue<float> Tier3_DropChance => new(() => YamlConfigManager.Success.Tier3_DropChance);
+        public static ConfigValue<float> Tier4_DropChance => new(() => YamlConfigManager.Success.Tier4_DropChance);
+        public static ConfigValue<float> StarLevelMultiplier => new(() => YamlConfigManager.Success.StarLevelMultiplier);
+        public static ConfigValue<bool> BossGuaranteedDrop => new(() => YamlConfigManager.Success.BossGuaranteedDrop);
+        public static ConfigValue<int> BossMinDrop => new(() => YamlConfigManager.Success.BossMinDrop);
+        public static ConfigValue<int> BossMaxDrop => new(() => YamlConfigManager.Success.BossMaxDrop);
+
+        // Stat Scaling: Weapons
+        public static ConfigValue<float> WeaponDamageBonusPerLevel => new(() => YamlConfigManager.Item.WeaponDamageBonusPerLevel);
+        public static ConfigValue<float> WeaponBackstabBonusPerLevel => new(() => YamlConfigManager.Item.WeaponBackstabBonusPerLevel);
+        public static ConfigValue<float> WeaponStaminaReductionPerLevel => new(() => YamlConfigManager.Item.WeaponStaminaReductionPerLevel);
+        public static ConfigValue<float> WeaponEitrReductionPerLevel => new(() => YamlConfigManager.Item.WeaponEitrReductionPerLevel);
+
+        // Stat Scaling: Armor & Defense
+        public static ConfigValue<float> ArmorFlatBonusPerLevel => new(() => YamlConfigManager.Armor.ArmorFlatBonusPerLevel);
+        public static ConfigValue<float> ArmorPercentBonusPerLevel => new(() => YamlConfigManager.Armor.ArmorPercentBonusPerLevel);
+        public static ConfigValue<float> ArmorMovementPenaltyReductionPerLevel => new(() => YamlConfigManager.Armor.ArmorMovementPenaltyReductionPerLevel);
+        public static ConfigValue<float> EitrRegenBonusPerLevel => new(() => YamlConfigManager.Armor.EitrRegenBonusPerLevel);
+
+        // Stat Scaling: Shields
+        public static ConfigValue<float> ShieldBlockPowerBonusPerLevel => new(() => YamlConfigManager.Armor.ShieldBlockPowerBonusPerLevel);
+        public static ConfigValue<float> ShieldDeflectionBonusPerLevel => new(() => YamlConfigManager.Armor.ShieldDeflectionBonusPerLevel);
+        public static ConfigValue<float> ShieldTimedBlockBonusPerLevel => new(() => YamlConfigManager.Armor.ShieldTimedBlockBonusPerLevel);
+        public static ConfigValue<float> ShieldBlockStaminaReductionPerLevel => new(() => YamlConfigManager.Armor.ShieldBlockStaminaReductionPerLevel);
+
+        // Stat Scaling: Player Mobility & Utilities
+        public static ConfigValue<float> DodgeStaminaReductionPerLevel => new(() => YamlConfigManager.Armor.DodgeStaminaReductionPerLevel);
+        public static ConfigValue<float> RunStaminaReductionPerLevel => new(() => YamlConfigManager.Armor.RunStaminaReductionPerLevel);
+        public static ConfigValue<float> JumpStaminaReductionPerLevel => new(() => YamlConfigManager.Armor.JumpStaminaReductionPerLevel);
+        public static ConfigValue<float> CarryWeightBonusPerLevel => new(() => YamlConfigManager.Item.CarryWeightBonusPerLevel);
+
+        // General Stat Scaling
+        public static ConfigValue<float> MaxDurabilityBonusPerLevel => new(() => YamlConfigManager.Item.MaxDurabilityBonusPerLevel);
+        public static ConfigValue<float> WeightReductionPerLevel => new(() => YamlConfigManager.Item.WeightReductionPerLevel);
+
+        // Cheat Abilities
+        public static ConfigValue<bool> EnableCheatAbilities => new(() => YamlConfigManager.Cheat.EnableCheatAbilities);
+        public static ConfigValue<float> CheatMaxHealthPerLevel => new(() => YamlConfigManager.Cheat.CheatMaxHealthPerLevel);
+        public static ConfigValue<float> CheatMaxStaminaPerLevel => new(() => YamlConfigManager.Cheat.CheatMaxStaminaPerLevel);
+        public static ConfigValue<float> CheatMaxEitrPerLevel => new(() => YamlConfigManager.Cheat.CheatMaxEitrPerLevel);
+        public static ConfigValue<float> CheatHealthRegenPerLevel => new(() => YamlConfigManager.Cheat.CheatHealthRegenPerLevel);
+        public static ConfigValue<float> CheatStaminaRegenPerLevel => new(() => YamlConfigManager.Cheat.CheatStaminaRegenPerLevel);
+        public static ConfigValue<float> CheatEitrRegenPerLevel => new(() => YamlConfigManager.Cheat.CheatEitrRegenPerLevel);
+        public static ConfigValue<float> CheatHealingMultiplierPerLevel => new(() => YamlConfigManager.Cheat.CheatHealingMultiplierPerLevel);
+
+        #endregion
+
         public static void Initialize(ConfigFile config)
         {
-            // Default Success Rates table:
-            // 1: 100%, 2: 100%, 3: 95%, 4: 90%, 5: 80%, 6: 70%, 7: 60%, 8: 50%, 9: 40%, 10: 35%,
-            // 11: 30%, 12: 25%, 13: 20%, 14: 15%, 15: 12%, 16: 10%, 17: 8%, 18: 5%, 19: 3%, 20: 1%
-            float[] defaultRates = new float[]
-            {
-                0f,
-                100f, 100f, 95f, 90f, 80f,
-                70f, 60f, 50f, 40f, 35f,
-                30f, 25f, 20f, 15f, 12f,
-                10f, 8f, 5f, 3f, 1f
-            };
+            // Initialize YAML subsystem
+            YamlConfigManager.Initialize();
 
-            for (int i = 1; i <= MaxLevel; i++)
-            {
-                SuccessRates[i] = config.Bind(
-                    "1. Success Rates (อัตราความสำเร็จ)",
-                    $"Level_{i:D2}_SuccessRate",
-                    defaultRates[i],
-                    new ConfigDescription(
-                        $"อัตราความสำเร็จสำหรับการตีบวกขึ้นเป็นระดับ +{i} (Success rate % for +{i})",
-                        new AcceptableValueRange<float>(0f, 100f),
-                        new ConfigurationManagerAttributes { Order = MaxLevel - i }
-                    )
-                );
-            }
-
-            // Failure Rules
-            SafeLevel = config.Bind(
-                "2. Failure Rules (กฎการล้มเหลว)",
-                "SafeLevel",
-                3,
-                "ระดับปลอดภัย: การตีบวกไม่เกินระดับนี้จะไม่ลดระดับและไม่แตก (Safe level: Upgrades up to this level will not downgrade or break)"
-            );
-
-            DowngradeOnFail = config.Bind(
-                "2. Failure Rules (กฎการล้มเหลว)",
-                "DowngradeOnFail",
-                true,
-                "หากล้มเหลวเกินระดับปลอดภัย ระดับจะลดลง 1 ขั้น (If failed above safe level, downgrade by 1 level)"
-            );
-
-            BreakOnFail = config.Bind(
-                "2. Failure Rules (กฎการล้มเหลว)",
-                "BreakOnFail",
-                false,
-                "หากล้มเหลวเกินระดับปลอดภัย มีโอกาสที่ไอเทมจะแตกสลาย (If failed above safe level, item has a chance to break)"
-            );
-
-            BreakChanceAboveSafeLevel = config.Bind(
-                "2. Failure Rules (กฎการล้มเหลว)",
-                "BreakChanceAboveSafeLevel",
-                10f,
-                new ConfigDescription(
-                    "โอกาสแตก (%) หากเปิดใช้งาน BreakOnFail (Break chance % when BreakOnFail is true)",
-                    new AcceptableValueRange<float>(0f, 100f)
-                )
-            );
-
-            // Costs (Default false/free)
-            RequireCoins = config.Bind(
-                "3. Costs & Requirements (ค่าธรรมเนียม)",
-                "RequireCoins",
-                false,
-                "ต้องใช้เหรียญทอง (Coins) ในการตีบวกหรือไม่ (Whether coins are required to enhance - default false for free fee)"
-            );
-
-            CoinsBaseCost = config.Bind(
-                "3. Costs & Requirements (ค่าธรรมเนียม)",
-                "CoinsBaseCost",
-                0,
-                "ค่าธรรมเนียมเหรียญทองพื้นฐาน (Base coin cost for enhancement)"
-            );
-
-            CoinsPerLevelIncrement = config.Bind(
-                "3. Costs & Requirements (ค่าธรรมเนียม)",
-                "CoinsPerLevelIncrement",
-                0f,
-                "เหรียญทองที่ต้องใช้เพิ่มขึ้นต่อระดับ (Coin cost increment per target level)"
-            );
-
-            RequireCraftingStation = config.Bind(
-                "3. Costs & Requirements (ค่าธรรมเนียม)",
-                "RequireCraftingStation",
-                true,
-                "ต้องอยู่ใกล้โต๊ะคราฟต์/เตาตีเหล็กเพื่อเปิดหน้าต่างตีบวก (Must be near a crafting station to enhance)"
-            );
-
-            // Enhancement Scrolls & Monster Drops
-            RequireScrolls = config.Bind(
-                "3.1 Enhancement Scrolls (ม้วนคัมภีร์ตีบวก)",
-                "RequireScrolls",
-                true,
-                "ต้องใช้ใบตีบวก/ม้วนคัมภีร์ตามระดับในการตีบวกหรือไม่ (Whether enhancement scrolls are required)"
-            );
-
-            ScrollsRequiredPerAttempt = config.Bind(
-                "3.1 Enhancement Scrolls (ม้วนคัมภีร์ตีบวก)",
-                "ScrollsRequiredPerAttempt",
-                1,
-                "จำนวนม้วนคัมภีร์ที่ใช้ต่อการกดตีบวก 1 ครั้ง (Number of scrolls consumed per enhancement attempt)"
-            );
-
-            EnableMonsterDrops = config.Bind(
-                "3.2 Monster Drops (การดรอปจากมอนสเตอร์)",
-                "EnableMonsterDrops",
-                true,
-                "เปิดใช้งานการดรอปม้วนคัมภีร์เมื่อสังหารมอนสเตอร์ (Enable enhancement scroll drops from monsters)"
-            );
-
-            Tier1_DropChance = config.Bind(
-                "3.2 Monster Drops (การดรอปจากมอนสเตอร์)",
-                "Tier1_DropChance",
-                15.0f,
-                new ConfigDescription(
-                    "โอกาสดรอปคัมภีร์ระดับ 1 (%) จากมอนสเตอร์ Meadows / Black Forest สำหรับ +1 ถึง +5",
-                    new AcceptableValueRange<float>(0f, 100f)
-                )
-            );
-
-            Tier2_DropChance = config.Bind(
-                "3.2 Monster Drops (การดรอปจากมอนสเตอร์)",
-                "Tier2_DropChance",
-                10.0f,
-                new ConfigDescription(
-                    "โอกาสดรอปคัมภีร์ระดับ 2 (%) จากมอนสเตอร์ Swamp / Mountain สำหรับ +6 ถึง +10",
-                    new AcceptableValueRange<float>(0f, 100f)
-                )
-            );
-
-            Tier3_DropChance = config.Bind(
-                "3.2 Monster Drops (การดรอปจากมอนสเตอร์)",
-                "Tier3_DropChance",
-                6.0f,
-                new ConfigDescription(
-                    "โอกาสดรอปคัมภีร์ระดับ 3 (%) จากมอนสเตอร์ Plains / Mistlands สำหรับ +11 ถึง +15",
-                    new AcceptableValueRange<float>(0f, 100f)
-                )
-            );
-
-            Tier4_DropChance = config.Bind(
-                "3.2 Monster Drops (การดรอปจากมอนสเตอร์)",
-                "Tier4_DropChance",
-                3.0f,
-                new ConfigDescription(
-                    "โอกาสดรอปคัมภีร์ระดับ 4 (%) จากมอนสเตอร์ Ashlands / Bosses สำหรับ +16 ถึง +20",
-                    new AcceptableValueRange<float>(0f, 100f)
-                )
-            );
-
-            StarLevelMultiplier = config.Bind(
-                "3.2 Monster Drops (การดรอปจากมอนสเตอร์)",
-                "StarLevelMultiplier",
-                1.5f,
-                "ตัวคูณโอกาสดรอปต่อระดับดาวของมอนสเตอร์ (Drop rate multiplier per star level: 1-star = 1.5x, 2-star = 2.0x)"
-            );
-
-            BossGuaranteedDrop = config.Bind(
-                "3.2 Monster Drops (การดรอปจากมอนสเตอร์)",
-                "BossGuaranteedDrop",
-                true,
-                "บอสโลกการันตีการดรอปคัมภีร์ 100% เสมอ (World bosses are guaranteed to drop scrolls)"
-            );
-
-            BossMinDrop = config.Bind(
-                "3.2 Monster Drops (การดรอปจากมอนสเตอร์)",
-                "BossMinDrop",
-                1,
-                "จำนวนคัมภีร์ขั้นต่ำที่บอสจะดรอป (Minimum scrolls dropped by bosses)"
-            );
-
-            BossMaxDrop = config.Bind(
-                "3.2 Monster Drops (การดรอปจากมอนสเตอร์)",
-                "BossMaxDrop",
-                3,
-                "จำนวนคัมภีร์สูงสุดที่บอสจะดรอป (Maximum scrolls dropped by bosses)"
-            );
-
-            // Stat Scaling: Weapons
-            WeaponDamageBonusPerLevel = config.Bind(
-                "4. Abilities - Weapons (อาวุธ)",
-                "WeaponDamageBonusPerLevel",
-                0.05f,
-                "โบนัสความเสียหายทุกประเภทต่อระดับ (Damage bonus multiplier per level, e.g. 0.05 = +5% per level)"
-            );
-
-            WeaponBackstabBonusPerLevel = config.Bind(
-                "4. Abilities - Weapons (อาวุธ)",
-                "WeaponBackstabBonusPerLevel",
-                0.05f,
-                "โบนัสตัวคูณ Backstab เพิ่มขึ้นต่อระดับ (Additional backstab multiplier bonus per level)"
-            );
-
-            WeaponStaminaReductionPerLevel = config.Bind(
-                "4. Abilities - Weapons (อาวุธ)",
-                "WeaponStaminaReductionPerLevel",
-                0.01f,
-                "ลดการใช้ Stamina โจมตีต่อระดับ (Attack stamina cost reduction per level, 0.01 = -1% per level)"
-            );
-
-            WeaponEitrReductionPerLevel = config.Bind(
-                "4. Abilities - Weapons (อาวุธ)",
-                "WeaponEitrReductionPerLevel",
-                0.01f,
-                "ลดการใช้ Eitr ของอาวุธเวทมนตร์ต่อระดับ (Attack eitr cost reduction per level, 0.01 = -1% per level)"
-            );
-
-            // Stat Scaling: Armor & Defense
-            ArmorFlatBonusPerLevel = config.Bind(
-                "5. Abilities - Armor (ชุดเกราะ)",
-                "ArmorFlatBonusPerLevel",
-                1.5f,
-                "พลังป้องกันเกราะคงที่เพิ่มขึ้นต่อระดับ (Flat armor bonus added per level)"
-            );
-
-            ArmorPercentBonusPerLevel = config.Bind(
-                "5. Abilities - Armor (ชุดเกราะ)",
-                "ArmorPercentBonusPerLevel",
-                0.02f,
-                "พลังป้องกันเกราะแบบ % ต่อระดับ (Percentage armor bonus per level, 0.02 = +2%)"
-            );
-
-            ArmorMovementPenaltyReductionPerLevel = config.Bind(
-                "5. Abilities - Armor (ชุดเกราะ)",
-                "ArmorMovementPenaltyReductionPerLevel",
-                0.05f,
-                "ลดโทษติดลบความเร็วเดินของเกราะหนัก/โล่ต่อระดับ (Movement penalty reduction per level, 0.05 = reduces penalty by 5% per level)"
-            );
-
-            EitrRegenBonusPerLevel = config.Bind(
-                "5. Abilities - Armor (ชุดเกราะ)",
-                "EitrRegenBonusPerLevel",
-                0.02f,
-                "เพิ่มอัตราฟื้นฟู Eitr ต่อระดับสำหรับชุดนักเวท (Eitr regen modifier bonus per level, 0.02 = +2%)"
-            );
-
-            // Stat Scaling: Shields
-            ShieldBlockPowerBonusPerLevel = config.Bind(
-                "6. Abilities - Shields (โล่)",
-                "ShieldBlockPowerBonusPerLevel",
-                0.05f,
-                "โบนัสพลังบล็อกของโล่ต่อระดับ (Block power bonus multiplier per level, 0.05 = +5%)"
-            );
-
-            ShieldDeflectionBonusPerLevel = config.Bind(
-                "6. Abilities - Shields (โล่)",
-                "ShieldDeflectionBonusPerLevel",
-                0.05f,
-                "โบนัสแรงปัดป้องต่อระดับ (Deflection force bonus multiplier per level)"
-            );
-
-            ShieldTimedBlockBonusPerLevel = config.Bind(
-                "6. Abilities - Shields (โล่)",
-                "ShieldTimedBlockBonusPerLevel",
-                0.02f,
-                "โบนัสตัวคูณ Parry เมื่อบล็อกตรงจังหวะต่อระดับ (Parry bonus multiplier per level)"
-            );
-
-            ShieldBlockStaminaReductionPerLevel = config.Bind(
-                "6. Abilities - Shields (โล่)",
-                "ShieldBlockStaminaReductionPerLevel",
-                0.015f,
-                "ลด Stamina ที่ใช้ในการบล็อกต่อระดับ (Block stamina cost reduction per level, 0.015 = -1.5%)"
-            );
-
-            // Stat Scaling: Mobility & Utilities
-            DodgeStaminaReductionPerLevel = config.Bind(
-                "7. Abilities - Mobility & Utilities (ความคล่องตัวและยูทิลิตี้)",
-                "DodgeStaminaReductionPerLevel",
-                0.01f,
-                "ลด Stamina ที่ใช้ในการกลิ้งหลบต่อระดับ (Dodge stamina reduction per level)"
-            );
-
-            RunStaminaReductionPerLevel = config.Bind(
-                "7. Abilities - Mobility & Utilities (ความคล่องตัวและยูทิลิตี้)",
-                "RunStaminaReductionPerLevel",
-                0.005f,
-                "ลด Stamina ที่ใช้ในการวิ่งสปรินต์ต่อระดับ (Run stamina reduction per level)"
-            );
-
-            JumpStaminaReductionPerLevel = config.Bind(
-                "7. Abilities - Mobility & Utilities (ความคล่องตัวและยูทิลิตี้)",
-                "JumpStaminaReductionPerLevel",
-                0.005f,
-                "ลด Stamina ที่ใช้ในการกระโดดต่อระดับ (Jump stamina reduction per level)"
-            );
-
-            CarryWeightBonusPerLevel = config.Bind(
-                "7. Abilities - Mobility & Utilities (ความคล่องตัวและยูทิลิตี้)",
-                "CarryWeightBonusPerLevel",
-                5.0f,
-                "เพิ่มน้ำหนักบรรทุกสูงสุดสำหรับเข็มขัด/เครื่องประดับต่อระดับ (Max carry weight bonus per level for accessories like Megingjord)"
-            );
-
-            MaxDurabilityBonusPerLevel = config.Bind(
-                "8. Abilities - General (คุณสมบัติทั่วไป)",
-                "MaxDurabilityBonusPerLevel",
-                0.05f,
-                "เพิ่มความทนทานสูงสุดต่อระดับ (Max durability bonus multiplier per level, 0.05 = +5%)"
-            );
-
-            WeightReductionPerLevel = config.Bind(
-                "8. Abilities - General (คุณสมบัติทั่วไป)",
-                "WeightReductionPerLevel",
-                0.015f,
-                "ลดน้ำหนักของไอเทมต่อระดับ (Weight reduction per level, 0.015 = -1.5% lighter)"
-            );
-
-            // UI & Controls
+            // Core UI & Controls bindings in BepInEx CFG
             ToggleGuiKey = config.Bind(
-                "9. UI & Controls (ปุ่มควบคุมและการแสดงผล)",
+                "1. General & UI (การตั้งค่าทั่วไปและปุ่มลัด)",
                 "ToggleGuiKey",
                 KeyCode.F8,
                 "ปุ่มลัดสำหรับเปิด/ปิดหน้าต่างตีบวก (Shortcut key to toggle enhancement window)"
             );
 
             ShowInventoryBadges = config.Bind(
-                "9. UI & Controls (ปุ่มควบคุมและการแสดงผล)",
+                "1. General & UI (การตั้งค่าทั่วไปและปุ่มลัด)",
                 "ShowInventoryBadges",
                 true,
                 "แสดงป้ายระดับ +X สีตามเทียร์บนไอคอนในกระเป๋า (Show tier-colored level badge on inventory icons)"
-            );
-
-            // 10. Cheat Abilities (ความสามารถพิเศษเสริม / โหมดโกง)
-            EnableCheatAbilities = config.Bind(
-                "10. Cheat Abilities (ความสามารถพิเศษเสริม / โหมดโกง)",
-                "EnableCheatAbilities",
-                false,
-                "เปิด/ปิด การใช้งานคุณสมบัติพิเศษระดับโกง (เพิ่ม Capacity เลือด, สเตมินา, พลังเวท และรีเจนต่างๆ) [Toggle Cheat Abilities ON/OFF]"
-            );
-
-            CheatMaxHealthPerLevel = config.Bind(
-                "10. Cheat Abilities (ความสามารถพิเศษเสริม / โหมดโกง)",
-                "CheatMaxHealthPerLevel",
-                5.0f,
-                "เพิ่มค่าพลังชีวิตสูงสุด (Max Health) ต่อระดับการตีบวกบนเกราะ โล่ และเครื่องประดับ (Max Health capacity bonus per level)"
-            );
-
-            CheatMaxStaminaPerLevel = config.Bind(
-                "10. Cheat Abilities (ความสามารถพิเศษเสริม / โหมดโกง)",
-                "CheatMaxStaminaPerLevel",
-                5.0f,
-                "เพิ่มค่า Stamina สูงสุด (Max Stamina) ต่อระดับการตีบวกบนเกราะ อาวุธ และเครื่องประดับ (Max Stamina capacity bonus per level)"
-            );
-
-            CheatMaxEitrPerLevel = config.Bind(
-                "10. Cheat Abilities (ความสามารถพิเศษเสริม / โหมดโกง)",
-                "CheatMaxEitrPerLevel",
-                5.0f,
-                "เพิ่มค่า Eitr สูงสุด (Max Eitr) ต่อระดับการตีบวกบนเกราะ อาวุธ และเครื่องประดับ (Max Eitr capacity bonus per level)"
-            );
-
-            CheatHealthRegenPerLevel = config.Bind(
-                "10. Cheat Abilities (ความสามารถพิเศษเสริม / โหมดโกง)",
-                "CheatHealthRegenPerLevel",
-                0.05f,
-                "เพิ่มอัตราการฟื้นฟูพลังชีวิต (Health Regen Multiplier) ต่อระดับการตีบวก (0.05 = +5% per level)"
-            );
-
-            CheatStaminaRegenPerLevel = config.Bind(
-                "10. Cheat Abilities (ความสามารถพิเศษเสริม / โหมดโกง)",
-                "CheatStaminaRegenPerLevel",
-                0.05f,
-                "เพิ่มอัตราการฟื้นฟู Stamina (Stamina Regen Multiplier) ต่อระดับการตีบวก (0.05 = +5% per level)"
-            );
-
-            CheatEitrRegenPerLevel = config.Bind(
-                "10. Cheat Abilities (ความสามารถพิเศษเสริม / โหมดโกง)",
-                "CheatEitrRegenPerLevel",
-                0.05f,
-                "เพิ่มอัตราการฟื้นฟู Eitr (Eitr Regen Multiplier) ต่อระดับการตีบวก (0.05 = +5% per level)"
-            );
-
-            CheatHealingMultiplierPerLevel = config.Bind(
-                "10. Cheat Abilities (ความสามารถพิเศษเสริม / โหมดโกง)",
-                "CheatHealingMultiplierPerLevel",
-                0.05f,
-                "เพิ่มประสิทธิภาพการฮีลที่ได้รับทั้งหมด (Healing Received Multiplier) ต่อระดับการตีบวก (0.05 = +5% per level)"
             );
         }
 
@@ -465,7 +105,7 @@ namespace Valheim.ItemEnhancements.Configuration
         {
             if (targetLevel < 1) return 100f;
             if (targetLevel > MaxLevel) return 0f;
-            return SuccessRates[targetLevel] != null ? SuccessRates[targetLevel].Value : 0f;
+            return YamlConfigManager.Success.GetSuccessRate(targetLevel);
         }
 
         public static int GetCoinCost(int targetLevel)
@@ -478,17 +118,31 @@ namespace Valheim.ItemEnhancements.Configuration
         {
             switch (tier)
             {
-                case 1: return Tier1_DropChance != null ? Tier1_DropChance.Value : 15.0f;
-                case 2: return Tier2_DropChance != null ? Tier2_DropChance.Value : 10.0f;
-                case 3: return Tier3_DropChance != null ? Tier3_DropChance.Value : 6.0f;
-                case 4: return Tier4_DropChance != null ? Tier4_DropChance.Value : 3.0f;
+                case 1: return Tier1_DropChance.Value;
+                case 2: return Tier2_DropChance.Value;
+                case 3: return Tier3_DropChance.Value;
+                case 4: return Tier4_DropChance.Value;
                 default: return 0f;
             }
         }
     }
 
-    public class ConfigurationManagerAttributes
+    /// <summary>
+    /// Wrapper struct เพื่อให้โค้ดส่วนอื่นสามารถเรียกใช้ .Value และแปลงค่าเป็น Primitive types ได้อย่างราบรื่น
+    /// </summary>
+    public readonly struct ConfigValue<T>
     {
-        public int? Order;
+        private readonly Func<T> _getter;
+
+        public ConfigValue(Func<T> getter)
+        {
+            _getter = getter;
+        }
+
+        public T Value => _getter != null ? _getter() : default;
+
+        public static implicit operator T(ConfigValue<T> configVal) => configVal.Value;
+
+        public override string ToString() => Value?.ToString() ?? string.Empty;
     }
 }

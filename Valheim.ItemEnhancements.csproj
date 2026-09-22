@@ -78,21 +78,27 @@
       <HintPath>$(BepInExCore)\0Harmony.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <PackageReference Include="YamlDotNet" Version="13.7.1" />
   </ItemGroup>
 
   <!-- Auto-copy to both r2modman and Steam plugins and configs after build -->
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <ItemGroup>
-      <PluginFiles Include="$(TargetDir)$(TargetName).dll" />
+      <PluginFiles Include="$(TargetDir)*.dll" />
       <PluginFiles Include="$(TargetDir)$(TargetName).pdb" Condition="Exists('$(TargetDir)$(TargetName).pdb')" />
       <ConfigFiles Include="$(ProjectDir)Configuration\*.cfg" />
+      <YamlFiles Include="$(ProjectDir)Configuration\Yaml\*.yml" />
     </ItemGroup>
     <MakeDir Directories="$(R2ModmanPluginDir)" Condition="Exists('$(BepInExCore)')" />
     <Copy SourceFiles="@(PluginFiles)" DestinationFolder="$(R2ModmanPluginDir)" Condition="Exists('$(BepInExCore)')" />
     <Copy SourceFiles="@(ConfigFiles)" DestinationFolder="$(AppData)\r2modmanPlus-local\Valheim\profiles\Sep2026\BepInEx\config" Condition="Exists('$(BepInExCore)')" />
+    <MakeDir Directories="$(AppData)\r2modmanPlus-local\Valheim\profiles\Sep2026\BepInEx\config\ckforgame.ItemEnhancements" Condition="Exists('$(BepInExCore)')" />
+    <Copy SourceFiles="@(YamlFiles)" DestinationFolder="$(AppData)\r2modmanPlus-local\Valheim\profiles\Sep2026\BepInEx\config\ckforgame.ItemEnhancements" Condition="Exists('$(BepInExCore)')" />
     <MakeDir Directories="$(SteamPluginDir)" Condition="Exists('$(ValheimPath)\BepInEx\plugins')" />
     <Copy SourceFiles="@(PluginFiles)" DestinationFolder="$(SteamPluginDir)" Condition="Exists('$(ValheimPath)\BepInEx\plugins')" />
     <Copy SourceFiles="@(ConfigFiles)" DestinationFolder="$(ValheimPath)\BepInEx\config" Condition="Exists('$(ValheimPath)\BepInEx\plugins')" />
+    <MakeDir Directories="$(ValheimPath)\BepInEx\config\ckforgame.ItemEnhancements" Condition="Exists('$(ValheimPath)\BepInEx\plugins')" />
+    <Copy SourceFiles="@(YamlFiles)" DestinationFolder="$(ValheimPath)\BepInEx\config\ckforgame.ItemEnhancements" Condition="Exists('$(ValheimPath)\BepInEx\plugins')" />
   </Target>
 
 </Project>
