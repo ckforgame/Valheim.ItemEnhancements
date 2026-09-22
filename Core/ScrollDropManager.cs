@@ -8,7 +8,7 @@ namespace Valheim.ItemEnhancements.Core
     public static class ScrollDropManager
     {
         /// <summary>
-        /// คำนวณและสุ่มดรอปม้วนคัมภีร์เมื่อมอนสเตอร์ตาย
+        /// คำนวณและสุ่มดรอปม้วนคัมภีร์เมื่อมอนสเตอร์ตาย โดยอ้างอิงจาก Drops.yml
         /// </summary>
         public static void TryAddScrollDrop(CharacterDrop dropComponent, Character character, List<KeyValuePair<GameObject, int>> dropsList)
         {
@@ -18,105 +18,98 @@ namespace Valheim.ItemEnhancements.Core
             bool isBoss = character.IsBoss();
             Vector3 pos = dropComponent.transform.position;
             Heightmap.Biome biome = Heightmap.FindBiome(pos);
+            string name = character.gameObject.name.ToLower();
 
-            // 1. กำหนด Tier ของคัมภีร์ที่จะดรอป
-            int tier = DetermineScrollTier(character, isBoss, biome);
+            // 1. จัดการการดรอปของบอสโลก (World Bosses)
+            if (isBoss)
+            {
+                var bossConfig = YamlConfigManager.Drops.BossDrops;
+                int bossTier = bossConfig.GetBossTier(name);
+                bool shouldDrop = bossConfig.GuaranteedDrop;
 
-            // 2. คำนวณโอกาสดรอปและจำนวน
-            int amount = 0;
-            if (isBoss && ModConfig.BossGuaranteedDrop.Value)
-            {
-                // บอสการันตีการดรอป
-                int minDrop = Mathf.Max(1, ModConfig.BossMinDrop.Value);
-                int maxDrop = Mathf.Max(minDrop, ModConfig.BossMaxDrop.Value);
-                amount = UnityEngine.Random.Range(minDrop, maxDrop + 1);
-            }
-            else
-            {
-                float baseChance = ModConfig.GetTierDropChance(tier);
-                
-                // ตัวคูณระดับดาวของมอนสเตอร์
-                int level = character.GetLevel(); // 1 = ปกติ, 2 = 1 ดาว, 3 = 2 ดาว
-                float starMult = 1f;
-                if (level > 1)
+                if (!shouldDrop)
                 {
-                    starMult = 1f + (level - 1) * (ModConfig.StarLevelMultiplier.Value - 1f);
+                    float chance = YamlConfigManager.Drops.GetBiomeTierChance(biome, bossTier);
+                    if (chance <= 0.0001f) chance = 50f; // Fallback หากไม่ได้ตั้งค่าไว้ใน Biome
+                    shouldDrop = UnityEngine.Random.Range(0f, 100f) < chance;
                 }
 
-                float finalChance = baseChance * starMult;
+                if (shouldDrop)
+                {
+                    int minDrop = Mathf.Max(1, bossConfig.MinAmount);
+                    int maxDrop = Mathf.Max(minDrop, bossConfig.MaxAmount);
+                    int amount = UnityEngine.Random.Range(minDrop, maxDrop + 1);
+
+                    GameObject prefab = ScrollItemManager.GetScrollPrefab(bossTier);
+                    if (prefab != null && amount > 0)
+                    {
+                        dropsList.Add(new KeyValuePair<GameObject, int>(prefab, amount));
+                    }
+                }
+                return;
+            }
+
+            // 2. มอนสเตอร์ทั่วไป และ มอนสเตอร์ระดับสูง (Elite Monsters)
+            bool isElite = IsEliteMonster(name);
+            float eliteBonus = isElite ? YamlConfigManager.Drops.EliteDrops.BonusMultiplier : 1f;
+
+            // ตัวคูณระดับดาว (1 = ปกติ, 2 = 1 ดาว, 3 = 2 ดาว)
+            int level = character.GetLevel();
+            float starMult = 1f;
+            if (level > 1)
+            {
+                starMult = 1f + (level - 1) * (YamlConfigManager.Drops.StarLevelMultiplier - 1f);
+            }
+
+            // สุ่มตรวจโอกาสดรอปจาก Tier สูงสุดลงไปต่ำสุด (Tier 4 -> Tier 1) ตามค่า % ใน BiomeDrops
+            for (int tier = 4; tier >= 1; tier--)
+            {
+                float baseChance = YamlConfigManager.Drops.GetBiomeTierChance(biome, tier);
+                if (baseChance <= 0.0001f) continue;
+
+                float finalChance = baseChance * starMult * eliteBonus;
                 float roll = UnityEngine.Random.Range(0f, 100f);
 
                 if (roll < finalChance)
                 {
-                    amount = 1;
-                }
-            }
+                    int dropTier = tier;
 
-            if (amount > 0)
-            {
-                GameObject prefab = ScrollItemManager.GetScrollPrefab(tier);
-                if (prefab != null)
-                {
-                    dropsList.Add(new KeyValuePair<GameObject, int>(prefab, amount));
+                    // มอนสเตอร์ระดับสูงมีโอกาสอัปเกรดเป็น Tier ถัดไป
+                    if (isElite && dropTier < 4)
+                    {
+                        float upgradeRoll = UnityEngine.Random.Range(0f, 100f);
+                        if (upgradeRoll < YamlConfigManager.Drops.EliteDrops.TierUpgradeChance)
+                        {
+                            dropTier = Mathf.Min(4, dropTier + 1);
+                        }
+                    }
+
+                    GameObject prefab = ScrollItemManager.GetScrollPrefab(dropTier);
+                    if (prefab != null)
+                    {
+                        dropsList.Add(new KeyValuePair<GameObject, int>(prefab, 1));
+                    }
+
+                    // ดรอป 1 ม้วนต่อมอนสเตอร์ 1 ตัว
+                    break;
                 }
             }
         }
 
         /// <summary>
-        /// ตัดสินระดับคัมภีร์ (Tier 1-4) ตามประเภทมอนสเตอร์, บอส, และ Biome
+        /// ตรวจสอบว่ามอนสเตอร์เข้าข่ายมอนสเตอร์ชั้นสูง/ยักษ์ใหญ่/มินิบอส หรือไม่
         /// </summary>
-        private static int DetermineScrollTier(Character character, bool isBoss, Heightmap.Biome biome)
+        private static bool IsEliteMonster(string lowerName)
         {
-            string name = character.gameObject.name.ToLower();
-
-            // ตรวจสอบบอสหลัก
-            if (isBoss)
-            {
-                if (name.Contains("eikthyr")) return 1;
-                if (name.Contains("gd_king") || name.Contains("elder")) return 2;
-                if (name.Contains("bonemass")) return 2;
-                if (name.Contains("dragon") || name.Contains("moder")) return 3;
-                if (name.Contains("goblinking") || name.Contains("yagluth")) return 3;
-                if (name.Contains("seekerqueen") || name.Contains("queen")) return 4;
-                if (name.Contains("fader")) return 4;
-            }
-
-            // มอนสเตอร์ชั้นสูง/ยักษ์ใหญ่พิเศษ (Elite)
-            if (name.Contains("troll")) return UnityEngine.Random.value < 0.25f ? 2 : 1;
-            if (name.Contains("stonegolem") || name.Contains("fenring")) return UnityEngine.Random.value < 0.25f ? 3 : 2;
-            if (name.Contains("gjall")) return UnityEngine.Random.value < 0.25f ? 4 : 3;
-
-            // คัดตาม Biome
-            switch (biome)
-            {
-                case Heightmap.Biome.Meadows:
-                    return 1;
-
-                case Heightmap.Biome.BlackForest:
-                    return 1;
-
-                case Heightmap.Biome.Swamp:
-                    return 2;
-
-                case Heightmap.Biome.Mountain:
-                    return 2;
-
-                case Heightmap.Biome.Plains:
-                    return 3;
-
-                case Heightmap.Biome.Mistlands:
-                    return UnityEngine.Random.value < 0.20f ? 4 : 3;
-
-                case Heightmap.Biome.AshLands:
-                case Heightmap.Biome.DeepNorth:
-                    return 4;
-
-                case Heightmap.Biome.Ocean:
-                    return 2;
-
-                default:
-                    return 1;
-            }
+            return lowerName.Contains("troll")
+                || lowerName.Contains("stonegolem")
+                || lowerName.Contains("fenring")
+                || lowerName.Contains("abomination")
+                || lowerName.Contains("gjall")
+                || lowerName.Contains("berserker")
+                || lowerName.Contains("morgen")
+                || lowerName.Contains("valkyrie")
+                || lowerName.Contains("charred_warlock");
         }
     }
 }

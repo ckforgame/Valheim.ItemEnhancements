@@ -19,6 +19,7 @@ namespace Valheim.ItemEnhancements.Configuration
         public static ItemConfigData Item { get; private set; } = new ItemConfigData();
         public static ArmorConfigData Armor { get; private set; } = new ArmorConfigData();
         public static CheatConfigData Cheat { get; private set; } = new CheatConfigData();
+        public static DropsConfigData Drops { get; private set; } = new DropsConfigData();
 
 
         private static FileSystemWatcher _watcher;
@@ -72,6 +73,7 @@ namespace Valheim.ItemEnhancements.Configuration
             Item = LoadWithOverride<ItemConfigData>("Item.yml", "Item.override.yml");
             Armor = LoadWithOverride<ArmorConfigData>("Armor.yml", "Armor.override.yml");
             Cheat = LoadWithOverride<CheatConfigData>("Cheat.yml", "Cheat.override.yml");
+            Drops = LoadWithOverride<DropsConfigData>("Drops.yml", "Drops.override.yml");
 
 
             LogInfo($"[Valheim.ItemEnhancements] YAML Configurations loaded successfully from '{ConfigDirectory}'.");
@@ -227,7 +229,7 @@ namespace Valheim.ItemEnhancements.Configuration
                             }
                             else if (prop.PropertyType == typeof(Dictionary<string, float>) && kvp.Value is Dictionary<object, object> dictObj)
                             {
-                                var currentDict = prop.GetValue(target) as Dictionary<string, float> ?? new Dictionary<string, float>();
+                                var currentDict = prop.GetValue(target) as Dictionary<string, float> ?? new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase);
                                 foreach (var entry in dictObj)
                                 {
                                     string key = entry.Key?.ToString();
@@ -237,6 +239,61 @@ namespace Valheim.ItemEnhancements.Configuration
                                     }
                                 }
                                 prop.SetValue(target, currentDict);
+                            }
+                            else if (prop.PropertyType == typeof(Dictionary<string, Dictionary<string, float>>) && kvp.Value is Dictionary<object, object> outerDict)
+                            {
+                                var currentOuter = prop.GetValue(target) as Dictionary<string, Dictionary<string, float>> ?? new Dictionary<string, Dictionary<string, float>>(StringComparer.OrdinalIgnoreCase);
+                                foreach (var outerEntry in outerDict)
+                                {
+                                    string outerKey = outerEntry.Key?.ToString();
+                                    if (string.IsNullOrEmpty(outerKey)) continue;
+
+                                    if (outerEntry.Value is Dictionary<object, object> innerDict)
+                                    {
+                                        if (!currentOuter.TryGetValue(outerKey, out var currentInner) || currentInner == null)
+                                        {
+                                            currentInner = new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase);
+                                            currentOuter[outerKey] = currentInner;
+                                        }
+                                        foreach (var innerEntry in innerDict)
+                                        {
+                                            string innerKey = innerEntry.Key?.ToString();
+                                            if (!string.IsNullOrEmpty(innerKey) && float.TryParse(innerEntry.Value?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out float val))
+                                            {
+                                                currentInner[innerKey] = val;
+                                            }
+                                        }
+                                    }
+                                }
+                                prop.SetValue(target, currentOuter);
+                            }
+                            else if (prop.PropertyType == typeof(Dictionary<string, int>) && kvp.Value is Dictionary<object, object> dictIntObj)
+                            {
+                                var currentDict = prop.GetValue(target) as Dictionary<string, int> ?? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                                foreach (var entry in dictIntObj)
+                                {
+                                    string key = entry.Key?.ToString();
+                                    if (!string.IsNullOrEmpty(key) && int.TryParse(entry.Value?.ToString(), out int val))
+                                    {
+                                        currentDict[key] = val;
+                                    }
+                                }
+                                prop.SetValue(target, currentDict);
+                            }
+                            else if (kvp.Value is Dictionary<object, object> childDict && !prop.PropertyType.IsPrimitive && prop.PropertyType != typeof(string) && !prop.PropertyType.IsEnum)
+                            {
+                                object childTarget = prop.GetValue(target);
+                                if (childTarget == null)
+                                {
+                                    childTarget = Activator.CreateInstance(prop.PropertyType);
+                                    prop.SetValue(target, childTarget);
+                                }
+                                var childOverrides = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+                                foreach (var cEntry in childDict)
+                                {
+                                    if (cEntry.Key != null) childOverrides[cEntry.Key.ToString()] = cEntry.Value;
+                                }
+                                ApplyOverrides(childTarget, childOverrides);
                             }
                             else
                             {
@@ -336,7 +393,7 @@ namespace Valheim.ItemEnhancements.Configuration
             WriteDefaultIfMissing("Item.yml", DefaultItemYaml);
             WriteDefaultIfMissing("Armor.yml", DefaultArmorYaml);
             WriteDefaultIfMissing("Cheat.yml", DefaultCheatYaml);
-
+            WriteDefaultIfMissing("Drops.yml", DefaultDropsYaml);
         }
 
         private static void WriteDefaultIfMissing(string fileName, string content)
@@ -622,7 +679,82 @@ Levels:
       Value: 15.0
 ";
 
+        private const string DefaultDropsYaml = @"# ====================================================================
+# VALHEIM ITEM ENHANCEMENTS - MONSTER SCROLL DROPS CONFIGURATION
+# หมวดหมู่อัตราการดรอปม้วนคัมภีร์จากมอนสเตอร์และบอสอย่างละเอียด
+# ====================================================================
+# หากต้องการปรับแต่งค่าโดยไม่ให้การอัปเดต Mod ส่งผลกระทบ
+# ให้สร้างไฟล์ ""Drops.override.yml"" ในโฟลเดอร์เดียวกันนี้
+# และใส่เฉพาะค่าที่ต้องการแก้ไข ระบบจะนำค่า override มาทับค่าเดิมอัตโนมัติ
+# ====================================================================
 
+EnableMonsterDrops: true
+StarLevelMultiplier: 1.5
+
+BiomeDrops:
+  Meadows:
+    Tier1: 15.0
+    Tier2: 0.0
+    Tier3: 0.0
+    Tier4: 0.0
+  BlackForest:
+    Tier1: 15.0
+    Tier2: 3.0
+    Tier3: 0.0
+    Tier4: 0.0
+  Swamp:
+    Tier1: 5.0
+    Tier2: 10.0
+    Tier3: 0.0
+    Tier4: 0.0
+  Mountain:
+    Tier1: 0.0
+    Tier2: 10.0
+    Tier3: 3.0
+    Tier4: 0.0
+  Plains:
+    Tier1: 0.0
+    Tier2: 2.0
+    Tier3: 6.0
+    Tier4: 0.0
+  Mistlands:
+    Tier1: 0.0
+    Tier2: 0.0
+    Tier3: 6.0
+    Tier4: 2.0
+  AshLands:
+    Tier1: 0.0
+    Tier2: 0.0
+    Tier3: 1.0
+    Tier4: 3.0
+  DeepNorth:
+    Tier1: 0.0
+    Tier2: 0.0
+    Tier3: 0.0
+    Tier4: 5.0
+  Ocean:
+    Tier1: 5.0
+    Tier2: 10.0
+    Tier3: 0.0
+    Tier4: 0.0
+
+EliteDrops:
+  BonusMultiplier: 2.0
+  TierUpgradeChance: 25.0
+
+BossDrops:
+  GuaranteedDrop: true
+  MinAmount: 1
+  MaxAmount: 3
+  BossTiers:
+    Eikthyr: 1
+    Elder: 2
+    Bonemass: 2
+    Moder: 3
+    Yagluth: 3
+    Queen: 4
+    Fader: 4
+";
 
         #endregion
     }
@@ -701,7 +833,89 @@ Levels:
         public float EffectiveValue => Math.Abs(Value) > 0.00001f ? Value : Percent;
     }
 
+    public class DropsConfigData
+    {
+        public bool EnableMonsterDrops { get; set; } = true;
+        public float StarLevelMultiplier { get; set; } = 1.5f;
 
+        public Dictionary<string, Dictionary<string, float>> BiomeDrops { get; set; } = new Dictionary<string, Dictionary<string, float>>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "Meadows", new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase) { { "Tier1", 15.0f }, { "Tier2", 0.0f }, { "Tier3", 0.0f }, { "Tier4", 0.0f } } },
+            { "BlackForest", new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase) { { "Tier1", 15.0f }, { "Tier2", 3.0f }, { "Tier3", 0.0f }, { "Tier4", 0.0f } } },
+            { "Swamp", new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase) { { "Tier1", 5.0f }, { "Tier2", 10.0f }, { "Tier3", 0.0f }, { "Tier4", 0.0f } } },
+            { "Mountain", new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase) { { "Tier1", 0.0f }, { "Tier2", 10.0f }, { "Tier3", 3.0f }, { "Tier4", 0.0f } } },
+            { "Plains", new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase) { { "Tier1", 0.0f }, { "Tier2", 2.0f }, { "Tier3", 6.0f }, { "Tier4", 0.0f } } },
+            { "Mistlands", new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase) { { "Tier1", 0.0f }, { "Tier2", 0.0f }, { "Tier3", 6.0f }, { "Tier4", 2.0f } } },
+            { "AshLands", new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase) { { "Tier1", 0.0f }, { "Tier2", 0.0f }, { "Tier3", 1.0f }, { "Tier4", 3.0f } } },
+            { "DeepNorth", new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase) { { "Tier1", 0.0f }, { "Tier2", 0.0f }, { "Tier3", 0.0f }, { "Tier4", 5.0f } } },
+            { "Ocean", new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase) { { "Tier1", 5.0f }, { "Tier2", 10.0f }, { "Tier3", 0.0f }, { "Tier4", 0.0f } } }
+        };
+
+        public EliteDropConfig EliteDrops { get; set; } = new EliteDropConfig();
+        public BossDropConfig BossDrops { get; set; } = new BossDropConfig();
+
+        public float GetBiomeTierChance(Heightmap.Biome biome, int tier)
+        {
+            string biomeKey = biome.ToString();
+            if (BiomeDrops != null && BiomeDrops.TryGetValue(biomeKey, out var tierRates) && tierRates != null)
+            {
+                string tierKey = $"Tier{tier}";
+                if (tierRates.TryGetValue(tierKey, out float chance))
+                {
+                    return chance;
+                }
+            }
+            return 0f;
+        }
+    }
+
+    public class EliteDropConfig
+    {
+        public float BonusMultiplier { get; set; } = 2.0f;
+        public float TierUpgradeChance { get; set; } = 25.0f;
+    }
+
+    public class BossDropConfig
+    {
+        public bool GuaranteedDrop { get; set; } = true;
+        public int MinAmount { get; set; } = 1;
+        public int MaxAmount { get; set; } = 3;
+        public Dictionary<string, int> BossTiers { get; set; } = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "Eikthyr", 1 },
+            { "Elder", 2 },
+            { "Bonemass", 2 },
+            { "Moder", 3 },
+            { "Yagluth", 3 },
+            { "Queen", 4 },
+            { "Fader", 4 }
+        };
+
+        public int GetBossTier(string characterName)
+        {
+            if (string.IsNullOrEmpty(characterName)) return 1;
+            string lowerName = characterName.ToLower();
+
+            foreach (var kvp in BossTiers)
+            {
+                if (lowerName.Contains(kvp.Key.ToLower()))
+                {
+                    return kvp.Value;
+                }
+            }
+
+            // Fallback default mappings
+            if (lowerName.Contains("eikthyr")) return 1;
+            if (lowerName.Contains("gd_king") || lowerName.Contains("elder")) return 2;
+            if (lowerName.Contains("bonemass")) return 2;
+            if (lowerName.Contains("dragon") || lowerName.Contains("moder")) return 3;
+            if (lowerName.Contains("goblinking") || lowerName.Contains("yagluth")) return 3;
+            if (lowerName.Contains("seekerqueen") || lowerName.Contains("queen")) return 4;
+            if (lowerName.Contains("fader")) return 4;
+
+            return 1;
+        }
+    }
 
     #endregion
 }

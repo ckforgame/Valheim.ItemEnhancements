@@ -169,5 +169,24 @@ Time Elapsed 00:00:03.60
    - เพิ่ม Property รองรับใน [YamlConfigManager.cs](../Configuration/YamlConfigManager.cs) และ [ModConfig.cs](../Configuration/ModConfig.cs)
    - ค่าเริ่มต้นตั้งไว้ที่ **5.0 เมตร** ซึ่งเป็นระยะที่เหมาะสมกับการยืนหน้าโต๊ะหรือข้างโต๊ะคราฟต์อย่างเป็นธรรมชาติ
 
+---
+
+## 8. ระบบกำหนดอัตราการดรอปคัมภีร์มอนสเตอร์อย่างละเอียด (Detailed Monster Drops & Drops.yml)
+
+1. **สร้างไฟล์แยกเฉพาะ `Drops.yml` (พร้อมรองรับ `Drops.override.yml`)**:
+   - แยกหมวดหมู่การดรอปออกจาก `Success.yml` เพื่อให้ตั้งค่าอัตราการดรอปของคัมภีร์ได้ทุกระดับอย่างละเอียด
+   - บันทึกและดึงข้อมูลผ่าน [YamlConfigManager.cs](../Configuration/YamlConfigManager.cs) พร้อมรองรับ Nested Overrides แบบ 2 มิติสำหรับ `BiomeDrops`
+2. **ปรับแต่งโอกาสดรอปคัมภีร์ Tier 1 ถึง 4 แยกตาม Biome อย่างอิสระ**:
+   - แต่ละ Biome (Meadows, BlackForest, Swamp, Mountain, Plains, Mistlands, AshLands, DeepNorth, Ocean) สามารถกำหนดโอกาสดรอป (% Drop Chance) ของคัมภีร์ทั้ง 4 Tier ได้อย่างอิสระ
+3. **ระบบมอนสเตอร์ระดับสูง (Elite Monsters)**:
+   - กำหนดตัวคูณโอกาสดรอปพิเศษ `EliteDrops.BonusMultiplier` (ค่าเริ่มต้น 2.0x) สำหรับมอนสเตอร์ระดับ Troll, Golem, Abomination, Gjall, Berserker, Morgen ฯลฯ
+   - กำหนดโอกาสสุ่มอัปเกรดเป็นคัมภีร์ Tier ถัดไป `EliteDrops.TierUpgradeChance` (ค่าเริ่มต้น 25.0%)
+4. **ระบบการดรอปของบอสโลก (Boss Drops)**:
+   - กำหนดการันตีการดรอป (`GuaranteedDrop`), จำนวนดรอปต่ำสุด-สูงสุด (`MinAmount`, `MaxAmount`)
+   - กำหนด Tier ของคัมภีร์ประจำบอสแต่ละตัวได้โดยตรงผ่าน `BossTiers` (Eikthyr, Elder, Bonemass, Moder, Yagluth, Queen, Fader)
+5. **การทำงานร่วมกับระบบเดิม (Backwards Compatibility)**:
+   - หากไม่มีไฟล์ `Drops.yml` หรือมีค่าบางส่วนไม่ได้กำหนด ระบบจะใช้ค่า Default fallback ที่กำหนดไว้ เพื่อให้เซฟและคอนฟิกเดิมทำงานได้ต่อเนื่อง 100%
+
+
 
 

@@ -36,7 +36,8 @@
      - `Item.yml`: อาวุธ (Damage, Stamina, Eitr, Backstab), ความทนทาน, น้ำหนัก, เครื่องประดับ พร้อมระบบกำหนดความสามารถรายระดับ `Levels: 1-20` แบบผลรวมสะสม (Cumulative Addition)
      - `Armor.yml`: พลังป้องกันเกราะ, โล่ (Block, Parry), การลด Stamina เคลื่อนที่ (Dodge, Run, Jump), EitrRegen พร้อมระบบกำหนดความสามารถรายระดับ `Levels: 1-20`
      - `Cheat.yml`: ตัวเลือกเปิด/ปิดโหมดโกง (`EnableCheatAbilities`), กำหนดความสามารถพิเศษระดับโกงรายระดับ (MaxHealth, MaxStamina, MaxEitr, HealthRegen, StaminaRegen, HealingMultiplier)
-     - `Success.yml`: อัตราความสำเร็จรายระดับ 1 ถึง 20, กฎการล้มเหลว, ค่าธรรมเนียม, การดรอปคัมภีร์, ระยะห่างจากโต๊ะคราฟต์ (`RequireCraftingStation`, `CraftingStationRange`)
+     - `Success.yml`: อัตราความสำเร็จรายระดับ 1 ถึง 20, กฎการล้มเหลว, ค่าธรรมเนียม, ระยะห่างจากโต๊ะคราฟต์ (`RequireCraftingStation`, `CraftingStationRange`)
+     - `Drops.yml`: **(ใหม่!)** อัตราการดรอปม้วนคัมภีร์จากมอนสเตอร์และบอสอย่างละเอียด ปรับแต่งโอกาสดรอป (% Drop Chance) ของคัมภีร์ Tier 1 ถึง 4 แยกตาม Biome, มอนสเตอร์ระดับสูง (Elite) และบอสโลก
    - **ระบบ Safe Overrides (`*.override.yml`)**: ป้องกันการตั้งค่าสูญหายเมื่ออัปเดตม็อด เพียงสร้างไฟล์ override เช่น `Item.override.yml`, `Armor.override.yml`, `Cheat.override.yml` หรือ `Success.override.yml` แล้วใส่เฉพาะระดับหรือค่าที่ต้องการคัสตอม ระบบจะโหลดค่าทับให้อัตโนมัติและไม่ถูกเขียนทับเมื่อม็อดมีการอัปเดต!
    - **Hot-Reload ในตัว**: ระบบตรวจจับการบันทึกไฟล์ `.yml` หรือ `.override.yml` และอัปเดตสเตตัสในเกมทันทีแบบ Real-time โดยไม่ต้องรีสตาร์ตเกม
 
@@ -140,7 +141,8 @@
 ```
 BepInEx/config/ckforgame.ItemEnhancements/
 ├── AbilityReference.txt # คู่มืออ้างอิงรายชื่อ Ability ID ทั้งหมด 25 ตัวที่รองรับ
-├── Success.yml          # อัตราสำเร็จ +1 ถึง +20, กฎ SafeLevel, คัมภีร์, ดรอปเรต
+├── Success.yml          # อัตราสำเร็จ +1 ถึง +20, กฎ SafeLevel, ค่าธรรมเนียม, โต๊ะคราฟต์
+├── Drops.yml            # อัตราการดรอปคัมภีร์จากมอนสเตอร์และบอสแยกตาม Biome (Tier 1-4)
 ├── Item.yml             # สเตตัสอาวุธ, ความทนทาน, น้ำหนัก, เครื่องประดับ และ Levels
 ├── Armor.yml            # สเตตัสเกราะ, โล่, การลด Stamina, EitrRegen และ Levels
 └── Cheat.yml            # โหมดโกง (MaxHealth, MaxStamina, MaxEitr, HealthRegen, StaminaRegen, HealingMultiplier)
@@ -153,6 +155,7 @@ BepInEx/config/ckforgame.ItemEnhancements/
    - `Armor.override.yml`
    - `Cheat.override.yml`
    - `Success.override.yml`
+   - `Drops.override.yml`
 3. ใส่เฉพาะฟิลด์หรือระดับที่ต้องการแก้ไข (ไม่จำเป็นต้องใส่ครบทุกบรรทัด) เช่น:
    - ตัวอย่างเพิ่มดาเมจแบบคงที่ต่อระดับ:
      ```yaml

@@ -48,11 +48,13 @@ RequireScrolls: true              # ต้องใช้ม้วนคัม�
 ScrollsRequiredPerAttempt: 1      # จำนวนคัมภีร์ที่ใช้ต่อการกด 1 ครั้ง
 
 # การดรอปจากมอนสเตอร์ (Monster Drops)
+# หมายเหตุ: ระบบการตั้งค่าอัตราดรอปแบบละเอียดถูกแยกไปไว้ใน "Drops.yml" และรองรับ "Drops.override.yml"
+# สามารถกำหนดโอกาสดรอป (% Drop Chance) ของคัมภีร์ Tier 1 ถึง 4 แยกตาม Biome, Elite และ Boss ได้อย่างอิสระ
 EnableMonsterDrops: true          # เปิดใช้งานการดรอปม้วนคัมภีร์เมื่อสังหารมอนสเตอร์
-Tier1_DropChance: 15.0            # โอกาสดรอปคัมภีร์ระดับ 1 (%) [Meadows / Black Forest] (+1 ถึง +5)
-Tier2_DropChance: 10.0            # โอกาสดรอปคัมภีร์ระดับ 2 (%) [Swamp / Mountain] (+6 ถึง +10)
-Tier3_DropChance: 6.0             # โอกาสดรอปคัมภีร์ระดับ 3 (%) [Plains / Mistlands] (+11 ถึง +15)
-Tier4_DropChance: 3.0             # โอกาสดรอปคัมภีร์ระดับ 4 (%) [Ashlands / Deep North] (+16 ถึง +20)
+Tier1_DropChance: 15.0            # โอกาสดรอปคัมภีร์ระดับ 1 (%) (Fallback)
+Tier2_DropChance: 10.0            # โอกาสดรอปคัมภีร์ระดับ 2 (%) (Fallback)
+Tier3_DropChance: 6.0             # โอกาสดรอปคัมภีร์ระดับ 3 (%) (Fallback)
+Tier4_DropChance: 3.0             # โอกาสดรอปคัมภีร์ระดับ 4 (%) (Fallback)
 StarLevelMultiplier: 1.5          # ตัวคูณโอกาสดรอปต่อระดับดาวมอนสเตอร์ (1 ดาว = 1.5x, 2 ดาว = 2.0x)
 BossGuaranteedDrop: true          # บอสโลกการันตีการดรอปคัมภีร์ 100%
 BossMinDrop: 1                    # จำนวนคัมภีร์ขั้นต่ำที่บอสดรอป

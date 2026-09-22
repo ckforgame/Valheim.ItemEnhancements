@@ -31,15 +31,11 @@ namespace Valheim.ItemEnhancements.Configuration
         // Enhancement Scrolls & Monster Drops
         public static ConfigValue<bool> RequireScrolls => new(() => YamlConfigManager.Success.RequireScrolls);
         public static ConfigValue<int> ScrollsRequiredPerAttempt => new(() => YamlConfigManager.Success.ScrollsRequiredPerAttempt);
-        public static ConfigValue<bool> EnableMonsterDrops => new(() => YamlConfigManager.Success.EnableMonsterDrops);
-        public static ConfigValue<float> Tier1_DropChance => new(() => YamlConfigManager.Success.Tier1_DropChance);
-        public static ConfigValue<float> Tier2_DropChance => new(() => YamlConfigManager.Success.Tier2_DropChance);
-        public static ConfigValue<float> Tier3_DropChance => new(() => YamlConfigManager.Success.Tier3_DropChance);
-        public static ConfigValue<float> Tier4_DropChance => new(() => YamlConfigManager.Success.Tier4_DropChance);
-        public static ConfigValue<float> StarLevelMultiplier => new(() => YamlConfigManager.Success.StarLevelMultiplier);
-        public static ConfigValue<bool> BossGuaranteedDrop => new(() => YamlConfigManager.Success.BossGuaranteedDrop);
-        public static ConfigValue<int> BossMinDrop => new(() => YamlConfigManager.Success.BossMinDrop);
-        public static ConfigValue<int> BossMaxDrop => new(() => YamlConfigManager.Success.BossMaxDrop);
+        public static ConfigValue<bool> EnableMonsterDrops => new(() => YamlConfigManager.Drops.EnableMonsterDrops);
+        public static ConfigValue<float> StarLevelMultiplier => new(() => YamlConfigManager.Drops.StarLevelMultiplier);
+        public static ConfigValue<bool> BossGuaranteedDrop => new(() => YamlConfigManager.Drops.BossDrops.GuaranteedDrop);
+        public static ConfigValue<int> BossMinDrop => new(() => YamlConfigManager.Drops.BossDrops.MinAmount);
+        public static ConfigValue<int> BossMaxDrop => new(() => YamlConfigManager.Drops.BossDrops.MaxAmount);
 
         // Cheat Abilities
         public static ConfigValue<bool> EnableCheatAbilities => new(() => YamlConfigManager.Cheat.EnableCheatAbilities);
@@ -81,16 +77,9 @@ namespace Valheim.ItemEnhancements.Configuration
             return CoinsBaseCost.Value + Mathf.RoundToInt((targetLevel - 1) * CoinsPerLevelIncrement.Value);
         }
 
-        public static float GetTierDropChance(int tier)
+        public static float GetTierDropChance(int tier, Heightmap.Biome biome = Heightmap.Biome.Meadows)
         {
-            switch (tier)
-            {
-                case 1: return Tier1_DropChance.Value;
-                case 2: return Tier2_DropChance.Value;
-                case 3: return Tier3_DropChance.Value;
-                case 4: return Tier4_DropChance.Value;
-                default: return 0f;
-            }
+            return YamlConfigManager.Drops.GetBiomeTierChance(biome, tier);
         }
     }
 
