@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Valheim.ItemEnhancements.Configuration;
 
@@ -183,5 +184,213 @@ namespace Valheim.ItemEnhancements.Core
             }
             return 0f;
         }
+
+        #region Cheat Abilities Calculations
+
+        public static bool IsCheatEnabled => ModConfig.EnableCheatAbilities != null && ModConfig.EnableCheatAbilities.Value;
+
+        public static bool IsArmor(ItemDrop.ItemData item)
+        {
+            if (item?.m_shared == null) return false;
+            var t = item.m_shared.m_itemType;
+            return t == ItemDrop.ItemData.ItemType.Helmet ||
+                   t == ItemDrop.ItemData.ItemType.Chest ||
+                   t == ItemDrop.ItemData.ItemType.Legs ||
+                   t == ItemDrop.ItemData.ItemType.Shoulder;
+        }
+
+        public static bool IsWeapon(ItemDrop.ItemData item)
+        {
+            if (item?.m_shared == null) return false;
+            var t = item.m_shared.m_itemType;
+            return t == ItemDrop.ItemData.ItemType.OneHandedWeapon ||
+                   t == ItemDrop.ItemData.ItemType.TwoHandedWeapon ||
+                   t == ItemDrop.ItemData.ItemType.TwoHandedWeaponLeft ||
+                   t == ItemDrop.ItemData.ItemType.Bow;
+        }
+
+        public static bool IsShield(ItemDrop.ItemData item)
+        {
+            if (item?.m_shared == null) return false;
+            return item.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Shield;
+        }
+
+        public static bool IsUtility(ItemDrop.ItemData item)
+        {
+            if (item?.m_shared == null) return false;
+            return item.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Utility;
+        }
+
+        // Single-item cheat bonus methods (for tooltips and UI)
+        public static float GetCheatItemMaxHealth(ItemDrop.ItemData item, int level)
+        {
+            if (!IsCheatEnabled || level <= 0 || item == null) return 0f;
+            if (IsArmor(item) || IsShield(item) || IsUtility(item))
+            {
+                return level * ModConfig.CheatMaxHealthPerLevel.Value;
+            }
+            return 0f;
+        }
+
+        public static float GetCheatItemMaxStamina(ItemDrop.ItemData item, int level)
+        {
+            if (!IsCheatEnabled || level <= 0 || item == null) return 0f;
+            if (IsArmor(item) || IsWeapon(item) || IsUtility(item))
+            {
+                return level * ModConfig.CheatMaxStaminaPerLevel.Value;
+            }
+            return 0f;
+        }
+
+        public static float GetCheatItemMaxEitr(ItemDrop.ItemData item, int level)
+        {
+            if (!IsCheatEnabled || level <= 0 || item == null) return 0f;
+            if (IsArmor(item) || IsWeapon(item) || IsUtility(item))
+            {
+                return level * ModConfig.CheatMaxEitrPerLevel.Value;
+            }
+            return 0f;
+        }
+
+        public static float GetCheatItemHealthRegen(ItemDrop.ItemData item, int level)
+        {
+            if (!IsCheatEnabled || level <= 0 || item == null) return 0f;
+            if (IsArmor(item) || IsShield(item) || IsUtility(item))
+            {
+                return level * ModConfig.CheatHealthRegenPerLevel.Value;
+            }
+            return 0f;
+        }
+
+        public static float GetCheatItemStaminaRegen(ItemDrop.ItemData item, int level)
+        {
+            if (!IsCheatEnabled || level <= 0 || item == null) return 0f;
+            if (IsArmor(item) || IsShield(item) || IsWeapon(item) || IsUtility(item))
+            {
+                return level * ModConfig.CheatStaminaRegenPerLevel.Value;
+            }
+            return 0f;
+        }
+
+        public static float GetCheatItemEitrRegen(ItemDrop.ItemData item, int level)
+        {
+            if (!IsCheatEnabled || level <= 0 || item == null) return 0f;
+            if (IsArmor(item) || IsWeapon(item) || IsUtility(item))
+            {
+                return level * ModConfig.CheatEitrRegenPerLevel.Value;
+            }
+            return 0f;
+        }
+
+        public static float GetCheatItemHealingBonus(ItemDrop.ItemData item, int level)
+        {
+            if (!IsCheatEnabled || level <= 0 || item == null) return 0f;
+            if (IsArmor(item) || IsShield(item) || IsUtility(item))
+            {
+                return level * ModConfig.CheatHealingMultiplierPerLevel.Value;
+            }
+            return 0f;
+        }
+
+        // Aggregate cheat bonuses for Player across all equipped items
+        public static float GetCheatMaxHealth(Player player)
+        {
+            if (!IsCheatEnabled || player == null || player.GetInventory() == null) return 0f;
+            float total = 0f;
+            var equipped = player.GetInventory().GetEquippedItems();
+            if (equipped == null) return 0f;
+            foreach (var item in equipped)
+            {
+                int level = EnhancementManager.GetEnhancementLevel(item);
+                total += GetCheatItemMaxHealth(item, level);
+            }
+            return total;
+        }
+
+        public static float GetCheatMaxStamina(Player player)
+        {
+            if (!IsCheatEnabled || player == null || player.GetInventory() == null) return 0f;
+            float total = 0f;
+            var equipped = player.GetInventory().GetEquippedItems();
+            if (equipped == null) return 0f;
+            foreach (var item in equipped)
+            {
+                int level = EnhancementManager.GetEnhancementLevel(item);
+                total += GetCheatItemMaxStamina(item, level);
+            }
+            return total;
+        }
+
+        public static float GetCheatMaxEitr(Player player)
+        {
+            if (!IsCheatEnabled || player == null || player.GetInventory() == null) return 0f;
+            float total = 0f;
+            var equipped = player.GetInventory().GetEquippedItems();
+            if (equipped == null) return 0f;
+            foreach (var item in equipped)
+            {
+                int level = EnhancementManager.GetEnhancementLevel(item);
+                total += GetCheatItemMaxEitr(item, level);
+            }
+            return total;
+        }
+
+        public static float GetCheatHealthRegenBonus(Player player)
+        {
+            if (!IsCheatEnabled || player == null || player.GetInventory() == null) return 0f;
+            float total = 0f;
+            var equipped = player.GetInventory().GetEquippedItems();
+            if (equipped == null) return 0f;
+            foreach (var item in equipped)
+            {
+                int level = EnhancementManager.GetEnhancementLevel(item);
+                total += GetCheatItemHealthRegen(item, level);
+            }
+            return total;
+        }
+
+        public static float GetCheatStaminaRegenBonus(Player player)
+        {
+            if (!IsCheatEnabled || player == null || player.GetInventory() == null) return 0f;
+            float total = 0f;
+            var equipped = player.GetInventory().GetEquippedItems();
+            if (equipped == null) return 0f;
+            foreach (var item in equipped)
+            {
+                int level = EnhancementManager.GetEnhancementLevel(item);
+                total += GetCheatItemStaminaRegen(item, level);
+            }
+            return total;
+        }
+
+        public static float GetCheatEitrRegenBonus(Player player)
+        {
+            if (!IsCheatEnabled || player == null || player.GetInventory() == null) return 0f;
+            float total = 0f;
+            var equipped = player.GetInventory().GetEquippedItems();
+            if (equipped == null) return 0f;
+            foreach (var item in equipped)
+            {
+                int level = EnhancementManager.GetEnhancementLevel(item);
+                total += GetCheatItemEitrRegen(item, level);
+            }
+            return total;
+        }
+
+        public static float GetCheatHealingBonus(Player player)
+        {
+            if (!IsCheatEnabled || player == null || player.GetInventory() == null) return 0f;
+            float total = 0f;
+            var equipped = player.GetInventory().GetEquippedItems();
+            if (equipped == null) return 0f;
+            foreach (var item in equipped)
+            {
+                int level = EnhancementManager.GetEnhancementLevel(item);
+                total += GetCheatItemHealingBonus(item, level);
+            }
+            return total;
+        }
+
+        #endregion
     }
 }

@@ -471,6 +471,30 @@ namespace Valheim.ItemEnhancements.Core
                 sb.AppendLine($"<color=#94a3b8>• น้ำหนักอุปกรณ์ (Weight): -{wtPct:F1}%</color>");
             }
 
+            // 6. Cheat Abilities (หากเปิดใช้งานใน Config)
+            if (StatCalculator.IsCheatEnabled)
+            {
+                float cheatHp = StatCalculator.GetCheatItemMaxHealth(item, level);
+                float cheatStam = StatCalculator.GetCheatItemMaxStamina(item, level);
+                float cheatEitr = StatCalculator.GetCheatItemMaxEitr(item, level);
+                float cheatHpRegen = StatCalculator.GetCheatItemHealthRegen(item, level) * 100f;
+                float cheatStamRegen = StatCalculator.GetCheatItemStaminaRegen(item, level) * 100f;
+                float cheatEitrRegen = StatCalculator.GetCheatItemEitrRegen(item, level) * 100f;
+                float cheatHeal = StatCalculator.GetCheatItemHealingBonus(item, level) * 100f;
+
+                if (cheatHp > 0f || cheatStam > 0f || cheatEitr > 0f || cheatHpRegen > 0f || cheatStamRegen > 0f || cheatEitrRegen > 0f || cheatHeal > 0f)
+                {
+                    sb.AppendLine($"<color=#f43f5e>--- [CHEAT ABILITIES (โหมดโกง)] ---</color>");
+                    if (cheatHp > 0f) sb.AppendLine($"<color=#fb7185>★ เพิ่มพลังชีวิตสูงสุด (Max HP): +{cheatHp:F0}</color>");
+                    if (cheatStam > 0f) sb.AppendLine($"<color=#fb7185>★ เพิ่มสเตมินาสูงสุด (Max Stamina): +{cheatStam:F0}</color>");
+                    if (cheatEitr > 0f) sb.AppendLine($"<color=#fb7185>★ เพิ่มพลังเวทสูงสุด (Max Eitr): +{cheatEitr:F0}</color>");
+                    if (cheatHpRegen > 0f) sb.AppendLine($"<color=#fb7185>★ ฟื้นฟูพลังชีวิต (HP Regen): +{cheatHpRegen:F0}%</color>");
+                    if (cheatStamRegen > 0f) sb.AppendLine($"<color=#fb7185>★ ฟื้นฟูสเตมินา (Stamina Regen): +{cheatStamRegen:F0}%</color>");
+                    if (cheatEitrRegen > 0f) sb.AppendLine($"<color=#fb7185>★ ฟื้นฟูพลังเวท (Eitr Regen): +{cheatEitrRegen:F0}%</color>");
+                    if (cheatHeal > 0f) sb.AppendLine($"<color=#fb7185>★ ประสิทธิภาพการฮีล (Healing): +{cheatHeal:F0}%</color>");
+                }
+            }
+
             // Crafter
             if (item.m_customData != null && item.m_customData.TryGetValue(CrafterDataKey, out string crafter) && !string.IsNullOrEmpty(crafter))
             {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
 using Valheim.ItemEnhancements.Configuration;
@@ -258,5 +259,159 @@ namespace Valheim.ItemEnhancements.Patches
                 }
             }
         }
+
+        #region Cheat Abilities Patches (Capacity, Regens, Healing)
+
+        // 12. Cheat Ability: Max Health Capacity
+        [HarmonyPatch(typeof(Player), nameof(Player.SetMaxHealth))]
+        public static class Player_SetMaxHealth_Patch
+        {
+            public static void Prefix(Player __instance, ref float health)
+            {
+                if (!StatCalculator.IsCheatEnabled || __instance == null) return;
+                float bonus = StatCalculator.GetCheatMaxHealth(__instance);
+                if (bonus > 0f)
+                {
+                    health += bonus;
+                }
+            }
+        }
+
+        // 13. Cheat Ability: Max Stamina Capacity
+        [HarmonyPatch(typeof(Player), nameof(Player.SetMaxStamina))]
+        public static class Player_SetMaxStamina_Patch
+        {
+            public static void Prefix(Player __instance, ref float stamina)
+            {
+                if (!StatCalculator.IsCheatEnabled || __instance == null) return;
+                float bonus = StatCalculator.GetCheatMaxStamina(__instance);
+                if (bonus > 0f)
+                {
+                    stamina += bonus;
+                }
+            }
+        }
+
+        // 14. Cheat Ability: Max Eitr Capacity
+        [HarmonyPatch(typeof(Player), "SetMaxEitr")]
+        public static class Player_SetMaxEitr_Patch
+        {
+            public static void Prefix(Player __instance, ref float eitr)
+            {
+                if (!StatCalculator.IsCheatEnabled || __instance == null) return;
+                float bonus = StatCalculator.GetCheatMaxEitr(__instance);
+                if (bonus > 0f)
+                {
+                    eitr += bonus;
+                }
+            }
+        }
+
+        // 15. Cheat Ability: Instant refresh on equip/unequip
+        [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.EquipItem))]
+        public static class Humanoid_EquipItem_Patch
+        {
+            private static MethodInfo _updateFoodMethod;
+
+            public static void Postfix(Humanoid __instance)
+            {
+                if (!StatCalculator.IsCheatEnabled || !(__instance is Player player)) return;
+                if (_updateFoodMethod == null)
+                {
+                    _updateFoodMethod = typeof(Player).GetMethod("UpdateFood", BindingFlags.NonPublic | BindingFlags.Instance);
+                }
+                _updateFoodMethod?.Invoke(player, new object[] { 0f, true });
+            }
+        }
+
+        [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.UnequipItem))]
+        public static class Humanoid_UnequipItem_Patch
+        {
+            private static MethodInfo _updateFoodMethod;
+
+            public static void Postfix(Humanoid __instance)
+            {
+                if (!StatCalculator.IsCheatEnabled || !(__instance is Player player)) return;
+                if (_updateFoodMethod == null)
+                {
+                    _updateFoodMethod = typeof(Player).GetMethod("UpdateFood", BindingFlags.NonPublic | BindingFlags.Instance);
+                }
+                _updateFoodMethod?.Invoke(player, new object[] { 0f, true });
+            }
+        }
+
+        // 16. Cheat Ability: Health Regen Multiplier
+        [HarmonyPatch(typeof(SEMan), nameof(SEMan.ModifyHealthRegen))]
+        public static class SEMan_ModifyHealthRegen_Patch
+        {
+            public static void Postfix(Character ___m_character, ref float regenMultiplier)
+            {
+                if (!StatCalculator.IsCheatEnabled) return;
+                if (___m_character is Player player)
+                {
+                    float bonus = StatCalculator.GetCheatHealthRegenBonus(player);
+                    if (bonus > 0f)
+                    {
+                        regenMultiplier += bonus;
+                    }
+                }
+            }
+        }
+
+        // 17. Cheat Ability: Stamina Regen Multiplier
+        [HarmonyPatch(typeof(SEMan), nameof(SEMan.ModifyStaminaRegen))]
+        public static class SEMan_ModifyStaminaRegen_Patch
+        {
+            public static void Postfix(Character ___m_character, ref float staminaMultiplier)
+            {
+                if (!StatCalculator.IsCheatEnabled) return;
+                if (___m_character is Player player)
+                {
+                    float bonus = StatCalculator.GetCheatStaminaRegenBonus(player);
+                    if (bonus > 0f)
+                    {
+                        staminaMultiplier += bonus;
+                    }
+                }
+            }
+        }
+
+        // 18. Cheat Ability: Eitr Regen Multiplier
+        [HarmonyPatch(typeof(SEMan), nameof(SEMan.ModifyEitrRegen))]
+        public static class SEMan_ModifyEitrRegen_Patch
+        {
+            public static void Postfix(Character ___m_character, ref float eitrMultiplier)
+            {
+                if (!StatCalculator.IsCheatEnabled) return;
+                if (___m_character is Player player)
+                {
+                    float bonus = StatCalculator.GetCheatEitrRegenBonus(player);
+                    if (bonus > 0f)
+                    {
+                        eitrMultiplier += bonus;
+                    }
+                }
+            }
+        }
+
+        // 19. Cheat Ability: Healing Received Multiplier
+        [HarmonyPatch(typeof(Character), nameof(Character.Heal))]
+        public static class Character_Heal_Patch
+        {
+            public static void Prefix(Character __instance, ref float hp)
+            {
+                if (!StatCalculator.IsCheatEnabled || hp <= 0f) return;
+                if (__instance is Player player)
+                {
+                    float bonus = StatCalculator.GetCheatHealingBonus(player);
+                    if (bonus > 0f)
+                    {
+                        hp *= (1f + bonus);
+                    }
+                }
+            }
+        }
+
+        #endregion
     }
 }

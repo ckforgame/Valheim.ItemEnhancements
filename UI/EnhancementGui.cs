@@ -12,7 +12,7 @@ namespace Valheim.ItemEnhancements.UI
         public static EnhancementGui Instance { get; private set; }
         public static bool IsOpen { get; set; } = false;
 
-        private Rect _windowRect = new Rect(Screen.width / 2f - 340f, Screen.height / 2f - 290f, 680f, 580f);
+        private Rect _windowRect = new Rect(Screen.width / 2f - 340f, Screen.height / 2f - 310f, 680f, 620f);
         private ItemDrop.ItemData _selectedItem;
         private Vector2 _scrollPosition = Vector2.zero;
 
@@ -310,6 +310,73 @@ namespace Valheim.ItemEnhancements.UI
             DrawStatRow("ความทนทานสูงสุด (Max Durability):",
                 $"{curDur:F0}",
                 isMax ? "-" : $"{curDur + diffDur:F0} <color=#4ade80>(+{diffDur:F0})</color>");
+
+            // 5. Cheat Abilities (หากเปิดใช้งานใน Config)
+            if (StatCalculator.IsCheatEnabled)
+            {
+                float curHp = StatCalculator.GetCheatItemMaxHealth(_selectedItem, currentLvl);
+                float nxtHp = StatCalculator.GetCheatItemMaxHealth(_selectedItem, nextLvl);
+                if (curHp > 0f || nxtHp > 0f)
+                {
+                    DrawStatRow("<color=#fb7185>★ [Cheat] เพิ่ม Max HP:</color>",
+                        $"+{curHp:F0}",
+                        isMax ? "-" : $"+{nxtHp:F0} <color=#fb7185>(+{ModConfig.CheatMaxHealthPerLevel.Value:F0})</color>");
+                }
+
+                float curStam = StatCalculator.GetCheatItemMaxStamina(_selectedItem, currentLvl);
+                float nxtStam = StatCalculator.GetCheatItemMaxStamina(_selectedItem, nextLvl);
+                if (curStam > 0f || nxtStam > 0f)
+                {
+                    DrawStatRow("<color=#fb7185>★ [Cheat] เพิ่ม Max Stamina:</color>",
+                        $"+{curStam:F0}",
+                        isMax ? "-" : $"+{nxtStam:F0} <color=#fb7185>(+{ModConfig.CheatMaxStaminaPerLevel.Value:F0})</color>");
+                }
+
+                float curEitr = StatCalculator.GetCheatItemMaxEitr(_selectedItem, currentLvl);
+                float nxtEitr = StatCalculator.GetCheatItemMaxEitr(_selectedItem, nextLvl);
+                if (curEitr > 0f || nxtEitr > 0f)
+                {
+                    DrawStatRow("<color=#fb7185>★ [Cheat] เพิ่ม Max Eitr:</color>",
+                        $"+{curEitr:F0}",
+                        isMax ? "-" : $"+{nxtEitr:F0} <color=#fb7185>(+{ModConfig.CheatMaxEitrPerLevel.Value:F0})</color>");
+                }
+
+                float curHpRegen = StatCalculator.GetCheatItemHealthRegen(_selectedItem, currentLvl) * 100f;
+                float nxtHpRegen = StatCalculator.GetCheatItemHealthRegen(_selectedItem, nextLvl) * 100f;
+                if (curHpRegen > 0f || nxtHpRegen > 0f)
+                {
+                    DrawStatRow("<color=#fb7185>★ [Cheat] ฟื้นฟู HP Regen:</color>",
+                        $"+{curHpRegen:F0}%",
+                        isMax ? "-" : $"+{nxtHpRegen:F0}% <color=#fb7185>(+{ModConfig.CheatHealthRegenPerLevel.Value * 100f:F0}%)</color>");
+                }
+
+                float curStamRegen = StatCalculator.GetCheatItemStaminaRegen(_selectedItem, currentLvl) * 100f;
+                float nxtStamRegen = StatCalculator.GetCheatItemStaminaRegen(_selectedItem, nextLvl) * 100f;
+                if (curStamRegen > 0f || nxtStamRegen > 0f)
+                {
+                    DrawStatRow("<color=#fb7185>★ [Cheat] ฟื้นฟู Stamina Regen:</color>",
+                        $"+{curStamRegen:F0}%",
+                        isMax ? "-" : $"+{nxtStamRegen:F0}% <color=#fb7185>(+{ModConfig.CheatStaminaRegenPerLevel.Value * 100f:F0}%)</color>");
+                }
+
+                float curEitrRegen = StatCalculator.GetCheatItemEitrRegen(_selectedItem, currentLvl) * 100f;
+                float nxtEitrRegen = StatCalculator.GetCheatItemEitrRegen(_selectedItem, nextLvl) * 100f;
+                if (curEitrRegen > 0f || nxtEitrRegen > 0f)
+                {
+                    DrawStatRow("<color=#fb7185>★ [Cheat] ฟื้นฟู Eitr Regen:</color>",
+                        $"+{curEitrRegen:F0}%",
+                        isMax ? "-" : $"+{nxtEitrRegen:F0}% <color=#fb7185>(+{ModConfig.CheatEitrRegenPerLevel.Value * 100f:F0}%)</color>");
+                }
+
+                float curHeal = StatCalculator.GetCheatItemHealingBonus(_selectedItem, currentLvl) * 100f;
+                float nxtHeal = StatCalculator.GetCheatItemHealingBonus(_selectedItem, nextLvl) * 100f;
+                if (curHeal > 0f || nxtHeal > 0f)
+                {
+                    DrawStatRow("<color=#fb7185>★ [Cheat] โบนัสการฮีล (Healing):</color>",
+                        $"+{curHeal:F0}%",
+                        isMax ? "-" : $"+{nxtHeal:F0}% <color=#fb7185>(+{ModConfig.CheatHealingMultiplierPerLevel.Value * 100f:F0}%)</color>");
+                }
+            }
 
             GUILayout.EndVertical();
         }

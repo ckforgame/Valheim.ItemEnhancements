@@ -65,6 +65,16 @@ namespace Valheim.ItemEnhancements.Configuration
         public static ConfigEntry<float> MaxDurabilityBonusPerLevel { get; private set; }
         public static ConfigEntry<float> WeightReductionPerLevel { get; private set; }
 
+        // Cheat Abilities (ความสามารถพิเศษเสริม / โหมดโกง)
+        public static ConfigEntry<bool> EnableCheatAbilities { get; private set; }
+        public static ConfigEntry<float> CheatMaxHealthPerLevel { get; private set; }
+        public static ConfigEntry<float> CheatMaxStaminaPerLevel { get; private set; }
+        public static ConfigEntry<float> CheatMaxEitrPerLevel { get; private set; }
+        public static ConfigEntry<float> CheatHealthRegenPerLevel { get; private set; }
+        public static ConfigEntry<float> CheatStaminaRegenPerLevel { get; private set; }
+        public static ConfigEntry<float> CheatEitrRegenPerLevel { get; private set; }
+        public static ConfigEntry<float> CheatHealingMultiplierPerLevel { get; private set; }
+
         // UI & Keybindings
         public static ConfigEntry<KeyCode> ToggleGuiKey { get; private set; }
         public static ConfigEntry<bool> ShowInventoryBadges { get; private set; }
@@ -391,6 +401,63 @@ namespace Valheim.ItemEnhancements.Configuration
                 "ShowInventoryBadges",
                 true,
                 "แสดงป้ายระดับ +X สีตามเทียร์บนไอคอนในกระเป๋า (Show tier-colored level badge on inventory icons)"
+            );
+
+            // 10. Cheat Abilities (ความสามารถพิเศษเสริม / โหมดโกง)
+            EnableCheatAbilities = config.Bind(
+                "10. Cheat Abilities (ความสามารถพิเศษเสริม / โหมดโกง)",
+                "EnableCheatAbilities",
+                false,
+                "เปิด/ปิด การใช้งานคุณสมบัติพิเศษระดับโกง (เพิ่ม Capacity เลือด, สเตมินา, พลังเวท และรีเจนต่างๆ) [Toggle Cheat Abilities ON/OFF]"
+            );
+
+            CheatMaxHealthPerLevel = config.Bind(
+                "10. Cheat Abilities (ความสามารถพิเศษเสริม / โหมดโกง)",
+                "CheatMaxHealthPerLevel",
+                5.0f,
+                "เพิ่มค่าพลังชีวิตสูงสุด (Max Health) ต่อระดับการตีบวกบนเกราะ โล่ และเครื่องประดับ (Max Health capacity bonus per level)"
+            );
+
+            CheatMaxStaminaPerLevel = config.Bind(
+                "10. Cheat Abilities (ความสามารถพิเศษเสริม / โหมดโกง)",
+                "CheatMaxStaminaPerLevel",
+                5.0f,
+                "เพิ่มค่า Stamina สูงสุด (Max Stamina) ต่อระดับการตีบวกบนเกราะ อาวุธ และเครื่องประดับ (Max Stamina capacity bonus per level)"
+            );
+
+            CheatMaxEitrPerLevel = config.Bind(
+                "10. Cheat Abilities (ความสามารถพิเศษเสริม / โหมดโกง)",
+                "CheatMaxEitrPerLevel",
+                5.0f,
+                "เพิ่มค่า Eitr สูงสุด (Max Eitr) ต่อระดับการตีบวกบนเกราะ อาวุธ และเครื่องประดับ (Max Eitr capacity bonus per level)"
+            );
+
+            CheatHealthRegenPerLevel = config.Bind(
+                "10. Cheat Abilities (ความสามารถพิเศษเสริม / โหมดโกง)",
+                "CheatHealthRegenPerLevel",
+                0.05f,
+                "เพิ่มอัตราการฟื้นฟูพลังชีวิต (Health Regen Multiplier) ต่อระดับการตีบวก (0.05 = +5% per level)"
+            );
+
+            CheatStaminaRegenPerLevel = config.Bind(
+                "10. Cheat Abilities (ความสามารถพิเศษเสริม / โหมดโกง)",
+                "CheatStaminaRegenPerLevel",
+                0.05f,
+                "เพิ่มอัตราการฟื้นฟู Stamina (Stamina Regen Multiplier) ต่อระดับการตีบวก (0.05 = +5% per level)"
+            );
+
+            CheatEitrRegenPerLevel = config.Bind(
+                "10. Cheat Abilities (ความสามารถพิเศษเสริม / โหมดโกง)",
+                "CheatEitrRegenPerLevel",
+                0.05f,
+                "เพิ่มอัตราการฟื้นฟู Eitr (Eitr Regen Multiplier) ต่อระดับการตีบวก (0.05 = +5% per level)"
+            );
+
+            CheatHealingMultiplierPerLevel = config.Bind(
+                "10. Cheat Abilities (ความสามารถพิเศษเสริม / โหมดโกง)",
+                "CheatHealingMultiplierPerLevel",
+                0.05f,
+                "เพิ่มประสิทธิภาพการฮีลที่ได้รับทั้งหมด (Healing Received Multiplier) ต่อระดับการตีบวก (0.05 = +5% per level)"
             );
         }
 

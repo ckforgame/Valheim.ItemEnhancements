@@ -99,5 +99,30 @@ Time Elapsed 00:00:03.60
 4. **ทดสอบฆ่ามอนสเตอร์**:
    - ฆ่ามอนสเตอร์ในทุ่งหญ้า/ป่าดำ เพื่อดูการดรอปใบตีบวกระดับ 1
    - ฆ่าบอสโลกเพื่อดูการันตีการดรอป 1-3 ใบ
-5. **ทดสอบการปรับแต่ง Config**:
+5. **ทดสอบระบบ Cheat Abilities (โหมดโกง)**:
+   - เปิดไฟล์ `ckforgame.ItemEnhancements.cfg` ปรับ `EnableCheatAbilities = true`
+   - สวมใส่อาวุธ เกราะ โล่ หรือเครื่องประดับที่ตีบวกไว้
+   - สังเกต Max HP, Max Stamina, Max Eitr และอัตราฟื้นฟู (Regen) รวมถึงการฮีลที่เพิ่มขึ้นมหาศาลแบบ Real-time
+6. **ทดสอบการปรับแต่ง Config**:
    - สามารถเปิดไฟล์ `ValheimItemEnhancements.cfg` ปรับค่า `Tier1_DropChance` ถึง `Tier4_DropChance` ได้ทันที
+
+---
+
+## 4. รายละเอียดฟีเจอร์ Cheat Abilities (โหมดโกงเสริม)
+
+- **การเปิด/ปิด**: ควบคุมผ่านหมวด `[10. Cheat Abilities (ความสามารถพิเศษเสริม / โหมดโกง)]` ด้วยตัวแปร `EnableCheatAbilities = true` / `false`
+- **ความจุสเตตัส (Capacities)**:
+  - `CheatMaxHealthPerLevel = 5` (+100 HP ที่ระดับ +20 ต่อชิ้นบนเกราะ/โล่/เครื่องประดับ)
+  - `CheatMaxStaminaPerLevel = 5` (+100 Stamina ที่ระดับ +20 ต่อชิ้นบนเกราะ/อาวุธ/เครื่องประดับ)
+  - `CheatMaxEitrPerLevel = 5` (+100 Eitr ที่ระดับ +20 ต่อชิ้น ทำให้ร่ายเวทได้แม้ไม่ได้กินอาหารเวทมนตร์!)
+- **อัตราการฟื้นฟูและการฮีล (Regenerations & Healing)**:
+  - `CheatHealthRegenPerLevel = 0.05` (+100% ที่ระดับ +20)
+  - `CheatStaminaRegenPerLevel = 0.05` (+100% ที่ระดับ +20)
+  - `CheatEitrRegenPerLevel = 0.05` (+100% ที่ระดับ +20)
+  - `CheatHealingMultiplierPerLevel = 0.05` (+100% ปริมาณฮีลที่ได้รับ)
+- **การประสานงานกับระบบเกม (Seamless Harmony Hooks)**:
+  - Intercept ค่า Max Health ใน `Player.SetMaxHealth`, Max Stamina ใน `Player.SetMaxStamina`, และ Max Eitr ใน `Player.SetMaxEitr`
+  - ซิงค์ทันทีเมื่อสวมใส่/ถอดอุปกรณ์ผ่าน `Humanoid.EquipItem` และ `Humanoid.UnequipItem`
+  - เสริมกำลังการฟื้นฟูใน `SEMan.ModifyHealthRegen`, `ModifyStaminaRegen`, และ `ModifyEitrRegen`
+  - ขยายผลการฮีลที่ได้รับใน `Character.Heal`
+  - แสดงรายละเอียดชัดเจนใน Tooltip ของไอเทมและหน้าต่าง GUI ตีบวกเมื่อเปิดใช้งาน
