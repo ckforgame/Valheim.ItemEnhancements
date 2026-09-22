@@ -207,14 +207,14 @@ namespace Valheim.ItemEnhancements.Patches
         }
 
         // 9. Weapon Attack Eitr Reduction (ลด Eitr ต่อการร่ายเวทของคทา)
-        [HarmonyPatch(typeof(Attack), "GetAttackEitr")]
+        [HarmonyPatch(typeof(Attack), nameof(Attack.GetAttackEitr), typeof(Character), typeof(ItemDrop.ItemData))]
         public static class GetAttackEitr_Patch
         {
-            public static void Postfix(ItemDrop.ItemData ___m_weapon, ref float __result)
+            public static void Postfix(ItemDrop.ItemData weapon, ref float __result)
             {
-                if (___m_weapon == null) return;
+                if (weapon == null) return;
 
-                int level = EnhancementManager.GetEnhancementLevel(___m_weapon);
+                int level = EnhancementManager.GetEnhancementLevel(weapon);
                 if (level > 0)
                 {
                     float reduction = StatCalculator.GetAttackEitrReduction(level);
