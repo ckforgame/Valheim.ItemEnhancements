@@ -379,13 +379,19 @@ namespace Valheim.ItemEnhancements.Core
                 item.m_shared.m_itemType == ItemDrop.ItemData.ItemType.TwoHandedWeaponLeft ||
                 item.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Bow)
             {
-                float dmgBonusPct = level * ModConfig.WeaponDamageBonusPerLevel.Value * 100f;
-                sb.AppendLine($"<color=#4ade80>• พลังโจมตีทุกธาตุ (All Damage): +{dmgBonusPct:F0}%</color>");
+                float dmgBonusPct = YamlConfigManager.GetCumulativeAbilityValue("WeaponDamage", level);
+                if (dmgBonusPct > 0f)
+                {
+                    sb.AppendLine($"<color=#4ade80>• พลังโจมตีทุกธาตุ (All Damage): +{dmgBonusPct:F0}%</color>");
+                }
 
                 if (item.m_shared.m_backstabBonus > 1f)
                 {
-                    float bsBonus = level * ModConfig.WeaponBackstabBonusPerLevel.Value;
-                    sb.AppendLine($"<color=#4ade80>• โบนัสแทงข้างหลัง (Backstab): +{bsBonus:F2}x</color>");
+                    float bsBonus = StatCalculator.GetBackstabBonus(level);
+                    if (bsBonus > 0f)
+                    {
+                        sb.AppendLine($"<color=#4ade80>• โบนัสแทงข้างหลัง (Backstab): +{bsBonus:F2}x</color>");
+                    }
                 }
 
                 float atkStam = StatCalculator.GetAttackStaminaReduction(level) * 100f;
@@ -408,7 +414,10 @@ namespace Valheim.ItemEnhancements.Core
                 item.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Shoulder)
             {
                 float armorBonus = StatCalculator.GetArmorBonus(item, level, item.m_shared.m_armor);
-                sb.AppendLine($"<color=#4ade80>• พลังป้องกันเกราะ (Armor): +{armorBonus:F1}</color>");
+                if (armorBonus > 0f)
+                {
+                    sb.AppendLine($"<color=#4ade80>• พลังป้องกันเกราะ (Armor): +{armorBonus:F1}</color>");
+                }
 
                 float moveDelta = StatCalculator.GetMovementModifierDelta(item, level) * 100f;
                 if (moveDelta > 0f)
@@ -432,11 +441,17 @@ namespace Valheim.ItemEnhancements.Core
             // 3. โล่
             if (item.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Shield)
             {
-                float blkPct = level * ModConfig.ShieldBlockPowerBonusPerLevel.Value * 100f;
-                sb.AppendLine($"<color=#4ade80>• พลังบล็อก (Block Power): +{blkPct:F0}%</color>");
+                float blkPct = YamlConfigManager.GetCumulativeAbilityValue("ShieldBlockPower", level);
+                if (blkPct > 0f)
+                {
+                    sb.AppendLine($"<color=#4ade80>• พลังบล็อก (Block Power): +{blkPct:F0}%</color>");
+                }
 
-                float defPct = level * ModConfig.ShieldDeflectionBonusPerLevel.Value * 100f;
-                sb.AppendLine($"<color=#4ade80>• แรงปัดป้อง (Parry Force): +{defPct:F0}%</color>");
+                float defPct = YamlConfigManager.GetCumulativeAbilityValue("ShieldDeflectionForce", level);
+                if (defPct > 0f)
+                {
+                    sb.AppendLine($"<color=#4ade80>• แรงปัดป้อง (Parry Force): +{defPct:F0}%</color>");
+                }
 
                 float blkStam = StatCalculator.GetBlockStaminaReduction(level) * 100f;
                 if (blkStam > 0f)
@@ -462,10 +477,13 @@ namespace Valheim.ItemEnhancements.Core
             }
 
             // 5. คุณสมบัติทั่วไป
-            float durPct = level * ModConfig.MaxDurabilityBonusPerLevel.Value * 100f;
-            sb.AppendLine($"<color=#94a3b8>• ความทนทานสูงสุด (Durability): +{durPct:F0}%</color>");
+            float durPct = YamlConfigManager.GetCumulativeAbilityValue("MaxDurability", level);
+            if (durPct > 0f)
+            {
+                sb.AppendLine($"<color=#94a3b8>• ความทนทานสูงสุด (Durability): +{durPct:F0}%</color>");
+            }
 
-            float wtPct = Mathf.Clamp(level * ModConfig.WeightReductionPerLevel.Value, 0f, 0.60f) * 100f;
+            float wtPct = Mathf.Clamp(YamlConfigManager.GetCumulativeAbilityValue("WeightReduction", level), 0f, 60f);
             if (wtPct > 0f)
             {
                 sb.AppendLine($"<color=#94a3b8>• น้ำหนักอุปกรณ์ (Weight): -{wtPct:F1}%</color>");

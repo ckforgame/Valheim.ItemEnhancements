@@ -234,7 +234,7 @@ namespace Valheim.ItemEnhancements.Patches
                 int level = EnhancementManager.GetEnhancementLevel(___m_weapon);
                 if (level > 0 && hitData.m_backstabBonus > 1f)
                 {
-                    hitData.m_backstabBonus += level * ModConfig.WeaponBackstabBonusPerLevel.Value;
+                    hitData.m_backstabBonus += StatCalculator.GetBackstabBonus(level);
                 }
             }
         }
@@ -253,7 +253,7 @@ namespace Valheim.ItemEnhancements.Patches
                         int level = EnhancementManager.GetEnhancementLevel(shieldOrWeapon);
                         if (level > 0)
                         {
-                            timedBlockBonus += level * ModConfig.ShieldTimedBlockBonusPerLevel.Value;
+                            timedBlockBonus += StatCalculator.GetTimedBlockBonus(level);
                         }
                     }
                 }

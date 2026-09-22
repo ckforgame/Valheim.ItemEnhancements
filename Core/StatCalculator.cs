@@ -14,7 +14,10 @@ namespace Valheim.ItemEnhancements.Core
         {
             if (level <= 0 || item == null) return;
 
-            float bonusMultiplier = 1f + (level * ModConfig.WeaponDamageBonusPerLevel.Value);
+            float bonusPercent = YamlConfigManager.GetCumulativeAbilityValue("WeaponDamage", level);
+            if (bonusPercent <= 0f) return;
+
+            float bonusMultiplier = 1f + (bonusPercent / 100f);
 
             if (damages.m_slash > 0f) damages.m_slash *= bonusMultiplier;
             if (damages.m_pierce > 0f) damages.m_pierce *= bonusMultiplier;
@@ -35,8 +38,8 @@ namespace Valheim.ItemEnhancements.Core
         {
             if (level <= 0 || item == null) return 0f;
 
-            float flatBonus = level * ModConfig.ArmorFlatBonusPerLevel.Value;
-            float percentBonus = baseArmor * (level * ModConfig.ArmorPercentBonusPerLevel.Value);
+            float flatBonus = YamlConfigManager.GetCumulativeAbilityValue("ArmorFlat", level);
+            float percentBonus = baseArmor * (YamlConfigManager.GetCumulativeAbilityValue("ArmorPercent", level) / 100f);
 
             return flatBonus + percentBonus;
         }
@@ -47,7 +50,7 @@ namespace Valheim.ItemEnhancements.Core
         public static float GetBlockPowerBonus(ItemDrop.ItemData item, int level, float baseBlock)
         {
             if (level <= 0 || item == null || baseBlock <= 0f) return 0f;
-            return baseBlock * (level * ModConfig.ShieldBlockPowerBonusPerLevel.Value);
+            return baseBlock * (YamlConfigManager.GetCumulativeAbilityValue("ShieldBlockPower", level) / 100f);
         }
 
         /// <summary>
@@ -56,7 +59,7 @@ namespace Valheim.ItemEnhancements.Core
         public static float GetDeflectionBonus(ItemDrop.ItemData item, int level, float baseDeflection)
         {
             if (level <= 0 || item == null || baseDeflection <= 0f) return 0f;
-            return baseDeflection * (level * ModConfig.ShieldDeflectionBonusPerLevel.Value);
+            return baseDeflection * (YamlConfigManager.GetCumulativeAbilityValue("ShieldDeflectionForce", level) / 100f);
         }
 
         /// <summary>
@@ -65,7 +68,7 @@ namespace Valheim.ItemEnhancements.Core
         public static float GetDurabilityBonus(ItemDrop.ItemData item, int level, float baseDurability)
         {
             if (level <= 0 || item == null || baseDurability <= 0f) return 0f;
-            return baseDurability * (level * ModConfig.MaxDurabilityBonusPerLevel.Value);
+            return baseDurability * (YamlConfigManager.GetCumulativeAbilityValue("MaxDurability", level) / 100f);
         }
 
         /// <summary>
@@ -74,7 +77,7 @@ namespace Valheim.ItemEnhancements.Core
         public static float GetWeightMultiplier(int level)
         {
             if (level <= 0) return 1f;
-            float reduction = Mathf.Clamp(level * ModConfig.WeightReductionPerLevel.Value, 0f, 0.60f); // ลดน้ำหนักได้สูงสุด 60%
+            float reduction = Mathf.Clamp(YamlConfigManager.GetCumulativeAbilityValue("WeightReduction", level) / 100f, 0f, 0.60f);
             return 1f - reduction;
         }
 
@@ -86,23 +89,27 @@ namespace Valheim.ItemEnhancements.Core
             if (level <= 0 || item?.m_shared == null) return 0f;
 
             float originalMod = item.m_shared.m_movementModifier;
+            float pct = YamlConfigManager.GetCumulativeAbilityValue("ArmorMovementPenaltyReduction", level) / 100f;
+            if (pct <= 0f) return 0f;
+
             if (originalMod < 0f)
             {
-                // ลดโทษติดลบลง
-                float penaltyRecoveryFraction = Mathf.Clamp01(level * ModConfig.ArmorMovementPenaltyReductionPerLevel.Value);
+                float penaltyRecoveryFraction = Mathf.Clamp01(pct);
                 float recovered = -originalMod * penaltyRecoveryFraction;
 
-                // หากเลเวล 15 ขึ้นไป ให้โบนัสความเร็วเล็กน้อย
-                if (level >= 15)
+                if (pct > 1.0f)
                 {
-                    recovered += (level - 14) * 0.005f; // +0.5% ถึง +3%
+                    recovered += (pct - 1.0f) * 0.05f;
+                }
+                else if (level >= 15)
+                {
+                    recovered += (level - 14) * 0.005f;
                 }
 
                 return recovered;
             }
             else if (level >= 10)
             {
-                // ถ้าไอเทมไม่มีโทษติดลบ (เช่น เสื้อผ้าเบา) ให้โบนัสความเร็วเล็กน้อย
                 return (level - 9) * 0.003f;
             }
 
@@ -115,7 +122,7 @@ namespace Valheim.ItemEnhancements.Core
         public static float GetAttackStaminaReduction(int level)
         {
             if (level <= 0) return 0f;
-            return Mathf.Clamp(level * ModConfig.WeaponStaminaReductionPerLevel.Value, 0f, 0.40f);
+            return Mathf.Clamp(YamlConfigManager.GetCumulativeAbilityValue("WeaponAttackStamina", level) / 100f, 0f, 0.50f);
         }
 
         /// <summary>
@@ -124,7 +131,7 @@ namespace Valheim.ItemEnhancements.Core
         public static float GetAttackEitrReduction(int level)
         {
             if (level <= 0) return 0f;
-            return Mathf.Clamp(level * ModConfig.WeaponEitrReductionPerLevel.Value, 0f, 0.40f);
+            return Mathf.Clamp(YamlConfigManager.GetCumulativeAbilityValue("WeaponAttackEitr", level) / 100f, 0f, 0.50f);
         }
 
         /// <summary>
@@ -133,7 +140,7 @@ namespace Valheim.ItemEnhancements.Core
         public static float GetBlockStaminaReduction(int level)
         {
             if (level <= 0) return 0f;
-            return Mathf.Clamp(level * ModConfig.ShieldBlockStaminaReductionPerLevel.Value, 0f, 0.50f);
+            return Mathf.Clamp(YamlConfigManager.GetCumulativeAbilityValue("ShieldBlockStaminaReduction", level) / 100f, 0f, 0.60f);
         }
 
         /// <summary>
@@ -142,7 +149,7 @@ namespace Valheim.ItemEnhancements.Core
         public static float GetDodgeStaminaReduction(int level)
         {
             if (level <= 0) return 0f;
-            return Mathf.Clamp(level * ModConfig.DodgeStaminaReductionPerLevel.Value, 0f, 0.40f);
+            return Mathf.Clamp(YamlConfigManager.GetCumulativeAbilityValue("DodgeStaminaReduction", level) / 100f, 0f, 0.50f);
         }
 
         /// <summary>
@@ -151,7 +158,7 @@ namespace Valheim.ItemEnhancements.Core
         public static float GetRunStaminaReduction(int level)
         {
             if (level <= 0) return 0f;
-            return Mathf.Clamp(level * ModConfig.RunStaminaReductionPerLevel.Value, 0f, 0.30f);
+            return Mathf.Clamp(YamlConfigManager.GetCumulativeAbilityValue("RunStaminaReduction", level) / 100f, 0f, 0.40f);
         }
 
         /// <summary>
@@ -160,7 +167,7 @@ namespace Valheim.ItemEnhancements.Core
         public static float GetJumpStaminaReduction(int level)
         {
             if (level <= 0) return 0f;
-            return Mathf.Clamp(level * ModConfig.JumpStaminaReductionPerLevel.Value, 0f, 0.30f);
+            return Mathf.Clamp(YamlConfigManager.GetCumulativeAbilityValue("JumpStaminaReduction", level) / 100f, 0f, 0.40f);
         }
 
         /// <summary>
@@ -169,7 +176,7 @@ namespace Valheim.ItemEnhancements.Core
         public static float GetEitrRegenBonus(int level)
         {
             if (level <= 0) return 0f;
-            return level * ModConfig.EitrRegenBonusPerLevel.Value;
+            return YamlConfigManager.GetCumulativeAbilityValue("EitrRegen", level) / 100f;
         }
 
         /// <summary>
@@ -180,9 +187,21 @@ namespace Valheim.ItemEnhancements.Core
             if (level <= 0 || item?.m_shared == null) return 0f;
             if (item.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Utility)
             {
-                return level * ModConfig.CarryWeightBonusPerLevel.Value;
+                return YamlConfigManager.GetCumulativeAbilityValue("CarryWeightBonus", level);
             }
             return 0f;
+        }
+
+        public static float GetBackstabBonus(int level)
+        {
+            if (level <= 0) return 0f;
+            return YamlConfigManager.GetCumulativeAbilityValue("WeaponBackstab", level) / 100f;
+        }
+
+        public static float GetTimedBlockBonus(int level)
+        {
+            if (level <= 0) return 0f;
+            return YamlConfigManager.GetCumulativeAbilityValue("ShieldTimedBlock", level) / 100f;
         }
 
         #region Cheat Abilities Calculations
@@ -227,7 +246,7 @@ namespace Valheim.ItemEnhancements.Core
             if (!IsCheatEnabled || level <= 0 || item == null) return 0f;
             if (IsArmor(item) || IsShield(item) || IsUtility(item))
             {
-                return level * ModConfig.CheatMaxHealthPerLevel.Value;
+                return YamlConfigManager.GetCumulativeAbilityValue("CheatMaxHealth", level);
             }
             return 0f;
         }
@@ -237,7 +256,7 @@ namespace Valheim.ItemEnhancements.Core
             if (!IsCheatEnabled || level <= 0 || item == null) return 0f;
             if (IsArmor(item) || IsWeapon(item) || IsUtility(item))
             {
-                return level * ModConfig.CheatMaxStaminaPerLevel.Value;
+                return YamlConfigManager.GetCumulativeAbilityValue("CheatMaxStamina", level);
             }
             return 0f;
         }
@@ -247,7 +266,7 @@ namespace Valheim.ItemEnhancements.Core
             if (!IsCheatEnabled || level <= 0 || item == null) return 0f;
             if (IsArmor(item) || IsWeapon(item) || IsUtility(item))
             {
-                return level * ModConfig.CheatMaxEitrPerLevel.Value;
+                return YamlConfigManager.GetCumulativeAbilityValue("CheatMaxEitr", level);
             }
             return 0f;
         }
@@ -257,7 +276,7 @@ namespace Valheim.ItemEnhancements.Core
             if (!IsCheatEnabled || level <= 0 || item == null) return 0f;
             if (IsArmor(item) || IsShield(item) || IsUtility(item))
             {
-                return level * ModConfig.CheatHealthRegenPerLevel.Value;
+                return YamlConfigManager.GetCumulativeAbilityValue("CheatHealthRegen", level) / 100f;
             }
             return 0f;
         }
@@ -267,7 +286,7 @@ namespace Valheim.ItemEnhancements.Core
             if (!IsCheatEnabled || level <= 0 || item == null) return 0f;
             if (IsArmor(item) || IsShield(item) || IsWeapon(item) || IsUtility(item))
             {
-                return level * ModConfig.CheatStaminaRegenPerLevel.Value;
+                return YamlConfigManager.GetCumulativeAbilityValue("CheatStaminaRegen", level) / 100f;
             }
             return 0f;
         }
@@ -277,7 +296,7 @@ namespace Valheim.ItemEnhancements.Core
             if (!IsCheatEnabled || level <= 0 || item == null) return 0f;
             if (IsArmor(item) || IsWeapon(item) || IsUtility(item))
             {
-                return level * ModConfig.CheatEitrRegenPerLevel.Value;
+                return YamlConfigManager.GetCumulativeAbilityValue("CheatEitrRegen", level) / 100f;
             }
             return 0f;
         }
@@ -287,7 +306,7 @@ namespace Valheim.ItemEnhancements.Core
             if (!IsCheatEnabled || level <= 0 || item == null) return 0f;
             if (IsArmor(item) || IsShield(item) || IsUtility(item))
             {
-                return level * ModConfig.CheatHealingMultiplierPerLevel.Value;
+                return YamlConfigManager.GetCumulativeAbilityValue("CheatHealingMultiplier", level) / 100f;
             }
             return 0f;
         }

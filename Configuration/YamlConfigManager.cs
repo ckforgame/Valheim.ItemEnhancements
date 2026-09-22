@@ -19,6 +19,7 @@ namespace Valheim.ItemEnhancements.Configuration
         public static ItemConfigData Item { get; private set; } = new ItemConfigData();
         public static ArmorConfigData Armor { get; private set; } = new ArmorConfigData();
         public static CheatConfigData Cheat { get; private set; } = new CheatConfigData();
+        public static AbilitiesConfigData Abilities { get; private set; } = new AbilitiesConfigData();
 
         private static FileSystemWatcher _watcher;
         private static System.Threading.Timer _reloadDebounceTimer;
@@ -71,9 +72,35 @@ namespace Valheim.ItemEnhancements.Configuration
             Item = LoadWithOverride<ItemConfigData>("Item.yml", "Item.override.yml");
             Armor = LoadWithOverride<ArmorConfigData>("Armor.yml", "Armor.override.yml");
             Cheat = LoadWithOverride<CheatConfigData>("Cheat.yml", "Cheat.override.yml");
+            Abilities = LoadWithOverride<AbilitiesConfigData>("Abilities.yml", "Abilities.override.yml");
 
             LogInfo($"[Valheim.ItemEnhancements] YAML Configurations loaded successfully from '{ConfigDirectory}'.");
             OnConfigReloaded?.Invoke();
+        }
+
+        public static float GetCumulativeAbilityValue(string abilityName, int level)
+        {
+            if (level <= 0 || Abilities?.Levels == null) return 0f;
+            float total = 0f;
+            for (int l = 1; l <= level; l++)
+            {
+                if (Abilities.Levels.TryGetValue(l, out var list) && list != null)
+                {
+                    foreach (var entry in list)
+                    {
+                        if (string.Equals(entry.Ability, abilityName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            total += entry.EffectiveValue;
+                        }
+                    }
+                }
+            }
+            return total;
+        }
+
+        public static bool HasAbilityAtLevel(string abilityName, int level)
+        {
+            return GetCumulativeAbilityValue(abilityName, level) > 0.0001f;
         }
 
         private static void LogInfo(string msg)
@@ -153,7 +180,41 @@ namespace Valheim.ItemEnhancements.Configuration
                     {
                         try
                         {
-                            if (prop.PropertyType == typeof(Dictionary<string, float>) && kvp.Value is Dictionary<object, object> dictObj)
+                            if (prop.PropertyType == typeof(Dictionary<int, List<AbilityEntry>>) && kvp.Value is Dictionary<object, object> levelsDict)
+                            {
+                                var currentLevels = prop.GetValue(target) as Dictionary<int, List<AbilityEntry>> ?? new Dictionary<int, List<AbilityEntry>>();
+                                foreach (var lvlEntry in levelsDict)
+                                {
+                                    if (int.TryParse(lvlEntry.Key?.ToString(), out int lvlNum))
+                                    {
+                                        if (lvlEntry.Value is List<object> entryList)
+                                        {
+                                            var newAbilityList = new List<AbilityEntry>();
+                                            foreach (var itemObj in entryList)
+                                            {
+                                                if (itemObj is Dictionary<object, object> itemDict)
+                                                {
+                                                    var entry = new AbilityEntry();
+                                                    foreach (var f in itemDict)
+                                                    {
+                                                        string fName = f.Key?.ToString();
+                                                        if (string.Equals(fName, "Ability", StringComparison.OrdinalIgnoreCase))
+                                                            entry.Ability = f.Value?.ToString();
+                                                        else if (string.Equals(fName, "Value", StringComparison.OrdinalIgnoreCase) && float.TryParse(f.Value?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out float v))
+                                                            entry.Value = v;
+                                                        else if (string.Equals(fName, "Percent", StringComparison.OrdinalIgnoreCase) && float.TryParse(f.Value?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out float p))
+                                                            entry.Percent = p;
+                                                    }
+                                                    newAbilityList.Add(entry);
+                                                }
+                                            }
+                                            currentLevels[lvlNum] = newAbilityList;
+                                        }
+                                    }
+                                }
+                                prop.SetValue(target, currentLevels);
+                            }
+                            else if (prop.PropertyType == typeof(Dictionary<string, float>) && kvp.Value is Dictionary<object, object> dictObj)
                             {
                                 var currentDict = prop.GetValue(target) as Dictionary<string, float> ?? new Dictionary<string, float>();
                                 foreach (var entry in dictObj)
@@ -264,6 +325,7 @@ namespace Valheim.ItemEnhancements.Configuration
             WriteDefaultIfMissing("Item.yml", DefaultItemYaml);
             WriteDefaultIfMissing("Armor.yml", DefaultArmorYaml);
             WriteDefaultIfMissing("Cheat.yml", DefaultCheatYaml);
+            WriteDefaultIfMissing("Abilities.yml", DefaultAbilitiesYaml);
         }
 
         private static void WriteDefaultIfMissing(string fileName, string content)
@@ -404,6 +466,180 @@ CheatEitrRegenPerLevel: 0.05
 CheatHealingMultiplierPerLevel: 0.05
 ";
 
+        private const string DefaultAbilitiesYaml = @"# ====================================================================
+# VALHEIM ITEM ENHANCEMENTS - ABILITIES BY LEVEL CONFIGURATION
+# กำหนด Abilities และเปอร์เซ็นต์/ค่าพลัง ที่จะได้รับในแต่ละระดับ (Level 1 - 20)
+# ====================================================================
+
+Levels:
+  1:
+    - Ability: WeaponAttackStamina
+      Value: 2.0
+    - Ability: WeaponAttackEitr
+      Value: 2.0
+    - Ability: MaxDurability
+      Value: 5.0
+    - Ability: DodgeStaminaReduction
+      Value: 1.0
+  2:
+    - Ability: WeaponDamage
+      Value: 5.0
+    - Ability: ArmorFlat
+      Value: 1.5
+    - Ability: ShieldBlockPower
+      Value: 5.0
+  3:
+    - Ability: WeaponAttackStamina
+      Value: 2.0
+    - Ability: RunStaminaReduction
+      Value: 1.0
+    - Ability: ShieldBlockStaminaReduction
+      Value: 2.0
+    - Ability: WeightReduction
+      Value: 3.0
+  4:
+    - Ability: WeaponDamage
+      Value: 5.0
+    - Ability: ArmorPercent
+      Value: 2.0
+    - Ability: JumpStaminaReduction
+      Value: 1.0
+    - Ability: WeaponBackstab
+      Value: 5.0
+  5:
+    - Ability: MaxDurability
+      Value: 5.0
+    - Ability: ShieldDeflectionForce
+      Value: 5.0
+    - Ability: ShieldTimedBlock
+      Value: 2.0
+    - Ability: CarryWeightBonus
+      Value: 10.0
+    - Ability: CheatMaxHealth
+      Value: 10.0
+    - Ability: CheatMaxStamina
+      Value: 10.0
+    - Ability: CheatMaxEitr
+      Value: 10.0
+  6:
+    - Ability: WeaponDamage
+      Value: 5.0
+    - Ability: ArmorFlat
+      Value: 1.5
+    - Ability: ShieldBlockPower
+      Value: 5.0
+  7:
+    - Ability: WeaponAttackStamina
+      Value: 2.0
+    - Ability: WeaponAttackEitr
+      Value: 2.0
+    - Ability: DodgeStaminaReduction
+      Value: 1.0
+    - Ability: WeightReduction
+      Value: 3.0
+  8:
+    - Ability: WeaponDamage
+      Value: 5.0
+    - Ability: ArmorPercent
+      Value: 2.0
+    - Ability: WeaponBackstab
+      Value: 5.0
+  9:
+    - Ability: ShieldBlockPower
+      Value: 5.0
+    - Ability: ShieldBlockStaminaReduction
+      Value: 2.0
+    - Ability: RunStaminaReduction
+      Value: 1.0
+  10:
+    - Ability: MaxDurability
+      Value: 5.0
+    - Ability: ArmorMovementPenaltyReduction
+      Value: 15.0
+    - Ability: EitrRegen
+      Value: 10.0
+    - Ability: CarryWeightBonus
+      Value: 15.0
+    - Ability: CheatHealthRegen
+      Value: 10.0
+    - Ability: CheatStaminaRegen
+      Value: 10.0
+    - Ability: CheatEitrRegen
+      Value: 10.0
+  11:
+    - Ability: WeaponDamage
+      Value: 5.0
+    - Ability: ArmorFlat
+      Value: 2.0
+  12:
+    - Ability: WeaponAttackStamina
+      Value: 2.0
+    - Ability: ShieldBlockPower
+      Value: 5.0
+    - Ability: WeightReduction
+      Value: 3.0
+  13:
+    - Ability: WeaponDamage
+      Value: 5.0
+    - Ability: ArmorPercent
+      Value: 2.0
+    - Ability: JumpStaminaReduction
+      Value: 1.0
+  14:
+    - Ability: WeaponBackstab
+      Value: 5.0
+    - Ability: ShieldTimedBlock
+      Value: 2.0
+    - Ability: DodgeStaminaReduction
+      Value: 1.0
+  15:
+    - Ability: MaxDurability
+      Value: 5.0
+    - Ability: ArmorMovementPenaltyReduction
+      Value: 20.0
+    - Ability: ShieldDeflectionForce
+      Value: 5.0
+    - Ability: CarryWeightBonus
+      Value: 25.0
+    - Ability: CheatHealingMultiplier
+      Value: 15.0
+  16:
+    - Ability: WeaponDamage
+      Value: 5.0
+    - Ability: ArmorFlat
+      Value: 2.0
+  17:
+    - Ability: WeaponAttackStamina
+      Value: 2.0
+    - Ability: ShieldBlockPower
+      Value: 5.0
+    - Ability: WeightReduction
+      Value: 3.0
+  18:
+    - Ability: WeaponDamage
+      Value: 5.0
+    - Ability: ArmorPercent
+      Value: 2.0
+  19:
+    - Ability: WeaponBackstab
+      Value: 5.0
+    - Ability: ShieldTimedBlock
+      Value: 2.0
+    - Ability: EitrRegen
+      Value: 10.0
+  20:
+    - Ability: WeaponDamage
+      Value: 10.0
+    - Ability: ArmorFlat
+      Value: 3.0
+    - Ability: MaxDurability
+      Value: 10.0
+    - Ability: ArmorMovementPenaltyReduction
+      Value: 25.0
+    - Ability: CarryWeightBonus
+      Value: 50.0
+";
+
         #endregion
     }
 
@@ -497,6 +733,20 @@ CheatHealingMultiplierPerLevel: 0.05
         public float CheatStaminaRegenPerLevel { get; set; } = 0.05f;
         public float CheatEitrRegenPerLevel { get; set; } = 0.05f;
         public float CheatHealingMultiplierPerLevel { get; set; } = 0.05f;
+    }
+
+    public class AbilityEntry
+    {
+        public string Ability { get; set; } = string.Empty;
+        public float Value { get; set; } = 0f;
+        public float Percent { get; set; } = 0f;
+
+        public float EffectiveValue => Math.Abs(Value) > 0.00001f ? Value : Percent;
+    }
+
+    public class AbilitiesConfigData
+    {
+        public Dictionary<int, List<AbilityEntry>> Levels { get; set; } = new Dictionary<int, List<AbilityEntry>>();
     }
 
     #endregion

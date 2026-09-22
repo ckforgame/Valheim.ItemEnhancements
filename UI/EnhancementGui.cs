@@ -248,19 +248,23 @@ namespace Valheim.ItemEnhancements.UI
             // 1. Damage (สำหรับอาวุธ)
             if (IsWeapon(_selectedItem))
             {
-                float curDmgMult = 1f + (currentLvl * ModConfig.WeaponDamageBonusPerLevel.Value);
-                float nxtDmgMult = 1f + (nextLvl * ModConfig.WeaponDamageBonusPerLevel.Value);
-                float diffPct = ModConfig.WeaponDamageBonusPerLevel.Value * 100f;
+                float curDmgPct = YamlConfigManager.GetCumulativeAbilityValue("WeaponDamage", currentLvl);
+                float nxtDmgPct = YamlConfigManager.GetCumulativeAbilityValue("WeaponDamage", nextLvl);
+                float diffDmg = nxtDmgPct - curDmgPct;
+                string diffDmgStr = curDmgPct <= 0f && nxtDmgPct > 0f ? "<color=#4ade80>(ปลดล็อก!)</color>" : $"<color=#4ade80>(+{diffDmg:F0}%)</color>";
 
                 DrawStatRow("พลังโจมตีทุกธาตุ (All Damage):",
-                    $"+{(curDmgMult - 1f) * 100f:F0}%",
-                    isMax ? "-" : $"+{(nxtDmgMult - 1f) * 100f:F0}% <color=#4ade80>(+{diffPct:F0}%)</color>");
+                    $"+{curDmgPct:F0}%",
+                    isMax ? "-" : $"+{nxtDmgPct:F0}% {diffDmgStr}");
 
                 float curStam = StatCalculator.GetAttackStaminaReduction(currentLvl) * 100f;
                 float nxtStam = StatCalculator.GetAttackStaminaReduction(nextLvl) * 100f;
+                float diffStam = nxtStam - curStam;
+                string diffStamStr = curStam <= 0f && nxtStam > 0f ? "<color=#38bdf8>(ปลดล็อก!)</color>" : $"<color=#38bdf8>(-{diffStam:F0}%)</color>";
+
                 DrawStatRow("ลด Stamina โจมตี:",
                     $"-{curStam:F0}%",
-                    isMax ? "-" : $"-{nxtStam:F0}% <color=#38bdf8>(-{ModConfig.WeaponStaminaReductionPerLevel.Value * 100f:F0}%)</color>");
+                    isMax ? "-" : $"-{nxtStam:F0}% {diffStamStr}");
             }
 
             // 2. Armor (สำหรับเกราะ)
@@ -270,16 +274,20 @@ namespace Valheim.ItemEnhancements.UI
                 float nextArmorBonus = StatCalculator.GetArmorBonus(_selectedItem, nextLvl, _selectedItem.m_shared.m_armor);
                 float curArmorBonus = StatCalculator.GetArmorBonus(_selectedItem, currentLvl, _selectedItem.m_shared.m_armor);
                 float diff = nextArmorBonus - curArmorBonus;
+                string diffArmorStr = curArmorBonus <= 0f && nextArmorBonus > 0f ? "<color=#4ade80>(ปลดล็อก!)</color>" : $"<color=#4ade80>(+{diff:F1})</color>";
 
                 DrawStatRow("พลังป้องกันเกราะ (Armor):",
                     $"{curArmor:F1}",
-                    isMax ? "-" : $"{curArmor + diff:F1} <color=#4ade80>(+{diff:F1})</color>");
+                    isMax ? "-" : $"{curArmor + diff:F1} {diffArmorStr}");
 
                 float curMove = StatCalculator.GetMovementModifierDelta(_selectedItem, currentLvl) * 100f;
                 float nxtMove = StatCalculator.GetMovementModifierDelta(_selectedItem, nextLvl) * 100f;
+                float diffMove = nxtMove - curMove;
+                string diffMoveStr = curMove <= 0f && nxtMove > 0f ? "<color=#38bdf8>(ปลดล็อก!)</color>" : $"<color=#38bdf8>(+{diffMove:F1}%)</color>";
+
                 DrawStatRow("ลดโทษความเร็วเดิน / โบนัส:",
                     $"+{curMove:F1}%",
-                    isMax ? "-" : $"+{nxtMove:F1}% <color=#38bdf8>(+{nxtMove - curMove:F1}%)</color>");
+                    isMax ? "-" : $"+{nxtMove:F1}% {diffMoveStr}");
             }
 
             // 3. Shield (สำหรับโล่)
@@ -289,16 +297,20 @@ namespace Valheim.ItemEnhancements.UI
                 float curBlkBonus = StatCalculator.GetBlockPowerBonus(_selectedItem, currentLvl, _selectedItem.m_shared.m_blockPower);
                 float nxtBlkBonus = StatCalculator.GetBlockPowerBonus(_selectedItem, nextLvl, _selectedItem.m_shared.m_blockPower);
                 float diffBlk = nxtBlkBonus - curBlkBonus;
+                string diffBlkStr = curBlkBonus <= 0f && nxtBlkBonus > 0f ? "<color=#4ade80>(ปลดล็อก!)</color>" : $"<color=#4ade80>(+{diffBlk:F1})</color>";
 
                 DrawStatRow("พลังบล็อก (Block Power):",
                     $"{curBlk:F1}",
-                    isMax ? "-" : $"{curBlk + diffBlk:F1} <color=#4ade80>(+{diffBlk:F1})</color>");
+                    isMax ? "-" : $"{curBlk + diffBlk:F1} {diffBlkStr}");
 
                 float curBlkStam = StatCalculator.GetBlockStaminaReduction(currentLvl) * 100f;
                 float nxtBlkStam = StatCalculator.GetBlockStaminaReduction(nextLvl) * 100f;
+                float diffBlkStam = nxtBlkStam - curBlkStam;
+                string diffBlkStamStr = curBlkStam <= 0f && nxtBlkStam > 0f ? "<color=#38bdf8>(ปลดล็อก!)</color>" : $"<color=#38bdf8>(-{diffBlkStam:F1}%)</color>";
+
                 DrawStatRow("ลด Stamina การบล็อก:",
                     $"-{curBlkStam:F0}%",
-                    isMax ? "-" : $"-{nxtBlkStam:F0}% <color=#38bdf8>(-{ModConfig.ShieldBlockStaminaReductionPerLevel.Value * 100f:F1}%)</color>");
+                    isMax ? "-" : $"-{nxtBlkStam:F0}% {diffBlkStamStr}");
             }
 
             // 4. Durability & Weight
@@ -306,10 +318,11 @@ namespace Valheim.ItemEnhancements.UI
             float curDurBonus = StatCalculator.GetDurabilityBonus(_selectedItem, currentLvl, _selectedItem.m_shared.m_maxDurability);
             float nxtDurBonus = StatCalculator.GetDurabilityBonus(_selectedItem, nextLvl, _selectedItem.m_shared.m_maxDurability);
             float diffDur = nxtDurBonus - curDurBonus;
+            string diffDurStr = curDurBonus <= 0f && nxtDurBonus > 0f ? "<color=#4ade80>(ปลดล็อก!)</color>" : $"<color=#4ade80>(+{diffDur:F0})</color>";
 
             DrawStatRow("ความทนทานสูงสุด (Max Durability):",
                 $"{curDur:F0}",
-                isMax ? "-" : $"{curDur + diffDur:F0} <color=#4ade80>(+{diffDur:F0})</color>");
+                isMax ? "-" : $"{curDur + diffDur:F0} {diffDurStr}");
 
             // 5. Cheat Abilities (หากเปิดใช้งานใน Config)
             if (StatCalculator.IsCheatEnabled)
@@ -318,63 +331,77 @@ namespace Valheim.ItemEnhancements.UI
                 float nxtHp = StatCalculator.GetCheatItemMaxHealth(_selectedItem, nextLvl);
                 if (curHp > 0f || nxtHp > 0f)
                 {
+                    float diffHp = nxtHp - curHp;
+                    string diffHpStr = curHp <= 0f && nxtHp > 0f ? "<color=#fb7185>(ปลดล็อก!)</color>" : $"<color=#fb7185>(+{diffHp:F0})</color>";
                     DrawStatRow("<color=#fb7185>★ [Cheat] เพิ่ม Max HP:</color>",
                         $"+{curHp:F0}",
-                        isMax ? "-" : $"+{nxtHp:F0} <color=#fb7185>(+{ModConfig.CheatMaxHealthPerLevel.Value:F0})</color>");
+                        isMax ? "-" : $"+{nxtHp:F0} {diffHpStr}");
                 }
 
                 float curStam = StatCalculator.GetCheatItemMaxStamina(_selectedItem, currentLvl);
                 float nxtStam = StatCalculator.GetCheatItemMaxStamina(_selectedItem, nextLvl);
                 if (curStam > 0f || nxtStam > 0f)
                 {
+                    float diffStam = nxtStam - curStam;
+                    string diffStamStr = curStam <= 0f && nxtStam > 0f ? "<color=#fb7185>(ปลดล็อก!)</color>" : $"<color=#fb7185>(+{diffStam:F0})</color>";
                     DrawStatRow("<color=#fb7185>★ [Cheat] เพิ่ม Max Stamina:</color>",
                         $"+{curStam:F0}",
-                        isMax ? "-" : $"+{nxtStam:F0} <color=#fb7185>(+{ModConfig.CheatMaxStaminaPerLevel.Value:F0})</color>");
+                        isMax ? "-" : $"+{nxtStam:F0} {diffStamStr}");
                 }
 
                 float curEitr = StatCalculator.GetCheatItemMaxEitr(_selectedItem, currentLvl);
                 float nxtEitr = StatCalculator.GetCheatItemMaxEitr(_selectedItem, nextLvl);
                 if (curEitr > 0f || nxtEitr > 0f)
                 {
+                    float diffEitr = nxtEitr - curEitr;
+                    string diffEitrStr = curEitr <= 0f && nxtEitr > 0f ? "<color=#fb7185>(ปลดล็อก!)</color>" : $"<color=#fb7185>(+{diffEitr:F0})</color>";
                     DrawStatRow("<color=#fb7185>★ [Cheat] เพิ่ม Max Eitr:</color>",
                         $"+{curEitr:F0}",
-                        isMax ? "-" : $"+{nxtEitr:F0} <color=#fb7185>(+{ModConfig.CheatMaxEitrPerLevel.Value:F0})</color>");
+                        isMax ? "-" : $"+{nxtEitr:F0} {diffEitrStr}");
                 }
 
                 float curHpRegen = StatCalculator.GetCheatItemHealthRegen(_selectedItem, currentLvl) * 100f;
                 float nxtHpRegen = StatCalculator.GetCheatItemHealthRegen(_selectedItem, nextLvl) * 100f;
                 if (curHpRegen > 0f || nxtHpRegen > 0f)
                 {
+                    float diffHpRegen = nxtHpRegen - curHpRegen;
+                    string diffHpRegenStr = curHpRegen <= 0f && nxtHpRegen > 0f ? "<color=#fb7185>(ปลดล็อก!)</color>" : $"<color=#fb7185>(+{diffHpRegen:F0}%)</color>";
                     DrawStatRow("<color=#fb7185>★ [Cheat] ฟื้นฟู HP Regen:</color>",
                         $"+{curHpRegen:F0}%",
-                        isMax ? "-" : $"+{nxtHpRegen:F0}% <color=#fb7185>(+{ModConfig.CheatHealthRegenPerLevel.Value * 100f:F0}%)</color>");
+                        isMax ? "-" : $"+{nxtHpRegen:F0}% {diffHpRegenStr}");
                 }
 
                 float curStamRegen = StatCalculator.GetCheatItemStaminaRegen(_selectedItem, currentLvl) * 100f;
                 float nxtStamRegen = StatCalculator.GetCheatItemStaminaRegen(_selectedItem, nextLvl) * 100f;
                 if (curStamRegen > 0f || nxtStamRegen > 0f)
                 {
+                    float diffStamRegen = nxtStamRegen - curStamRegen;
+                    string diffStamRegenStr = curStamRegen <= 0f && nxtStamRegen > 0f ? "<color=#fb7185>(ปลดล็อก!)</color>" : $"<color=#fb7185>(+{diffStamRegen:F0}%)</color>";
                     DrawStatRow("<color=#fb7185>★ [Cheat] ฟื้นฟู Stamina Regen:</color>",
                         $"+{curStamRegen:F0}%",
-                        isMax ? "-" : $"+{nxtStamRegen:F0}% <color=#fb7185>(+{ModConfig.CheatStaminaRegenPerLevel.Value * 100f:F0}%)</color>");
+                        isMax ? "-" : $"+{nxtStamRegen:F0}% {diffStamRegenStr}");
                 }
 
                 float curEitrRegen = StatCalculator.GetCheatItemEitrRegen(_selectedItem, currentLvl) * 100f;
                 float nxtEitrRegen = StatCalculator.GetCheatItemEitrRegen(_selectedItem, nextLvl) * 100f;
                 if (curEitrRegen > 0f || nxtEitrRegen > 0f)
                 {
+                    float diffEitrRegen = nxtEitrRegen - curEitrRegen;
+                    string diffEitrRegenStr = curEitrRegen <= 0f && nxtEitrRegen > 0f ? "<color=#fb7185>(ปลดล็อก!)</color>" : $"<color=#fb7185>(+{diffEitrRegen:F0}%)</color>";
                     DrawStatRow("<color=#fb7185>★ [Cheat] ฟื้นฟู Eitr Regen:</color>",
                         $"+{curEitrRegen:F0}%",
-                        isMax ? "-" : $"+{nxtEitrRegen:F0}% <color=#fb7185>(+{ModConfig.CheatEitrRegenPerLevel.Value * 100f:F0}%)</color>");
+                        isMax ? "-" : $"+{nxtEitrRegen:F0}% {diffEitrRegenStr}");
                 }
 
                 float curHeal = StatCalculator.GetCheatItemHealingBonus(_selectedItem, currentLvl) * 100f;
                 float nxtHeal = StatCalculator.GetCheatItemHealingBonus(_selectedItem, nextLvl) * 100f;
                 if (curHeal > 0f || nxtHeal > 0f)
                 {
+                    float diffHeal = nxtHeal - curHeal;
+                    string diffHealStr = curHeal <= 0f && nxtHeal > 0f ? "<color=#fb7185>(ปลดล็อก!)</color>" : $"<color=#fb7185>(+{diffHeal:F0}%)</color>";
                     DrawStatRow("<color=#fb7185>★ [Cheat] โบนัสการฮีล (Healing):</color>",
                         $"+{curHeal:F0}%",
-                        isMax ? "-" : $"+{nxtHeal:F0}% <color=#fb7185>(+{ModConfig.CheatHealingMultiplierPerLevel.Value * 100f:F0}%)</color>");
+                        isMax ? "-" : $"+{nxtHeal:F0}% {diffHealStr}");
                 }
             }
 
