@@ -948,12 +948,33 @@ BossDrops:
         public EliteDropConfig EliteDrops { get; set; } = new EliteDropConfig();
         public BossDropConfig BossDrops { get; set; } = new BossDropConfig();
 
+        private static readonly string[] s_tierKeys = { "", "Tier1", "Tier2", "Tier3", "Tier4" };
+
+        private static readonly Dictionary<Heightmap.Biome, string> s_biomeStringCache = new Dictionary<Heightmap.Biome, string>
+        {
+            { Heightmap.Biome.Meadows, "Meadows" },
+            { Heightmap.Biome.BlackForest, "BlackForest" },
+            { Heightmap.Biome.Swamp, "Swamp" },
+            { Heightmap.Biome.Mountain, "Mountain" },
+            { Heightmap.Biome.Plains, "Plains" },
+            { Heightmap.Biome.Mistlands, "Mistlands" },
+            { Heightmap.Biome.AshLands, "AshLands" },
+            { Heightmap.Biome.DeepNorth, "DeepNorth" },
+            { Heightmap.Biome.Ocean, "Ocean" }
+        };
+
+        private static string GetBiomeString(Heightmap.Biome biome)
+        {
+            if (s_biomeStringCache.TryGetValue(biome, out string name)) return name;
+            return biome.ToString();
+        }
+
         public float GetBiomeTierChance(Heightmap.Biome biome, int tier)
         {
             if (BiomeDrops == null) return 0f;
 
-            string tierKey = $"Tier{tier}";
-            string biomeKey = biome.ToString();
+            string tierKey = (tier >= 1 && tier <= 4) ? s_tierKeys[tier] : $"Tier{tier}";
+            string biomeKey = GetBiomeString(biome);
 
             if (BiomeDrops.TryGetValue(biomeKey, out var tierRates) && tierRates != null)
             {
