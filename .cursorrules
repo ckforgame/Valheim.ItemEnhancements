@@ -1,0 +1,36 @@
+# Cursor Rules for Valheim.ItemEnhancements
+
+You are working on **Valheim.ItemEnhancements**, a production-grade MMORPG item refinement mod (+1 to +20) for Valheim.
+The complete, authoritative system architecture specification is located at [AGENTS.md](file:///D:/GameCustoms/ValheimCustoms/Valheim.ItemEnhancements/AGENTS.md). Read it whenever working on this repository.
+
+## Key Principles & Architectural Constraints
+
+1. **100% Vanilla Save-Safe**:
+   - Store all enhancement data strictly in `ItemDrop.ItemData.m_customData` (Keys: `ValheimEnhancement_Level`, `ValheimEnhancement_Crafter`).
+   - Never add custom Unity components or custom save files to character or world data.
+
+2. **Prefab Template Instantiation Guard**:
+   - When instantiating custom item prefabs from base game items (e.g. Amber/Ruby/Coins), always set `ScrollItemManager.IsCloningCustomPrefab = true` in a `try...finally` block.
+   - Harmony prefix guards in `CharacterDropPatches` prevent `ZNetView.Awake()`, `ItemDrop.Awake()`, and `Floating.Awake()` from firing on templates, preventing `ZNetScene.RemoveObjects` null pointer crashes.
+
+3. **Performance in Hot Loops**:
+   - Never allocate objects, strings, lists, or LINQ queries inside per-frame hooks (e.g., `GetEquipmentMovementModifier`, `UpdateGui`, `GetAttackStamina`).
+   - Query cached values in `PlayerBonusCache` and `YamlConfigManager.GetCumulativeAbilityValue()`.
+   - Invalidate player bonus cache using `PlayerBonusCache.MarkDirty()` upon equip/unequip or enhancement.
+
+4. **Modular YAML & Safe Overrides**:
+   - Never hardcode gameplay balance constants in C#. Maintain them in `Item.yml`, `Armor.yml`, `Success.yml`, `Drops.yml`, or `Cheat.yml`.
+   - User overrides must go through `*.override.yml` files (partial dictionary merging in `YamlConfigManager.cs`).
+   - All 25 supported ability IDs are documented in `Configuration/Yaml/AbilityReference.txt`.
+
+5. **Crafting Station Proximity**:
+   - Use `EnhancementGui.IsNearCraftingStation()` which measures distance against `CraftingStation.m_allStations` and `CraftingStationRange`. Do not rely solely on `Player.GetCurrentCraftingStation()`.
+
+6. **Cheat Mode Gate**:
+   - Keep cheat stats completely inert unless `StatCalculator.IsCheatEnabled` is true.
+
+## Build Command
+```powershell
+dotnet build -c Release
+```
+Compiling automatically deploys DLLs, PDBs, and YAML configs to both Steam and r2modman BepInEx plugin folders.
