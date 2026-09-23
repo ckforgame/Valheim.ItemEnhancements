@@ -17,25 +17,9 @@ namespace Valheim.ItemEnhancements.Patches
         {
             public static void Postfix(Player __instance, ref float __result)
             {
-                if (__instance == null || __instance.GetInventory() == null) return;
-
-                List<ItemDrop.ItemData> equipped = __instance.GetInventory().GetEquippedItems();
-                if (equipped == null) return;
-
-                float bonus = 0f;
-                foreach (var item in equipped)
-                {
-                    if (StatCalculator.IsArmor(item) || StatCalculator.IsShield(item))
-                    {
-                        int level = EnhancementManager.GetEnhancementLevel(item);
-                        if (level > 0)
-                        {
-                            bonus += StatCalculator.GetMovementModifierDelta(item, level);
-                        }
-                    }
-                }
-
-                __result += bonus;
+                if (__instance != Player.m_localPlayer) return;
+                PlayerBonusCache.EnsureFresh(__instance);
+                __result += PlayerBonusCache.MovementBonus;
             }
         }
 
@@ -45,26 +29,9 @@ namespace Valheim.ItemEnhancements.Patches
         {
             public static void Postfix(Player __instance, ref float __result)
             {
-                if (__instance == null || __instance.GetInventory() == null) return;
-
-                List<ItemDrop.ItemData> equipped = __instance.GetInventory().GetEquippedItems();
-                if (equipped == null) return;
-
-                float reduction = 0f;
-                foreach (var item in equipped)
-                {
-                    if (StatCalculator.IsArmor(item))
-                    {
-                        int level = EnhancementManager.GetEnhancementLevel(item);
-                        if (level > 0)
-                        {
-                            reduction += StatCalculator.GetDodgeStaminaReduction(level);
-                        }
-                    }
-                }
-
-                // Negative modifier indicates reduced stamina cost in Valheim
-                __result -= Mathf.Clamp(reduction, 0f, 0.50f);
+                if (__instance != Player.m_localPlayer) return;
+                PlayerBonusCache.EnsureFresh(__instance);
+                __result -= PlayerBonusCache.DodgeStaminaReduction;
             }
         }
 
@@ -74,25 +41,9 @@ namespace Valheim.ItemEnhancements.Patches
         {
             public static void Postfix(Player __instance, ref float __result)
             {
-                if (__instance == null || __instance.GetInventory() == null) return;
-
-                List<ItemDrop.ItemData> equipped = __instance.GetInventory().GetEquippedItems();
-                if (equipped == null) return;
-
-                float reduction = 0f;
-                foreach (var item in equipped)
-                {
-                    if (StatCalculator.IsArmor(item))
-                    {
-                        int level = EnhancementManager.GetEnhancementLevel(item);
-                        if (level > 0)
-                        {
-                            reduction += StatCalculator.GetRunStaminaReduction(level);
-                        }
-                    }
-                }
-
-                __result -= Mathf.Clamp(reduction, 0f, 0.40f);
+                if (__instance != Player.m_localPlayer) return;
+                PlayerBonusCache.EnsureFresh(__instance);
+                __result -= PlayerBonusCache.RunStaminaReduction;
             }
         }
 
@@ -102,25 +53,9 @@ namespace Valheim.ItemEnhancements.Patches
         {
             public static void Postfix(Player __instance, ref float __result)
             {
-                if (__instance == null || __instance.GetInventory() == null) return;
-
-                List<ItemDrop.ItemData> equipped = __instance.GetInventory().GetEquippedItems();
-                if (equipped == null) return;
-
-                float reduction = 0f;
-                foreach (var item in equipped)
-                {
-                    if (StatCalculator.IsArmor(item))
-                    {
-                        int level = EnhancementManager.GetEnhancementLevel(item);
-                        if (level > 0)
-                        {
-                            reduction += StatCalculator.GetJumpStaminaReduction(level);
-                        }
-                    }
-                }
-
-                __result -= Mathf.Clamp(reduction, 0f, 0.40f);
+                if (__instance != Player.m_localPlayer) return;
+                PlayerBonusCache.EnsureFresh(__instance);
+                __result -= PlayerBonusCache.JumpStaminaReduction;
             }
         }
 
@@ -130,25 +65,9 @@ namespace Valheim.ItemEnhancements.Patches
         {
             public static void Postfix(Player __instance, ref float __result)
             {
-                if (__instance == null || __instance.GetInventory() == null) return;
-
-                List<ItemDrop.ItemData> equipped = __instance.GetInventory().GetEquippedItems();
-                if (equipped == null) return;
-
-                float reduction = 0f;
-                foreach (var item in equipped)
-                {
-                    if (item.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Shield)
-                    {
-                        int level = EnhancementManager.GetEnhancementLevel(item);
-                        if (level > 0)
-                        {
-                            reduction += StatCalculator.GetBlockStaminaReduction(level);
-                        }
-                    }
-                }
-
-                __result -= Mathf.Clamp(reduction, 0f, 0.50f);
+                if (__instance != Player.m_localPlayer) return;
+                PlayerBonusCache.EnsureFresh(__instance);
+                __result -= PlayerBonusCache.BlockStaminaReduction;
             }
         }
 
@@ -158,22 +77,9 @@ namespace Valheim.ItemEnhancements.Patches
         {
             public static void Postfix(Player __instance, ref float __result)
             {
-                if (__instance == null || __instance.GetInventory() == null) return;
-
-                List<ItemDrop.ItemData> equipped = __instance.GetInventory().GetEquippedItems();
-                if (equipped == null) return;
-
-                float bonus = 0f;
-                foreach (var item in equipped)
-                {
-                    int level = EnhancementManager.GetEnhancementLevel(item);
-                    if (level > 0 && item.m_shared.m_eitrRegenModifier > 0f)
-                    {
-                        bonus += StatCalculator.GetEitrRegenBonus(level);
-                    }
-                }
-
-                __result += bonus;
+                if (__instance != Player.m_localPlayer) return;
+                PlayerBonusCache.EnsureFresh(__instance);
+                __result += PlayerBonusCache.EitrRegenBonus;
             }
         }
 
@@ -183,22 +89,9 @@ namespace Valheim.ItemEnhancements.Patches
         {
             public static void Postfix(Player __instance, ref float __result)
             {
-                if (__instance == null || __instance.GetInventory() == null) return;
-
-                List<ItemDrop.ItemData> equipped = __instance.GetInventory().GetEquippedItems();
-                if (equipped == null) return;
-
-                float bonus = 0f;
-                foreach (var item in equipped)
-                {
-                    int level = EnhancementManager.GetEnhancementLevel(item);
-                    if (level > 0)
-                    {
-                        bonus += StatCalculator.GetCarryWeightBonus(item, level);
-                    }
-                }
-
-                __result += bonus;
+                if (__instance != Player.m_localPlayer) return;
+                PlayerBonusCache.EnsureFresh(__instance);
+                __result += PlayerBonusCache.CarryWeightBonus;
             }
         }
 
@@ -289,12 +182,9 @@ namespace Valheim.ItemEnhancements.Patches
         {
             public static void Prefix(Player __instance, ref float health)
             {
-                if (!StatCalculator.IsCheatEnabled || __instance == null) return;
-                float bonus = StatCalculator.GetCheatMaxHealth(__instance);
-                if (bonus > 0f)
-                {
-                    health += bonus;
-                }
+                if (!StatCalculator.IsCheatEnabled || __instance != Player.m_localPlayer) return;
+                PlayerBonusCache.EnsureFresh(__instance);
+                health += PlayerBonusCache.CheatMaxHealth;
             }
         }
 
@@ -304,12 +194,9 @@ namespace Valheim.ItemEnhancements.Patches
         {
             public static void Prefix(Player __instance, ref float stamina)
             {
-                if (!StatCalculator.IsCheatEnabled || __instance == null) return;
-                float bonus = StatCalculator.GetCheatMaxStamina(__instance);
-                if (bonus > 0f)
-                {
-                    stamina += bonus;
-                }
+                if (!StatCalculator.IsCheatEnabled || __instance != Player.m_localPlayer) return;
+                PlayerBonusCache.EnsureFresh(__instance);
+                stamina += PlayerBonusCache.CheatMaxStamina;
             }
         }
 
@@ -319,16 +206,13 @@ namespace Valheim.ItemEnhancements.Patches
         {
             public static void Prefix(Player __instance, ref float eitr)
             {
-                if (!StatCalculator.IsCheatEnabled || __instance == null) return;
-                float bonus = StatCalculator.GetCheatMaxEitr(__instance);
-                if (bonus > 0f)
-                {
-                    eitr += bonus;
-                }
+                if (!StatCalculator.IsCheatEnabled || __instance != Player.m_localPlayer) return;
+                PlayerBonusCache.EnsureFresh(__instance);
+                eitr += PlayerBonusCache.CheatMaxEitr;
             }
         }
 
-        // 15. Cheat Ability: Instant refresh on equip/unequip
+        // 15. Equipment cache invalidation & Cheat Food refresh on equip/unequip
         [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.EquipItem))]
         public static class Humanoid_EquipItem_Patch
         {
@@ -337,8 +221,14 @@ namespace Valheim.ItemEnhancements.Patches
 
             public static void Postfix(Humanoid __instance)
             {
-                if (!StatCalculator.IsCheatEnabled || !(__instance is Player player)) return;
-                _updateFoodMethod?.Invoke(player, new object[] { 0f, true });
+                if (__instance is Player player && player == Player.m_localPlayer)
+                {
+                    PlayerBonusCache.MarkDirty();
+                    if (StatCalculator.IsCheatEnabled)
+                    {
+                        _updateFoodMethod?.Invoke(player, new object[] { 0f, true });
+                    }
+                }
             }
         }
 
@@ -350,79 +240,86 @@ namespace Valheim.ItemEnhancements.Patches
 
             public static void Postfix(Humanoid __instance)
             {
-                if (!StatCalculator.IsCheatEnabled || !(__instance is Player player)) return;
-                _updateFoodMethod?.Invoke(player, new object[] { 0f, true });
+                if (__instance is Player player && player == Player.m_localPlayer)
+                {
+                    PlayerBonusCache.MarkDirty();
+                    if (StatCalculator.IsCheatEnabled)
+                    {
+                        _updateFoodMethod?.Invoke(player, new object[] { 0f, true });
+                    }
+                }
             }
         }
 
-        // 16. Cheat Ability: Health Regen Multiplier
+        // 16. Invalidate cache on Player spawn
+        [HarmonyPatch(typeof(Player), nameof(Player.OnSpawned))]
+        public static class Player_OnSpawned_Patch
+        {
+            public static void Postfix(Player __instance)
+            {
+                if (__instance == Player.m_localPlayer)
+                {
+                    PlayerBonusCache.MarkDirty();
+                }
+            }
+        }
+
+        // 17. Cheat Ability: Health Regen Multiplier
         [HarmonyPatch(typeof(SEMan), nameof(SEMan.ModifyHealthRegen))]
         public static class SEMan_ModifyHealthRegen_Patch
         {
             public static void Postfix(Character ___m_character, ref float regenMultiplier)
             {
                 if (!StatCalculator.IsCheatEnabled) return;
-                if (___m_character is Player player)
+                if (___m_character == Player.m_localPlayer)
                 {
-                    float bonus = StatCalculator.GetCheatHealthRegenBonus(player);
-                    if (bonus > 0f)
-                    {
-                        regenMultiplier += bonus;
-                    }
+                    PlayerBonusCache.EnsureFresh(Player.m_localPlayer);
+                    regenMultiplier += PlayerBonusCache.CheatHealthRegen;
                 }
             }
         }
 
-        // 17. Cheat Ability: Stamina Regen Multiplier
+        // 18. Cheat Ability: Stamina Regen Multiplier
         [HarmonyPatch(typeof(SEMan), nameof(SEMan.ModifyStaminaRegen))]
         public static class SEMan_ModifyStaminaRegen_Patch
         {
             public static void Postfix(Character ___m_character, ref float staminaMultiplier)
             {
                 if (!StatCalculator.IsCheatEnabled) return;
-                if (___m_character is Player player)
+                if (___m_character == Player.m_localPlayer)
                 {
-                    float bonus = StatCalculator.GetCheatStaminaRegenBonus(player);
-                    if (bonus > 0f)
-                    {
-                        staminaMultiplier += bonus;
-                    }
+                    PlayerBonusCache.EnsureFresh(Player.m_localPlayer);
+                    staminaMultiplier += PlayerBonusCache.CheatStaminaRegen;
                 }
             }
         }
 
-        // 18. Cheat Ability: Eitr Regen Multiplier
+        // 19. Cheat Ability: Eitr Regen Multiplier
         [HarmonyPatch(typeof(SEMan), nameof(SEMan.ModifyEitrRegen))]
         public static class SEMan_ModifyEitrRegen_Patch
         {
             public static void Postfix(Character ___m_character, ref float eitrMultiplier)
             {
                 if (!StatCalculator.IsCheatEnabled) return;
-                if (___m_character is Player player)
+                if (___m_character == Player.m_localPlayer)
                 {
-                    float bonus = StatCalculator.GetCheatEitrRegenBonus(player);
-                    if (bonus > 0f)
-                    {
-                        eitrMultiplier += bonus;
-                    }
+                    PlayerBonusCache.EnsureFresh(Player.m_localPlayer);
+                    eitrMultiplier += PlayerBonusCache.CheatEitrRegen;
                 }
             }
         }
 
-        // 19. Cheat Ability: Healing Received Multiplier
+        // 20. Cheat Ability: Healing Received Multiplier
         [HarmonyPatch(typeof(Character), nameof(Character.Heal))]
         public static class Character_Heal_Patch
         {
             public static void Prefix(Character __instance, ref float hp)
             {
                 if (!StatCalculator.IsCheatEnabled || hp <= 0f) return;
-                if (__instance is Player player)
+                if (__instance == Player.m_localPlayer)
                 {
-                    float bonus = StatCalculator.GetCheatHealingBonus(player);
-                    if (bonus > 0f)
-                    {
-                        hp *= (1f + bonus);
-                    }
+                    PlayerBonusCache.EnsureFresh(Player.m_localPlayer);
+                    hp *= (1f + PlayerBonusCache.CheatHealingBonus);
                 }
             }
         }

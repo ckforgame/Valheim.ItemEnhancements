@@ -364,6 +364,7 @@ namespace Valheim.ItemEnhancements.Core
             if (player == null) return;
             try
             {
+                PlayerBonusCache.MarkDirty();
                 Inventory inv = player.GetInventory();
                 if (inv != null)
                 {
