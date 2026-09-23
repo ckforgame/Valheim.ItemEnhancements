@@ -159,7 +159,7 @@ namespace Valheim.ItemEnhancements.Patches
         {
             public static void Postfix()
             {
-                EnhancementGui.Close();
+                EnhancementGui.Close(forceLockCursorIfNoMenu: true);
             }
         }
     }

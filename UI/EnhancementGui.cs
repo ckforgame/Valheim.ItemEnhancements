@@ -17,6 +17,9 @@ namespace Valheim.ItemEnhancements.UI
         private static readonly FieldInfo s_allStationsField =
             AccessTools.Field(typeof(CraftingStation), "m_allStations");
 
+        private static readonly AccessTools.FieldRef<GameCamera, bool> s_mouseCaptureRef =
+            AccessTools.FieldRefAccess<GameCamera, bool>("m_mouseCapture");
+
         private Rect _windowRect = new Rect(Screen.width / 2f - 340f, Screen.height / 2f - 310f, 680f, 620f);
         private ItemDrop.ItemData _selectedItem;
         private Vector2 _scrollPosition = Vector2.zero;
@@ -137,7 +140,7 @@ namespace Valheim.ItemEnhancements.UI
             }
         }
 
-        public static void Close()
+        public static void Close(bool forceLockCursorIfNoMenu = false)
         {
             IsOpen = false;
             if (Instance != null)
@@ -146,10 +149,28 @@ namespace Valheim.ItemEnhancements.UI
                 Instance._forgeTimer = 0f;
             }
 
+            // Restore GameCamera mouse capture if it was disabled
+            if (GameCamera.instance != null && s_mouseCaptureRef != null)
+            {
+                s_mouseCaptureRef(GameCamera.instance) = true;
+            }
+
             // Restore cursor lock if no other UI is open
-            bool otherGuiVisible = (InventoryGui.instance != null && InventoryGui.IsVisible())
-                                || (Menu.instance != null && Menu.IsVisible())
-                                || (StoreGui.instance != null && StoreGui.IsVisible());
+            bool otherGuiVisible = false;
+            if (!forceLockCursorIfNoMenu)
+            {
+                otherGuiVisible = (InventoryGui.instance != null && InventoryGui.IsVisible())
+                               || (StoreGui.instance != null && StoreGui.IsVisible());
+            }
+
+            if (Menu.instance != null && (Menu.IsVisible() || Menu.IsActive()))
+            {
+                otherGuiVisible = true;
+            }
+            if (TextInput.IsVisible())
+            {
+                otherGuiVisible = true;
+            }
 
             if (!otherGuiVisible)
             {
@@ -174,10 +195,15 @@ namespace Valheim.ItemEnhancements.UI
             if (!IsOpen) return;
 
             // Keep cursor unlocked while UI is open
-            if (Cursor.lockState != CursorLockMode.None)
+            if (Cursor.lockState != CursorLockMode.None || !Cursor.visible)
             {
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
+            }
+            if (ZCursor.LockState != CursorLockMode.None)
+            {
+                ZCursor.LockState = CursorLockMode.None;
+                ZCursor.Show();
             }
 
             // Handle forging timer
