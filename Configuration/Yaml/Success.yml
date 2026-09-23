@@ -1,13 +1,13 @@
 # ====================================================================
 # VALHEIM ITEM ENHANCEMENTS - SUCCESS & RULES CONFIGURATION
-# หมวดหมู่อัตราความสำเร็จ, กฎการล้มเหลว, ค่าธรรมเนียม และการดรอปคัมภีร์
+# Success rates, failure penalties, coin fees, and scroll requirements
 # ====================================================================
-# หากต้องการปรับแต่งค่าโดยไม่ให้การอัปเดต Mod ส่งผลกระทบ
-# ให้สร้างไฟล์ "Success.override.yml" ในโฟลเดอร์เดียวกันนี้
-# และใส่เฉพาะค่าที่ต้องการแก้ไข ระบบจะนำค่า override มาทับค่าเดิมอัตโนมัติ
+# To customize values without having mod updates overwrite your changes,
+# create a file named "Success.override.yml" in this same folder
+# and specify only the values you wish to override.
 # ====================================================================
 
-# อัตราความสำเร็จสำหรับการตีบวกขึ้นเป็นระดับ +1 ถึง +20 (%)
+# Success rate for attempting each level from +1 to +20 (%)
 SuccessRates:
   Level_01: 100.0
   Level_02: 100.0
@@ -30,19 +30,19 @@ SuccessRates:
   Level_19: 3.0
   Level_20: 1.0
 
-# กฎการล้มเหลว (Failure Mechanics)
-SafeLevel: 3                      # ระดับปลอดภัย (ไม่ลดระดับและไม่แตก)
-DowngradeOnFail: true             # หากล้มเหลวเกินระดับปลอดภัย จะลดระดับลง 1 ขั้น
-BreakOnFail: false                # หากล้มเหลวเกินระดับปลอดภัย มีโอกาสไอเทมแตกสลาย
-BreakChanceAboveSafeLevel: 10.0   # โอกาสแตก (%) หากเปิดใช้งาน BreakOnFail
+# Failure Mechanics
+SafeLevel: 3                      # Safe level: failures at or below this level do not downgrade or break
+DowngradeOnFail: true             # If failed above safe level, downgrades level by 1
+BreakOnFail: false                # If failed above safe level, item has a chance to break
+BreakChanceAboveSafeLevel: 10.0   # Break chance (%) if BreakOnFail is enabled
 
-# ค่าธรรมเนียมและข้อกำหนด (Costs & Requirements)
-RequireCoins: false               # ต้องใช้เหรียญทองในการตีบวกหรือไม่ (false = ฟรีค่าธรรมเนียม)
-CoinsBaseCost: 0                  # ค่าธรรมเนียมทองพื้นฐาน
-CoinsPerLevelIncrement: 0.0       # ค่าธรรมเนียมทองที่เพิ่มขึ้นต่อระดับเป้าหมาย
-RequireCraftingStation: true      # ต้องอยู่ใกล้โต๊ะคราฟต์หรือเตาตีเหล็กเพื่อเปิดหน้าต่างตีบวก
-CraftingStationRange: 5.0         # รัศมีระยะห่างจากโต๊ะคราฟต์ (เมตร) ที่อนุญาตให้เปิดได้ (เช่น 5.0m = ยืนหน้าโต๊ะ/ข้างโต๊ะ, 15.0m = ทั่วห้องช่าง)
+# Costs & Requirements
+RequireCoins: false               # Require coins to enhance (false = free of coin fees)
+CoinsBaseCost: 0                  # Base coin fee per attempt
+CoinsPerLevelIncrement: 0.0       # Additional coin fee scaling per target level
+RequireCraftingStation: true      # Require nearby workbench or forge to open enhancement window
+CraftingStationRange: 5.0         # Allowed range (meters) to crafting station (e.g. 5.0m = at station, 15.0m = entire workshop)
 
-# ม้วนคัมภีร์ตีบวก (Enhancement Scrolls Requirements)
-RequireScrolls: true              # ต้องใช้ม้วนคัมภีร์ตามระดับในการตีบวกหรือไม่
-ScrollsRequiredPerAttempt: 1      # จำนวนคัมภีร์ที่ใช้ต่อการกด 1 ครั้ง
+# Enhancement Scrolls Requirements
+RequireScrolls: true              # Require tier-appropriate enhancement scrolls to attempt
+ScrollsRequiredPerAttempt: 1      # Number of scrolls consumed per attempt

@@ -8,7 +8,7 @@ namespace Valheim.ItemEnhancements.Core
     public static class ScrollDropManager
     {
         /// <summary>
-        /// คำนวณและสุ่มดรอปม้วนคัมภีร์เมื่อมอนสเตอร์ตาย โดยอ้างอิงจาก Drops.yml
+        /// Calculates and rolls for enhancement scroll drops upon monster death based on Drops.yml
         /// </summary>
         public static void TryAddScrollDrop(CharacterDrop dropComponent, Character character, List<KeyValuePair<GameObject, int>> dropsList)
         {
@@ -20,7 +20,7 @@ namespace Valheim.ItemEnhancements.Core
             Heightmap.Biome biome = Heightmap.FindBiome(pos);
             string name = character.gameObject.name.ToLower();
 
-            // 1. จัดการการดรอปของบอสโลก (World Bosses)
+            // 1. Handle World Boss Drops
             if (isBoss)
             {
                 var bossConfig = YamlConfigManager.Drops.BossDrops;
@@ -30,7 +30,7 @@ namespace Valheim.ItemEnhancements.Core
                 if (!shouldDrop)
                 {
                     float chance = YamlConfigManager.Drops.GetBiomeTierChance(biome, bossTier);
-                    if (chance <= 0.0001f) chance = 50f; // Fallback หากไม่ได้ตั้งค่าไว้ใน Biome
+                    if (chance <= 0.0001f) chance = 50f; // Fallback if unconfigured in Biome
                     shouldDrop = UnityEngine.Random.Range(0f, 100f) < chance;
                 }
 
@@ -54,11 +54,11 @@ namespace Valheim.ItemEnhancements.Core
                 return;
             }
 
-            // 2. มอนสเตอร์ทั่วไป และ มอนสเตอร์ระดับสูง (Elite Monsters)
+            // 2. Normal and Elite Monsters
             bool isElite = IsEliteMonster(name);
             float eliteBonus = isElite ? YamlConfigManager.Drops.EliteDrops.BonusMultiplier : 1f;
 
-            // ตัวคูณระดับดาว (1 = ปกติ, 2 = 1 ดาว, 3 = 2 ดาว)
+            // Star level multiplier (1 = normal, 2 = 1 star, 3 = 2 stars)
             int level = character.GetLevel();
             float starMult = 1f;
             if (level > 1)
@@ -66,7 +66,7 @@ namespace Valheim.ItemEnhancements.Core
                 starMult = 1f + (level - 1) * (YamlConfigManager.Drops.StarLevelMultiplier - 1f);
             }
 
-            // สุ่มตรวจโอกาสดรอปจาก Tier สูงสุดลงไปต่ำสุด (Tier 4 -> Tier 1) ตามค่า % ใน BiomeDrops
+            // Roll from highest tier down to lowest (Tier 4 -> Tier 1) according to BiomeDrops
             for (int tier = 4; tier >= 1; tier--)
             {
                 float baseChance = YamlConfigManager.Drops.GetBiomeTierChance(biome, tier);
@@ -79,7 +79,7 @@ namespace Valheim.ItemEnhancements.Core
                 {
                     int dropTier = tier;
 
-                    // มอนสเตอร์ระดับสูงมีโอกาสอัปเกรดเป็น Tier ถัดไป
+                    // Elite monsters have a chance to upgrade to the next tier
                     if (isElite && dropTier < 4)
                     {
                         float upgradeRoll = UnityEngine.Random.Range(0f, 100f);
@@ -100,14 +100,14 @@ namespace Valheim.ItemEnhancements.Core
                         Plugin.Log.LogWarning($"[ScrollDrop] Roll succeeded for Tier {dropTier} ({roll:F1}/{finalChance:F1}%) but prefab was null!");
                     }
 
-                    // ดรอป 1 ม้วนต่อมอนสเตอร์ 1 ตัว
+                    // Maximum 1 scroll drop per monster
                     break;
                 }
             }
         }
 
         /// <summary>
-        /// ตรวจสอบว่ามอนสเตอร์เข้าข่ายมอนสเตอร์ชั้นสูง/ยักษ์ใหญ่/มินิบอส หรือไม่
+        /// Checks whether the monster qualifies as an elite/giant/miniboss
         /// </summary>
         private static bool IsEliteMonster(string lowerName)
         {

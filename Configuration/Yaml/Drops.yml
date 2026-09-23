@@ -1,20 +1,20 @@
 # ====================================================================
 # VALHEIM ITEM ENHANCEMENTS - MONSTER SCROLL DROPS CONFIGURATION
-# หมวดหมู่อัตราการดรอปม้วนคัมภีร์จากมอนสเตอร์และบอสอย่างละเอียด
+# Detailed drop rates for enhancement scrolls from monsters and bosses
 # ====================================================================
-# หากต้องการปรับแต่งค่าโดยไม่ให้การอัปเดต Mod ส่งผลกระทบ
-# ให้สร้างไฟล์ "Drops.override.yml" ในโฟลเดอร์เดียวกันนี้
-# และใส่เฉพาะค่าที่ต้องการแก้ไข ระบบจะนำค่า override มาทับค่าเดิมอัตโนมัติ
+# To customize values without having mod updates overwrite your changes,
+# create a file named "Drops.override.yml" in this same folder
+# and specify only the values you wish to override.
 # ====================================================================
 
-EnableMonsterDrops: true          # เปิดใช้งานการดรอปม้วนคัมภีร์เมื่อสังหารมอนสเตอร์
-StarLevelMultiplier: 1.5          # ตัวคูณโอกาสดรอปต่อระดับดาวมอนสเตอร์ (1 ดาว = 1.5x, 2 ดาว = 2.0x)
+EnableMonsterDrops: true          # Enable enhancement scroll drops when slaying monsters
+StarLevelMultiplier: 1.5          # Drop rate multiplier per monster star level (1 star = 1.5x, 2 star = 2.0x)
 
 # --------------------------------------------------------------------
-# 1. อัตราการดรอปแยกตาม Biome และ Tier ของคัมภีร์ (%)
+# 1. Drop rates by Biome and Scroll Tier (%)
 # --------------------------------------------------------------------
-# ในแต่ละ Biome สามารถตั้งค่าโอกาสดรอป (% Drop Chance) ของคัมภีร์ Tier 1 ถึง Tier 4 ได้อย่างอิสระ
-# (ค่า 0.0 คือไม่ดรอปคัมภีร์เทียร์นั้นใน Biome ดังกล่าว)
+# Each biome can configure drop chance (%) for Tier 1 through Tier 4 independently.
+# (A value of 0.0 means that tier cannot drop in the given biome)
 BiomeDrops:
   Meadows:
     Tier1: 15.0
@@ -63,19 +63,19 @@ BiomeDrops:
     Tier4: 0.0
 
 # --------------------------------------------------------------------
-# 2. มอนสเตอร์ชั้นสูง / มินิบอส (Elite Monsters เช่น Troll, Golem, Abomination, Gjall)
+# 2. Elite Monsters & Minibosses (e.g. Troll, Golem, Abomination, Gjall)
 # --------------------------------------------------------------------
 EliteDrops:
-  BonusMultiplier: 2.0            # ตัวคูณเพิ่มโอกาสดรอปสำหรับมอนสเตอร์ระดับสูง
-  TierUpgradeChance: 25.0         # โอกาส (%) ที่จะอัปเกรดเป็นคัมภีร์ Tier ถัดไป
+  BonusMultiplier: 2.0            # Drop rate multiplier for elite monsters
+  TierUpgradeChance: 25.0         # Chance (%) to upgrade scroll to next tier
 
 # --------------------------------------------------------------------
-# 3. บอสโลก (World Bosses)
+# 3. World Bosses
 # --------------------------------------------------------------------
 BossDrops:
-  GuaranteedDrop: true            # บอสโลกการันตีการดรอป 100%
-  MinAmount: 1                    # จำนวนดรอปขั้นต่ำ
-  MaxAmount: 3                    # จำนวนดรอปสูงสุด
+  GuaranteedDrop: true            # World bosses guarantee a 100% scroll drop
+  MinAmount: 1                    # Minimum scroll drop count
+  MaxAmount: 3                    # Maximum scroll drop count
   BossTiers:
     Eikthyr: 1
     Elder: 2

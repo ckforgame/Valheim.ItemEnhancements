@@ -1,189 +1,189 @@
 # ====================================================================
 # VALHEIM ITEM ENHANCEMENTS - ITEM & WEAPON ABILITIES CONFIGURATION
-# หมวดหมู่อาวุธ, คุณสมบัติทั่วไป (ความทนทาน, น้ำหนัก) และเครื่องประดับ
+# Weapons, tools, general durability/weight, and utility accessories
 # ====================================================================
-# [คำอธิบายระบบการคำนวณ: ผลบวกสะสม (Cumulative Addition)]
-# - แต่ละระดับ ให้ระบุเฉพาะค่าที่ "เพิ่มขึ้นในระดับนั้น" (Value หรือ Percent)
-# - เมื่อไอเทมมีระดับตีบวกถึงระดับใด ระบบจะรวมผลสะสมตั้งแต่ +1 ถึงระดับนั้นให้อัตโนมัติ
-# - ตัวอย่าง: หาก +1 ใส่ WeaponAttackStamina: 2.0 และ +3 ใส่ WeaponAttackStamina: 2.0
-#   เมื่ออาวุธถึง +3 จะได้รับลด Stamina โจมตีรวม = 4.0%
-# - หากระดับใดไม่ได้ระบุ Ability ใดไว้ จะยังคงได้ค่าสะสมของ Ability นั้นจากระดับก่อนหน้าต่อไป
+# [Calculation System: Cumulative Addition]
+# - For each level, specify only the incremental value gained at that level.
+# - As an item reaches higher enhancement levels, the system automatically sums
+#   all values from level +1 up to the current level.
+# - Example: If +1 grants WeaponAttackStamina: 2.0 and +3 grants WeaponAttackStamina: 2.0,
+#   at level +3 the weapon has a cumulative -4.0% attack stamina cost.
+# - If a level does not specify an ability, it retains the accumulated total from previous levels.
 # ====================================================================
-# [การปรับแต่งส่วนตัวโดยไม่ให้การอัปเดต Mod ส่งผลกระทบ (Custom Override)]
-# หากต้องการปรับแต่งเอง ให้สร้างไฟล์ "Item.override.yml" ในโฟลเดอร์เดียวกันนี้
-# และใส่เฉพาะ Level ที่ต้องการเปลี่ยน เช่น:
+# [Custom Overrides]
+# To customize values without having mod updates overwrite your changes,
+# create a file named "Item.override.yml" in this same folder
+# and specify only the levels you wish to override, for example:
 #
 # Levels:
 #   1:
 #     - Ability: WeaponDamage
 #       Value: 15.0
-#
-# ระบบจะนำค่าใน Item.override.yml มาแทนที่เฉพาะระดับนั้น โดยระดับอื่นยังคงเดิม
 # ====================================================================
-# [รายชื่อ Ability ID ที่รองรับในไฟล์นี้]
-# - อาวุธ: WeaponDamage, WeaponBackstab, WeaponAttackStamina, WeaponAttackEitr
-# - ทั่วไป: MaxDurability, WeightReduction, CarryWeightBonus
-# [ดูรายชื่อ Ability ID ทั้งหมด → AbilityReference.txt]
+# [Supported Ability IDs in this file]
+# - Weapons: WeaponDamage, WeaponBackstab, WeaponAttackStamina, WeaponAttackEitr
+# - General: MaxDurability, WeightReduction, CarryWeightBonus
+# [Full Ability ID list → AbilityReference.txt]
 # ====================================================================
 
 Levels:
   # ------------------------------------------------------------------
-  # Level +1: เน้นการบริหาร Stamina/Eitr พื้นฐาน และความทนทาน
+  # Level +1: Basic stamina/eitr efficiency and durability
   # ------------------------------------------------------------------
   1:
     - Ability: WeaponAttackStamina
-      Value: 2.0      # ลด Stamina โจมตี 2%
+      Value: 2.0      # -2% Attack Stamina
     - Ability: WeaponAttackEitr
-      Value: 2.0      # ลด Eitr ร่ายเวท 2%
+      Value: 2.0      # -2% Spell Eitr
     - Ability: MaxDurability
-      Value: 5.0      # เพิ่มความทนทาน 5%
+      Value: 5.0      # +5% Max Durability
 
   # ------------------------------------------------------------------
-  # Level +2: เริ่มได้รับพลังโจมตี
+  # Level +2: Initial damage increase
   # ------------------------------------------------------------------
   2:
     - Ability: WeaponDamage
-      Value: 5.0      # โบนัสดาเมจ +5%
+      Value: 5.0      # +5% Weapon Damage
 
   # ------------------------------------------------------------------
-  # Level +3: ความคล่องตัว และน้ำหนักเบา
+  # Level +3: Mobility and weight reduction
   # ------------------------------------------------------------------
   3:
     - Ability: WeaponAttackStamina
-      Value: 2.0      # สะสม Stamina โจมตีรวมเป็น -4%
+      Value: 2.0      # Cumulative -4% Attack Stamina
     - Ability: WeightReduction
-      Value: 3.0      # ลดน้ำหนักอุปกรณ์ 3%
+      Value: 3.0      # -3% Item Weight
 
   # ------------------------------------------------------------------
-  # Level +4: ดาเมจรอบสอง และท่าลอบสังหาร
+  # Level +4: Damage and backstab bonus
   # ------------------------------------------------------------------
   4:
     - Ability: WeaponDamage
-      Value: 5.0      # สะสมดาเมจรวมเป็น +10%
+      Value: 5.0      # Cumulative +10% Weapon Damage
     - Ability: WeaponBackstab
-      Value: 5.0      # เพิ่มโบนัสแทงหลัง +0.05x (5%)
+      Value: 5.0      # +0.05x (+5%) Backstab Bonus
 
   # ------------------------------------------------------------------
-  # Level +5: ★ MILESTONE: เข็มขัดแบกของ
+  # Level +5: ★ MILESTONE: Carry Weight Accessory Bonus
   # ------------------------------------------------------------------
   5:
     - Ability: MaxDurability
-      Value: 5.0      # สะสมความทนทานรวมเป็น +10%
+      Value: 5.0      # Cumulative +10% Max Durability
     - Ability: CarryWeightBonus
-      Value: 10.0     # เพิ่มขีดจำกัดน้ำหนักบรรทุก +10
+      Value: 10.0     # +10 Max Carry Weight
 
   # ------------------------------------------------------------------
-  # Level +6: พลังรุกขั้นกลาง
+  # Level +6: Mid-tier offensive power
   # ------------------------------------------------------------------
   6:
     - Ability: WeaponDamage
-      Value: 5.0      # สะสมดาเมจรวมเป็น +15%
+      Value: 5.0      # Cumulative +15% Weapon Damage
 
   # ------------------------------------------------------------------
-  # Level +7: คล่องตัวระดับสูง และลดน้ำหนัก
+  # Level +7: Advanced agility and weight reduction
   # ------------------------------------------------------------------
   7:
     - Ability: WeaponAttackStamina
-      Value: 2.0      # สะสม Stamina โจมตีรวมเป็น -6%
+      Value: 2.0      # Cumulative -6% Attack Stamina
     - Ability: WeaponAttackEitr
-      Value: 2.0      # สะสม Eitr ร่ายเวทรวมเป็น -4%
+      Value: 2.0      # Cumulative -4% Spell Eitr
     - Ability: WeightReduction
-      Value: 3.0      # สะสมลดน้ำหนักรวมเป็น -6%
+      Value: 3.0      # Cumulative -6% Item Weight
 
   # ------------------------------------------------------------------
-  # Level +8: ดาเมจรุนแรง
+  # Level +8: Heavy offensive strike
   # ------------------------------------------------------------------
   8:
     - Ability: WeaponDamage
-      Value: 5.0      # สะสมดาเมจรวมเป็น +20%
+      Value: 5.0      # Cumulative +20% Weapon Damage
     - Ability: WeaponBackstab
-      Value: 5.0      # สะสมแทงหลังรวมเป็น +0.10x
+      Value: 5.0      # Cumulative +0.10x Backstab Bonus
 
   # ------------------------------------------------------------------
   # Level +10: ★ MILESTONE: Masterwork
   # ------------------------------------------------------------------
   10:
     - Ability: MaxDurability
-      Value: 5.0      # สะสมความทนทานรวมเป็น +15%
+      Value: 5.0      # Cumulative +15% Max Durability
     - Ability: CarryWeightBonus
-      Value: 15.0     # สะสมน้ำหนักบรรทุกรวมเป็น +25
+      Value: 15.0     # Cumulative +25 Max Carry Weight
 
   # ------------------------------------------------------------------
-  # Level +11: ก้าวสู่อุปกรณ์ระดับสูง (Elite Tier)
+  # Level +11: Elite tier progression
   # ------------------------------------------------------------------
   11:
     - Ability: WeaponDamage
-      Value: 5.0      # สะสมดาเมจรวมเป็น +25%
+      Value: 5.0      # Cumulative +25% Weapon Damage
 
   # ------------------------------------------------------------------
-  # Level +12: เบาสบาย
+  # Level +12: Enhanced lightness
   # ------------------------------------------------------------------
   12:
     - Ability: WeaponAttackStamina
-      Value: 2.0      # สะสม Stamina โจมตีรวมเป็น -8%
+      Value: 2.0      # Cumulative -8% Attack Stamina
     - Ability: WeightReduction
-      Value: 3.0      # สะสมลดน้ำหนักรวมเป็น -9%
+      Value: 3.0      # Cumulative -9% Item Weight
 
   # ------------------------------------------------------------------
-  # Level +13: พลังทำลายล้าง
+  # Level +13: Destructive power
   # ------------------------------------------------------------------
   13:
     - Ability: WeaponDamage
-      Value: 5.0      # สะสมดาเมจรวมเป็น +30%
+      Value: 5.0      # Cumulative +30% Weapon Damage
 
   # ------------------------------------------------------------------
-  # Level +14: ลอบสังหารระดับสูง
+  # Level +14: Advanced assassination
   # ------------------------------------------------------------------
   14:
     - Ability: WeaponBackstab
-      Value: 5.0      # สะสมแทงหลังรวมเป็น +0.15x
+      Value: 5.0      # Cumulative +0.15x Backstab Bonus
 
   # ------------------------------------------------------------------
-  # Level +15: ★ MILESTONE: Legendary - แบกของจุใจ
+  # Level +15: ★ MILESTONE: Legendary utility
   # ------------------------------------------------------------------
   15:
     - Ability: MaxDurability
-      Value: 5.0      # สะสมความทนทานรวมเป็น +20%
+      Value: 5.0      # Cumulative +20% Max Durability
     - Ability: CarryWeightBonus
-      Value: 25.0     # สะสมน้ำหนักบรรทุกรวมเป็น +50
+      Value: 25.0     # Cumulative +50 Max Carry Weight
 
   # ------------------------------------------------------------------
-  # Level +16: สู่ระดับตำนาน (Mythic Tier)
+  # Level +16: Mythic tier power
   # ------------------------------------------------------------------
   16:
     - Ability: WeaponDamage
-      Value: 5.0      # สะสมดาเมจรวมเป็น +35%
+      Value: 5.0      # Cumulative +35% Weapon Damage
 
   # ------------------------------------------------------------------
-  # Level +17: ความเบาระดับเทพ
+  # Level +17: Pinnacle lightness
   # ------------------------------------------------------------------
   17:
     - Ability: WeaponAttackStamina
-      Value: 2.0      # สะสม Stamina โจมตีรวมเป็น -10%
+      Value: 2.0      # Cumulative -10% Attack Stamina
     - Ability: WeightReduction
-      Value: 3.0      # สะสมลดน้ำหนักรวมเป็น -12%
+      Value: 3.0      # Cumulative -12% Item Weight
 
   # ------------------------------------------------------------------
-  # Level +18: ดาเมจขั้นสุดยอด
+  # Level +18: Extreme damage
   # ------------------------------------------------------------------
   18:
     - Ability: WeaponDamage
-      Value: 5.0      # สะสมดาเมจรวมเป็น +40%
+      Value: 5.0      # Cumulative +40% Weapon Damage
 
   # ------------------------------------------------------------------
-  # Level +19: ลอบสังหารขั้นเทพ
+  # Level +19: Divine backstab mastery
   # ------------------------------------------------------------------
   19:
     - Ability: WeaponBackstab
-      Value: 5.0      # สะสมแทงหลังรวมเป็น +0.20x
+      Value: 5.0      # Cumulative +0.20x Backstab Bonus
 
   # ------------------------------------------------------------------
-  # Level +20: ★ ULTIMATE AWAKENING: จุดสูงสุดของพลังอาวุธ
+  # Level +20: ★ ULTIMATE AWAKENING: Apex Weapon Power
   # ------------------------------------------------------------------
   20:
     - Ability: WeaponDamage
-      Value: 10.0     # รวมโบนัสดาเมจสะสมทั้งหมด = +50%
+      Value: 10.0     # Total Cumulative Weapon Damage = +50%
     - Ability: MaxDurability
-      Value: 10.0     # รวมโบนัสความทนทานสะสมทั้งหมด = +30%
+      Value: 10.0     # Total Cumulative Max Durability = +30%
     - Ability: CarryWeightBonus
-      Value: 50.0     # รวมโบนัสน้ำหนักบรรทุกสะสมทั้งหมด = +100
+      Value: 50.0     # Total Cumulative Max Carry Weight = +100

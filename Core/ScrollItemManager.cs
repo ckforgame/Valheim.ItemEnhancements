@@ -30,7 +30,7 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// ลบ instance คัมภีร์ที่อาจตกค้างหรือหลงเหลืออยู่ในฉากโดยไม่มี ZDO/ZNetView สมบูรณ์
+        /// Cleans up orphaned or corrupted scroll instances in the scene lacking valid ZDO/ZNetView
         /// </summary>
         public static void CleanupOrphanScrolls()
         {
@@ -50,13 +50,13 @@ namespace Valheim.ItemEnhancements.Core
                         continue;
                     }
 
-                    // ปล่อยให้ prefab template ใน container อยู่รอดปลอดภัย
+                    // Preserve valid prefab templates in container
                     if (_prefabContainer != null && item.transform.IsChildOf(_prefabContainer.transform))
                     {
                         continue;
                     }
 
-                    // หากเป็น instance ในฉากที่ไม่มี ZNetView หรือ ZDO ให้กำจัดทิ้งเพื่อป้องกัน NRE
+                    // Destroy corrupted ground instance lacking ZNetView or ZDO to prevent NRE
                     ZNetView znv = item.GetComponent<ZNetView>();
                     if (znv == null || znv.GetZDO() == null)
                     {
@@ -121,11 +121,11 @@ namespace Valheim.ItemEnhancements.Core
         {
             switch (tier)
             {
-                case 1: return "ใบตีบวกระดับ 1 (พื้นฐาน +1 ถึง +5)";
-                case 2: return "ใบตีบวกระดับ 2 (ขัดเกลา +6 ถึง +10)";
-                case 3: return "ใบตีบวกระดับ 3 (ประณีต +11 ถึง +15)";
-                case 4: return "ใบตีบวกระดับ 4 (เทวะ +16 ถึง +20)";
-                default: return $"ใบตีบวกระดับ {tier}";
+                case 1: return "Enhancement Scroll Tier 1 (Basic +1 to +5)";
+                case 2: return "Enhancement Scroll Tier 2 (Refined +6 to +10)";
+                case 3: return "Enhancement Scroll Tier 3 (Exquisite +11 to +15)";
+                case 4: return "Enhancement Scroll Tier 4 (Divine +16 to +20)";
+                default: return $"Enhancement Scroll Tier {tier}";
             }
         }
 
@@ -142,13 +142,13 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// ลงทะเบียน Prefabs ไอเทมเข้าสู่ ObjectDB เมื่อพร้อม
+        /// Registers scroll item prefabs into ObjectDB when ready
         /// </summary>
         public static void InitCustomItems(ObjectDB objectDb)
         {
             if (objectDb == null || objectDb.m_items == null || objectDb.m_items.Count == 0) return;
 
-            // ค้นหา Base Item ที่มีฟิสิกส์ 3D และ ItemDrop สมบูรณ์ เช่น Amber หรือ Ruby หรือ Coins
+            // Look up base item with 3D physics and ItemDrop components (e.g. Amber, Ruby, or Coins)
             GameObject baseItem = objectDb.GetItemPrefab("Amber") ?? objectDb.GetItemPrefab("Ruby") ?? objectDb.GetItemPrefab("Coins");
             if (baseItem == null)
             {
@@ -193,7 +193,7 @@ namespace Valheim.ItemEnhancements.Core
                 {
                     scrollObj = UnityEngine.Object.Instantiate(baseItem, container.transform);
                     scrollObj.name = prefabName;
-                    // ให้ activeSelf เป็น true เพื่อให้ Object.Instantiate ในเกมสร้าง instance ที่ active บนพื้นโลก
+                    // Ensure activeSelf is true so Object.Instantiate creates active ground objects
                     scrollObj.SetActive(true);
                 }
                 finally
@@ -214,14 +214,14 @@ namespace Valheim.ItemEnhancements.Core
                     shared.m_maxStackSize = 50;
                     shared.m_weight = 0.1f;
 
-                    // สไปรท์ไอคอนคัมภีร์ประจำเทียร์
+                    // Tier scroll icon sprite
                     Sprite icon = GetOrCreateScrollSprite(tier);
                     if (icon != null)
                     {
                         shared.m_icons = new Sprite[] { icon };
                     }
 
-                    // ย้อมสีโมเดล 3D ที่ตกบนพื้น
+                    // Tint ground 3D model
                     MeshRenderer renderer = scrollObj.GetComponentInChildren<MeshRenderer>();
                     if (renderer != null && renderer.material != null)
                     {
@@ -230,7 +230,7 @@ namespace Valheim.ItemEnhancements.Core
                     }
                 }
 
-                // บันทึกลง ObjectDB
+                // Register into ObjectDB
                 objectDb.m_items.Add(scrollObj);
                 int hash = prefabName.GetStableHashCode();
                 try
@@ -259,7 +259,7 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// ลงทะเบียน Prefabs เข้าสู่ ZNetScene เพื่อให้สามารถ Drop ลงในโลก 3D และซิงค์ Multiplayer ได้
+        /// Registers prefabs into ZNetScene for 3D world drops and multiplayer synchronization
         /// </summary>
         public static void RegisterZNetScenePrefabs(ZNetScene znetScene)
         {
@@ -320,27 +320,45 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// ลงทะเบียนข้อความภาษาไทยและอังกฤษ
+        /// Registers localization words for enhancement scrolls. English is the primary language.
         /// </summary>
         public static void RegisterLocalization()
         {
             if (Localization.instance == null) return;
 
-            AddWord("item_scroll_enhance_t1", "ใบตีบวกระดับ 1 (พื้นฐาน)");
-            AddWord("item_scroll_enhance_t1_desc", "ม้วนคัมภีร์เวทมนตร์โบราณ ใช้สำหรับตีบวกอุปกรณ์ระดับ +1 ถึง +5\nดรอปจากมอนสเตอร์ในทุ่งหญ้าและป่าดำ");
+            string language = Localization.instance.GetSelectedLanguage();
+            if (string.Equals(language, "Thai", StringComparison.OrdinalIgnoreCase))
+            {
+                AddWord("item_scroll_enhance_t1", "ใบตีบวกระดับ 1 (พื้นฐาน)");
+                AddWord("item_scroll_enhance_t1_desc", "ม้วนคัมภีร์เวทมนตร์โบราณ ใช้สำหรับตีบวกอุปกรณ์ระดับ +1 ถึง +5\nดรอปจากมอนสเตอร์ในทุ่งหญ้าและป่าดำ");
 
-            AddWord("item_scroll_enhance_t2", "ใบตีบวกระดับ 2 (ขัดเกลา)");
-            AddWord("item_scroll_enhance_t2_desc", "ม้วนคัมภีร์เวทมนตร์โบราณ ใช้สำหรับตีบวกอุปกรณ์ระดับ +6 ถึง +10\nดรอปจากมอนสเตอร์ในหนองน้ำและภูเขา");
+                AddWord("item_scroll_enhance_t2", "ใบตีบวกระดับ 2 (ขัดเกลา)");
+                AddWord("item_scroll_enhance_t2_desc", "ม้วนคัมภีร์เวทมนตร์โบราณ ใช้สำหรับตีบวกอุปกรณ์ระดับ +6 ถึง +10\nดรอปจากมอนสเตอร์ในหนองน้ำและภูเขา");
 
-            AddWord("item_scroll_enhance_t3", "ใบตีบวกระดับ 3 (ประณีต)");
-            AddWord("item_scroll_enhance_t3_desc", "ม้วนคัมภีร์เวทมนตร์โบราณ ใช้สำหรับตีบวกอุปกรณ์ระดับ +11 ถึง +15\nดรอปจากมอนสเตอร์ในที่ราบและม่านหมอก");
+                AddWord("item_scroll_enhance_t3", "ใบตีบวกระดับ 3 (ประณีต)");
+                AddWord("item_scroll_enhance_t3_desc", "ม้วนคัมภีร์เวทมนตร์โบราณ ใช้สำหรับตีบวกอุปกรณ์ระดับ +11 ถึง +15\nดรอปจากมอนสเตอร์ในที่ราบและม่านหมอก");
 
-            AddWord("item_scroll_enhance_t4", "ใบตีบวกระดับ 4 (เทวะ)");
-            AddWord("item_scroll_enhance_t4_desc", "ม้วนคัมภีร์เวทมนตร์โบราณ ใช้สำหรับตีบวกอุปกรณ์ระดับ +16 ถึง +20\nดรอปจากมอนสเตอร์ในแดนเถ้าถ่านและบอสโลก");
+                AddWord("item_scroll_enhance_t4", "ใบตีบวกระดับ 4 (เทวะ)");
+                AddWord("item_scroll_enhance_t4_desc", "ม้วนคัมภีร์เวทมนตร์โบราณ ใช้สำหรับตีบวกอุปกรณ์ระดับ +16 ถึง +20\nดรอปจากมอนสเตอร์ในแดนเถ้าถ่านและบอสโลก");
+            }
+            else
+            {
+                AddWord("item_scroll_enhance_t1", "Enhancement Scroll Tier 1 (Basic)");
+                AddWord("item_scroll_enhance_t1_desc", "An ancient magical scroll used for enhancing equipment from +1 to +5.\nDrops from monsters in the Meadows and Black Forest.");
+
+                AddWord("item_scroll_enhance_t2", "Enhancement Scroll Tier 2 (Refined)");
+                AddWord("item_scroll_enhance_t2_desc", "An ancient magical scroll used for enhancing equipment from +6 to +10.\nDrops from monsters in the Swamp and Mountain.");
+
+                AddWord("item_scroll_enhance_t3", "Enhancement Scroll Tier 3 (Exquisite)");
+                AddWord("item_scroll_enhance_t3_desc", "An ancient magical scroll used for enhancing equipment from +11 to +15.\nDrops from monsters in the Plains and Mistlands.");
+
+                AddWord("item_scroll_enhance_t4", "Enhancement Scroll Tier 4 (Divine)");
+                AddWord("item_scroll_enhance_t4_desc", "An ancient magical scroll used for enhancing equipment from +16 to +20.\nDrops from monsters in the Ashlands and World Bosses.");
+            }
         }
 
         /// <summary>
-        /// เพิ่มสูตรหลอมรวมคัมภีร์ที่โต๊ะคราฟต์: นำระดับต่ำ 3 ใบมารวมเป็นระดับถัดไป 1 ใบ
+        /// Registers fusion recipes at workbench: fuse 3 lower-tier scrolls into 1 next-tier scroll
         /// </summary>
         private static void RegisterFusionRecipes(ObjectDB objectDb)
         {
@@ -351,7 +369,7 @@ namespace Valheim.ItemEnhancements.Core
                 int nextTier = tier + 1;
                 string recipeName = $"Recipe_Fusion_ScrollTier{nextTier}";
 
-                // ตรวจสอบว่ามีสูตรนี้อยู่แล้วหรือไม่
+                // Check if recipe already exists
                 if (objectDb.m_recipes.Exists(r => r != null && r.name == recipeName)) continue;
 
                 GameObject sourcePrefab = GetScrollPrefab(tier);
@@ -389,7 +407,7 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// สร้างสไปรท์ม้วนคัมภีร์โบราณแยกสีและตราประทับตามระดับ
+        /// Generates vintage parchment scroll sprite with tier-specific wax seal
         /// </summary>
         public static Sprite GetOrCreateScrollSprite(int tier)
         {
@@ -404,14 +422,14 @@ namespace Valheim.ItemEnhancements.Core
             tex.filterMode = FilterMode.Bilinear;
 
             Color transparent = new Color(0, 0, 0, 0);
-            Color parchmentBody = new Color(0.95f, 0.90f, 0.78f, 1f); // โทนกระดาษสาโบราณ
-            Color parchmentEdge = new Color(0.76f, 0.65f, 0.48f, 1f); // ขอบเงากระดาษ
+            Color parchmentBody = new Color(0.95f, 0.90f, 0.78f, 1f); // Aged parchment tone
+            Color parchmentEdge = new Color(0.76f, 0.65f, 0.48f, 1f); // Border shadow
             Color parchmentShade = new Color(0.85f, 0.77f, 0.62f, 1f);
-            Color woodCap = new Color(0.40f, 0.22f, 0.10f, 1f);       // ไม้ก้านม้วน
-            Color sealColor = GetTierColor(tier);                     // สีตราประทับประจำเทียร์
+            Color woodCap = new Color(0.40f, 0.22f, 0.10f, 1f);       // Wooden roller caps
+            Color sealColor = GetTierColor(tier);                     // Tier wax seal color
             Color ribbonColor = new Color(sealColor.r * 0.8f, sealColor.g * 0.8f, sealColor.b * 0.8f, 1f);
 
-            // เคลียร์พื้นหลังโปร่งใส
+            // Clear transparent background
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
@@ -420,7 +438,7 @@ namespace Valheim.ItemEnhancements.Core
                 }
             }
 
-            // วาดตัวม้วนกระดาษ (แนวตั้งทรงกระบอกแบนกลางภาพ)
+            // Draw scroll parchment body (vertical cylinder)
             int minX = 14;
             int maxX = 49;
             int minY = 10;
@@ -430,10 +448,10 @@ namespace Valheim.ItemEnhancements.Core
             {
                 for (int x = minX; x <= maxX; x++)
                 {
-                    // ขอบซ้ายขวาทำมุมโค้งมน
+                    // Rounded corner edges
                     if ((x == minX || x == maxX) && (y == minY || y == maxY)) continue;
 
-                    // การไล่เฉดให้มีมิติกระบอกโค้ง
+                    // Gradient shading for cylinder volume
                     float horizontalFactor = (float)(x - minX) / (maxX - minX);
                     Color pixel = Color.Lerp(parchmentShade, parchmentBody, Mathf.Sin(horizontalFactor * Mathf.PI));
 
@@ -446,7 +464,7 @@ namespace Valheim.ItemEnhancements.Core
                 }
             }
 
-            // วาดหัวท้ายไม้ม้วน (Top & Bottom Wooden Rollers)
+            // Draw wooden rollers (Top & Bottom Wooden Rollers)
             for (int x = minX - 4; x <= maxX + 4; x++)
             {
                 for (int y = maxY; y <= maxY + 3; y++)
@@ -459,7 +477,7 @@ namespace Valheim.ItemEnhancements.Core
                 }
             }
 
-            // วาดริบบิ้นคาดตรงกลาง (Middle Ribbon)
+            // Draw middle binding ribbon
             int midY = 32;
             for (int y = midY - 3; y <= midY + 3; y++)
             {
@@ -469,7 +487,7 @@ namespace Valheim.ItemEnhancements.Core
                 }
             }
 
-            // วาดตราประทับขี้ผึ้งกลมกลางภาพ (Wax Seal)
+            // Draw wax seal (round seal in center)
             int centerX = 32;
             int centerY = 32;
             int radius = 9;
@@ -488,7 +506,7 @@ namespace Valheim.ItemEnhancements.Core
                         }
                         else if (dist < 3.5f)
                         {
-                            // ประกายเรืองแสงตรงกลางตรา
+                            // Center highlight glow
                             c = Color.Lerp(sealColor, Color.white, 0.6f);
                         }
                         tex.SetPixel(x, y, c);

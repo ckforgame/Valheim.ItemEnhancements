@@ -12,7 +12,7 @@ namespace Valheim.ItemEnhancements.Patches
         private static GameObject _enhanceButtonObj;
 
         /// <summary>
-        /// สร้างปุ่ม [⚡ ตีบวก] วางข้างๆ ปุ่มซ่อมแซม (Repair Button) บนโต๊ะคราฟต์
+        /// Creates [⚡ Enhance] button next to the Repair Button on crafting stations.
         /// </summary>
         [HarmonyPatch(typeof(InventoryGui), "Awake")]
         public static class Awake_Patch
@@ -25,11 +25,11 @@ namespace Valheim.ItemEnhancements.Patches
                 {
                     if (_enhanceButtonObj != null) return;
 
-                    // โคลนปุ่มจาก m_repairButton ให้อยู่ใน parent เดียวกัน (m_repairPanel)
+                    // Clone button from m_repairButton inside the same parent (m_repairPanel)
                     _enhanceButtonObj = UnityEngine.Object.Instantiate(__instance.m_repairButton.gameObject, __instance.m_repairButton.transform.parent);
                     _enhanceButtonObj.name = "EnhanceButton";
 
-                    // ปลดล็อก Mask เพื่อไม่ให้ปุ่มที่วางเพิ่มถูก Clip
+                    // Unlock mask to prevent clipping the additional button
                     var mask = __instance.m_repairButton.transform.parent.GetComponent<Mask>();
                     if (mask != null) mask.enabled = false;
                     var mask2d = __instance.m_repairButton.transform.parent.GetComponent<RectMask2D>();
@@ -51,7 +51,7 @@ namespace Valheim.ItemEnhancements.Patches
                         rt.anchoredPosition = new Vector2(repairRt.anchoredPosition.x, repairRt.anchoredPosition.y - offsetY);
                     }
 
-                    // ปิดเอฟเฟกต์เรืองแสงของปุ่มซ่อมแซมที่ถูกโคลนมา
+                    // Disable glow effect cloned from repair button
                     foreach (Transform child in _enhanceButtonObj.transform)
                     {
                         if (child.name.ToLower().Contains("glow"))
@@ -60,7 +60,7 @@ namespace Valheim.ItemEnhancements.Patches
                         }
                     }
 
-                    // ตั้งค่า Event เมื่อคลิกปุ่ม
+                    // Setup button click event
                     Button btn = _enhanceButtonObj.GetComponent<Button>();
                     if (btn != null)
                     {
@@ -72,16 +72,16 @@ namespace Valheim.ItemEnhancements.Patches
                         btn.interactable = true;
                     }
 
-                    // ตั้งค่า Tooltip แสดงชื่อระบบตีบวก
+                    // Setup tooltip for enhancement system
                     UITooltip tooltip = _enhanceButtonObj.GetComponent<UITooltip>();
                     if (tooltip == null)
                     {
                         tooltip = _enhanceButtonObj.AddComponent<UITooltip>();
                     }
-                    tooltip.m_text = "เปิดหน้าต่างตีบวกอุปกรณ์ (Item Enhancement)";
-                    tooltip.m_topic = "⚡ ตีบวกอุปกรณ์";
+                    tooltip.m_text = "Open Item Enhancement Window";
+                    tooltip.m_topic = "⚡ Enhance Item";
 
-                    // ปรับสีไอคอนให้เป็นสีทอง
+                    // Tint icon to golden color
                     Image[] images = _enhanceButtonObj.GetComponentsInChildren<Image>(true);
                     foreach (var img in images)
                     {
@@ -91,7 +91,7 @@ namespace Valheim.ItemEnhancements.Patches
                         }
                     }
 
-                    // เพิ่มป้ายสัญลักษณ์สายฟ้า ⚡ ตรงกลางปุ่ม
+                    // Add lightning badge icon ⚡ in center of button
                     GameObject labelObj = new GameObject("EnhanceIconBadge");
                     labelObj.transform.SetParent(_enhanceButtonObj.transform, false);
                     RectTransform labelRt = labelObj.AddComponent<RectTransform>();
@@ -130,7 +130,7 @@ namespace Valheim.ItemEnhancements.Patches
         }
 
         /// <summary>
-        /// อัปเดตสถานะการแสดงผลและความพร้อมใช้งานของปุ่มตีบวกให้ตรงกับการเปิดโต๊ะคราฟต์
+        /// Updates enhancement button visibility and state according to crafting station status.
         /// </summary>
         [HarmonyPatch(typeof(InventoryGui), "UpdateRepair")]
         public static class UpdateRepair_Patch
@@ -139,7 +139,7 @@ namespace Valheim.ItemEnhancements.Patches
             {
                 if (_enhanceButtonObj == null) return;
 
-                // ปุ่มตีบวกพร้อมใช้งานตลอดเมื่ออยู่ที่โต๊ะคราฟต์ (ไม่ต้อง Gray out ตามปุ่มซ่อม)
+                // Enhancement button stays active whenever crafting station is open (does not gray out with repair button)
                 Button btn = _enhanceButtonObj.GetComponent<Button>();
                 if (btn != null)
                 {
@@ -152,7 +152,7 @@ namespace Valheim.ItemEnhancements.Patches
         }
 
         /// <summary>
-        /// เมื่อปิดหน้าต่าง Inventory ให้ปิดหน้าต่างตีบวกด้วย
+        /// Closes enhancement window when inventory window is hidden.
         /// </summary>
         [HarmonyPatch(typeof(InventoryGui), nameof(InventoryGui.Hide))]
         public static class Hide_Patch

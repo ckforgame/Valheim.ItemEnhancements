@@ -108,7 +108,7 @@ namespace Valheim.ItemEnhancements.UI
 
             if (ModConfig.RequireCraftingStation.Value && !IsNearCraftingStation())
             {
-                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "<color=#f59e0b>ต้องอยู่ใกล้โต๊ะคราฟต์หรือเตาตีเหล็กเพื่อตีบวก! (Must be near a crafting station)</color>");
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "<color=#f59e0b>Must be near a crafting station or forge to enhance items!</color>");
                 return;
             }
 
@@ -224,7 +224,7 @@ namespace Valheim.ItemEnhancements.UI
         {
             // Title Bar
             GUILayout.BeginHorizontal();
-            GUILayout.Label("✦  MMORPG ITEM REFINEMENT (ระบบตีบวกอุปกรณ์)  ✦", _headerStyle);
+            GUILayout.Label("✦  MMORPG ITEM ENHANCEMENT  ✦", _headerStyle);
             if (GUILayout.Button("✕", GUILayout.Width(30f), GUILayout.Height(26f)))
             {
                 Close();
@@ -250,7 +250,7 @@ namespace Valheim.ItemEnhancements.UI
 
                 GUILayout.Space(10f);
 
-                // Action Button (ตีบวก) & Result Banner
+                // Action Button & Result Banner
                 DrawActionButtonSection();
             }
             else
@@ -274,11 +274,11 @@ namespace Valheim.ItemEnhancements.UI
 
                 GUILayout.BeginHorizontal();
                 string localizedName = Localization.instance != null ? Localization.instance.Localize(_selectedItem.m_shared.m_name) : _selectedItem.m_shared.m_name;
-                GUILayout.Label($"<b>ไอเทมเป้าหมาย:</b> <color={hex}><b>{localizedName} +{currentLvl}</b></color> <color=#94a3b8>({rank})</color>", _subHeaderStyle);
+                GUILayout.Label($"<b>Target Item:</b> <color={hex}><b>{localizedName} +{currentLvl}</b></color> <color=#94a3b8>({rank})</color>", _subHeaderStyle);
 
                 GUILayout.FlexibleSpace();
 
-                if (GUILayout.Button("เลือกไอเทมอื่น (Change)", GUILayout.Width(150f), GUILayout.Height(26f)))
+                if (GUILayout.Button("Change Item", GUILayout.Width(150f), GUILayout.Height(26f)))
                 {
                     _selectedItem = null;
                     _lastResultMessage = "";
@@ -287,7 +287,7 @@ namespace Valheim.ItemEnhancements.UI
             }
             else
             {
-                GUILayout.Label("<color=#ffd700>กรุณาคลิกเลือกไอเทมที่ต้องการตีบวกจากรายการด้านล่าง หรือคลิกไอเทมในกระเป๋าของคุณ</color>", _subHeaderStyle);
+                GUILayout.Label("<color=#ffd700>Select an item to enhance from the list below or click an item in your inventory.</color>", _subHeaderStyle);
             }
 
             GUILayout.EndVertical();
@@ -300,16 +300,16 @@ namespace Valheim.ItemEnhancements.UI
             bool isMax = currentLvl >= ModConfig.MaxLevel;
 
             GUILayout.BeginVertical(_boxSectionStyle);
-            GUILayout.Label("<b>เปรียบเทียบสเตตัส (Stat Progression):</b>", _statLabelStyle);
+            GUILayout.Label("<b>Stat Progression:</b>", _statLabelStyle);
             GUILayout.Space(4f);
 
             // Columns Header
             GUILayout.BeginHorizontal();
-            GUILayout.Label($"ระดับปัจจุบัน: <color={EnhancementManager.GetTierHex(currentLvl)}><b>+{currentLvl}</b></color>", _statValueCurrentStyle, GUILayout.Width(270f));
+            GUILayout.Label($"Current: <color={EnhancementManager.GetTierHex(currentLvl)}><b>+{currentLvl}</b></color>", _statValueCurrentStyle, GUILayout.Width(270f));
             GUILayout.Label("➔", _headerStyle, GUILayout.Width(60f));
             if (!isMax)
             {
-                GUILayout.Label($"ระดับถัดไป: <color={EnhancementManager.GetTierHex(nextLvl)}><b>+{nextLvl}</b></color>", _statValueNextStyle, GUILayout.Width(270f));
+                GUILayout.Label($"Next: <color={EnhancementManager.GetTierHex(nextLvl)}><b>+{nextLvl}</b></color>", _statValueNextStyle, GUILayout.Width(270f));
             }
             else
             {
@@ -320,70 +320,70 @@ namespace Valheim.ItemEnhancements.UI
             GUILayout.Space(6f);
 
             // Stats Rows
-            // 1. Damage (สำหรับอาวุธ)
+            // 1. Damage (Weapons)
             if (IsWeapon(_selectedItem))
             {
                 float curDmgPct = YamlConfigManager.GetCumulativeAbilityValue("WeaponDamage", currentLvl);
                 float nxtDmgPct = YamlConfigManager.GetCumulativeAbilityValue("WeaponDamage", nextLvl);
                 float diffDmg = nxtDmgPct - curDmgPct;
-                string diffDmgStr = curDmgPct <= 0f && nxtDmgPct > 0f ? "<color=#4ade80>(ปลดล็อก!)</color>" : $"<color=#4ade80>(+{diffDmg:F0}%)</color>";
+                string diffDmgStr = curDmgPct <= 0f && nxtDmgPct > 0f ? "<color=#4ade80>(Unlocked!)</color>" : $"<color=#4ade80>(+{diffDmg:F0}%)</color>";
 
-                DrawStatRow("พลังโจมตีทุกธาตุ (All Damage):",
+                DrawStatRow("All Damage:",
                     $"+{curDmgPct:F0}%",
                     isMax ? "-" : $"+{nxtDmgPct:F0}% {diffDmgStr}");
 
                 float curStam = StatCalculator.GetAttackStaminaReduction(currentLvl) * 100f;
                 float nxtStam = StatCalculator.GetAttackStaminaReduction(nextLvl) * 100f;
                 float diffStam = nxtStam - curStam;
-                string diffStamStr = curStam <= 0f && nxtStam > 0f ? "<color=#38bdf8>(ปลดล็อก!)</color>" : $"<color=#38bdf8>(-{diffStam:F0}%)</color>";
+                string diffStamStr = curStam <= 0f && nxtStam > 0f ? "<color=#38bdf8>(Unlocked!)</color>" : $"<color=#38bdf8>(-{diffStam:F0}%)</color>";
 
-                DrawStatRow("ลด Stamina โจมตี:",
+                DrawStatRow("Attack Stamina Cost:",
                     $"-{curStam:F0}%",
                     isMax ? "-" : $"-{nxtStam:F0}% {diffStamStr}");
             }
 
-            // 2. Armor (สำหรับเกราะ)
+            // 2. Armor (Armor pieces)
             if (IsArmor(_selectedItem))
             {
                 float curArmor = _selectedItem.GetArmor();
                 float nextArmorBonus = StatCalculator.GetArmorBonus(_selectedItem, nextLvl, _selectedItem.m_shared.m_armor);
                 float curArmorBonus = StatCalculator.GetArmorBonus(_selectedItem, currentLvl, _selectedItem.m_shared.m_armor);
                 float diff = nextArmorBonus - curArmorBonus;
-                string diffArmorStr = curArmorBonus <= 0f && nextArmorBonus > 0f ? "<color=#4ade80>(ปลดล็อก!)</color>" : $"<color=#4ade80>(+{diff:F1})</color>";
+                string diffArmorStr = curArmorBonus <= 0f && nextArmorBonus > 0f ? "<color=#4ade80>(Unlocked!)</color>" : $"<color=#4ade80>(+{diff:F1})</color>";
 
-                DrawStatRow("พลังป้องกันเกราะ (Armor):",
+                DrawStatRow("Armor:",
                     $"{curArmor:F1}",
                     isMax ? "-" : $"{curArmor + diff:F1} {diffArmorStr}");
 
                 float curMove = StatCalculator.GetMovementModifierDelta(_selectedItem, currentLvl) * 100f;
                 float nxtMove = StatCalculator.GetMovementModifierDelta(_selectedItem, nextLvl) * 100f;
                 float diffMove = nxtMove - curMove;
-                string diffMoveStr = curMove <= 0f && nxtMove > 0f ? "<color=#38bdf8>(ปลดล็อก!)</color>" : $"<color=#38bdf8>(+{diffMove:F1}%)</color>";
+                string diffMoveStr = curMove <= 0f && nxtMove > 0f ? "<color=#38bdf8>(Unlocked!)</color>" : $"<color=#38bdf8>(+{diffMove:F1}%)</color>";
 
-                DrawStatRow("ลดโทษความเร็วเดิน / โบนัส:",
+                DrawStatRow("Movement Speed Bonus:",
                     $"+{curMove:F1}%",
                     isMax ? "-" : $"+{nxtMove:F1}% {diffMoveStr}");
             }
 
-            // 3. Shield (สำหรับโล่)
+            // 3. Shield
             if (_selectedItem.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Shield)
             {
                 float curBlk = _selectedItem.GetBlockPower(Player.m_localPlayer.GetSkillFactor(Skills.SkillType.Blocking));
                 float curBlkBonus = StatCalculator.GetBlockPowerBonus(_selectedItem, currentLvl, _selectedItem.m_shared.m_blockPower);
                 float nxtBlkBonus = StatCalculator.GetBlockPowerBonus(_selectedItem, nextLvl, _selectedItem.m_shared.m_blockPower);
                 float diffBlk = nxtBlkBonus - curBlkBonus;
-                string diffBlkStr = curBlkBonus <= 0f && nxtBlkBonus > 0f ? "<color=#4ade80>(ปลดล็อก!)</color>" : $"<color=#4ade80>(+{diffBlk:F1})</color>";
+                string diffBlkStr = curBlkBonus <= 0f && nxtBlkBonus > 0f ? "<color=#4ade80>(Unlocked!)</color>" : $"<color=#4ade80>(+{diffBlk:F1})</color>";
 
-                DrawStatRow("พลังบล็อก (Block Power):",
+                DrawStatRow("Block Power:",
                     $"{curBlk:F1}",
                     isMax ? "-" : $"{curBlk + diffBlk:F1} {diffBlkStr}");
 
                 float curBlkStam = StatCalculator.GetBlockStaminaReduction(currentLvl) * 100f;
                 float nxtBlkStam = StatCalculator.GetBlockStaminaReduction(nextLvl) * 100f;
                 float diffBlkStam = nxtBlkStam - curBlkStam;
-                string diffBlkStamStr = curBlkStam <= 0f && nxtBlkStam > 0f ? "<color=#38bdf8>(ปลดล็อก!)</color>" : $"<color=#38bdf8>(-{diffBlkStam:F1}%)</color>";
+                string diffBlkStamStr = curBlkStam <= 0f && nxtBlkStam > 0f ? "<color=#38bdf8>(Unlocked!)</color>" : $"<color=#38bdf8>(-{diffBlkStam:F1}%)</color>";
 
-                DrawStatRow("ลด Stamina การบล็อก:",
+                DrawStatRow("Block Stamina Cost:",
                     $"-{curBlkStam:F0}%",
                     isMax ? "-" : $"-{nxtBlkStam:F0}% {diffBlkStamStr}");
             }
@@ -393,13 +393,13 @@ namespace Valheim.ItemEnhancements.UI
             float curDurBonus = StatCalculator.GetDurabilityBonus(_selectedItem, currentLvl, _selectedItem.m_shared.m_maxDurability);
             float nxtDurBonus = StatCalculator.GetDurabilityBonus(_selectedItem, nextLvl, _selectedItem.m_shared.m_maxDurability);
             float diffDur = nxtDurBonus - curDurBonus;
-            string diffDurStr = curDurBonus <= 0f && nxtDurBonus > 0f ? "<color=#4ade80>(ปลดล็อก!)</color>" : $"<color=#4ade80>(+{diffDur:F0})</color>";
+            string diffDurStr = curDurBonus <= 0f && nxtDurBonus > 0f ? "<color=#4ade80>(Unlocked!)</color>" : $"<color=#4ade80>(+{diffDur:F0})</color>";
 
-            DrawStatRow("ความทนทานสูงสุด (Max Durability):",
+            DrawStatRow("Max Durability:",
                 $"{curDur:F0}",
                 isMax ? "-" : $"{curDur + diffDur:F0} {diffDurStr}");
 
-            // 5. Cheat Abilities (หากเปิดใช้งานใน Config)
+            // 5. Cheat Abilities (If enabled in config)
             if (StatCalculator.IsCheatEnabled)
             {
                 float curHp = StatCalculator.GetCheatItemMaxHealth(_selectedItem, currentLvl);
@@ -407,8 +407,8 @@ namespace Valheim.ItemEnhancements.UI
                 if (curHp > 0f || nxtHp > 0f)
                 {
                     float diffHp = nxtHp - curHp;
-                    string diffHpStr = curHp <= 0f && nxtHp > 0f ? "<color=#fb7185>(ปลดล็อก!)</color>" : $"<color=#fb7185>(+{diffHp:F0})</color>";
-                    DrawStatRow("<color=#fb7185>★ [Cheat] เพิ่ม Max HP:</color>",
+                    string diffHpStr = curHp <= 0f && nxtHp > 0f ? "<color=#fb7185>(Unlocked!)</color>" : $"<color=#fb7185>(+{diffHp:F0})</color>";
+                    DrawStatRow("<color=#fb7185>★ [Cheat] Max HP:</color>",
                         $"+{curHp:F0}",
                         isMax ? "-" : $"+{nxtHp:F0} {diffHpStr}");
                 }
@@ -418,8 +418,8 @@ namespace Valheim.ItemEnhancements.UI
                 if (curStam > 0f || nxtStam > 0f)
                 {
                     float diffStam = nxtStam - curStam;
-                    string diffStamStr = curStam <= 0f && nxtStam > 0f ? "<color=#fb7185>(ปลดล็อก!)</color>" : $"<color=#fb7185>(+{diffStam:F0})</color>";
-                    DrawStatRow("<color=#fb7185>★ [Cheat] เพิ่ม Max Stamina:</color>",
+                    string diffStamStr = curStam <= 0f && nxtStam > 0f ? "<color=#fb7185>(Unlocked!)</color>" : $"<color=#fb7185>(+{diffStam:F0})</color>";
+                    DrawStatRow("<color=#fb7185>★ [Cheat] Max Stamina:</color>",
                         $"+{curStam:F0}",
                         isMax ? "-" : $"+{nxtStam:F0} {diffStamStr}");
                 }
@@ -429,8 +429,8 @@ namespace Valheim.ItemEnhancements.UI
                 if (curEitr > 0f || nxtEitr > 0f)
                 {
                     float diffEitr = nxtEitr - curEitr;
-                    string diffEitrStr = curEitr <= 0f && nxtEitr > 0f ? "<color=#fb7185>(ปลดล็อก!)</color>" : $"<color=#fb7185>(+{diffEitr:F0})</color>";
-                    DrawStatRow("<color=#fb7185>★ [Cheat] เพิ่ม Max Eitr:</color>",
+                    string diffEitrStr = curEitr <= 0f && nxtEitr > 0f ? "<color=#fb7185>(Unlocked!)</color>" : $"<color=#fb7185>(+{diffEitr:F0})</color>";
+                    DrawStatRow("<color=#fb7185>★ [Cheat] Max Eitr:</color>",
                         $"+{curEitr:F0}",
                         isMax ? "-" : $"+{nxtEitr:F0} {diffEitrStr}");
                 }
@@ -440,8 +440,8 @@ namespace Valheim.ItemEnhancements.UI
                 if (curHpRegen > 0f || nxtHpRegen > 0f)
                 {
                     float diffHpRegen = nxtHpRegen - curHpRegen;
-                    string diffHpRegenStr = curHpRegen <= 0f && nxtHpRegen > 0f ? "<color=#fb7185>(ปลดล็อก!)</color>" : $"<color=#fb7185>(+{diffHpRegen:F0}%)</color>";
-                    DrawStatRow("<color=#fb7185>★ [Cheat] ฟื้นฟู HP Regen:</color>",
+                    string diffHpRegenStr = curHpRegen <= 0f && nxtHpRegen > 0f ? "<color=#fb7185>(Unlocked!)</color>" : $"<color=#fb7185>(+{diffHpRegen:F0}%)</color>";
+                    DrawStatRow("<color=#fb7185>★ [Cheat] HP Regen:</color>",
                         $"+{curHpRegen:F0}%",
                         isMax ? "-" : $"+{nxtHpRegen:F0}% {diffHpRegenStr}");
                 }
@@ -451,8 +451,8 @@ namespace Valheim.ItemEnhancements.UI
                 if (curStamRegen > 0f || nxtStamRegen > 0f)
                 {
                     float diffStamRegen = nxtStamRegen - curStamRegen;
-                    string diffStamRegenStr = curStamRegen <= 0f && nxtStamRegen > 0f ? "<color=#fb7185>(ปลดล็อก!)</color>" : $"<color=#fb7185>(+{diffStamRegen:F0}%)</color>";
-                    DrawStatRow("<color=#fb7185>★ [Cheat] ฟื้นฟู Stamina Regen:</color>",
+                    string diffStamRegenStr = curStamRegen <= 0f && nxtStamRegen > 0f ? "<color=#fb7185>(Unlocked!)</color>" : $"<color=#fb7185>(+{diffStamRegen:F0}%)</color>";
+                    DrawStatRow("<color=#fb7185>★ [Cheat] Stamina Regen:</color>",
                         $"+{curStamRegen:F0}%",
                         isMax ? "-" : $"+{nxtStamRegen:F0}% {diffStamRegenStr}");
                 }
@@ -462,8 +462,8 @@ namespace Valheim.ItemEnhancements.UI
                 if (curEitrRegen > 0f || nxtEitrRegen > 0f)
                 {
                     float diffEitrRegen = nxtEitrRegen - curEitrRegen;
-                    string diffEitrRegenStr = curEitrRegen <= 0f && nxtEitrRegen > 0f ? "<color=#fb7185>(ปลดล็อก!)</color>" : $"<color=#fb7185>(+{diffEitrRegen:F0}%)</color>";
-                    DrawStatRow("<color=#fb7185>★ [Cheat] ฟื้นฟู Eitr Regen:</color>",
+                    string diffEitrRegenStr = curEitrRegen <= 0f && nxtEitrRegen > 0f ? "<color=#fb7185>(Unlocked!)</color>" : $"<color=#fb7185>(+{diffEitrRegen:F0}%)</color>";
+                    DrawStatRow("<color=#fb7185>★ [Cheat] Eitr Regen:</color>",
                         $"+{curEitrRegen:F0}%",
                         isMax ? "-" : $"+{nxtEitrRegen:F0}% {diffEitrRegenStr}");
                 }
@@ -473,8 +473,8 @@ namespace Valheim.ItemEnhancements.UI
                 if (curHeal > 0f || nxtHeal > 0f)
                 {
                     float diffHeal = nxtHeal - curHeal;
-                    string diffHealStr = curHeal <= 0f && nxtHeal > 0f ? "<color=#fb7185>(ปลดล็อก!)</color>" : $"<color=#fb7185>(+{diffHeal:F0}%)</color>";
-                    DrawStatRow("<color=#fb7185>★ [Cheat] โบนัสการฮีล (Healing):</color>",
+                    string diffHealStr = curHeal <= 0f && nxtHeal > 0f ? "<color=#fb7185>(Unlocked!)</color>" : $"<color=#fb7185>(+{diffHeal:F0}%)</color>";
+                    DrawStatRow("<color=#fb7185>★ [Cheat] Healing Bonus:</color>",
                         $"+{curHeal:F0}%",
                         isMax ? "-" : $"+{nxtHeal:F0}% {diffHealStr}");
                 }
@@ -503,7 +503,7 @@ namespace Valheim.ItemEnhancements.UI
 
             if (isMax)
             {
-                GUILayout.Label("<color=#ffd700><b>ไอเทมนี้ได้รับการตีบวกถึงระดับสูงสุดแล้ว (+20 MAX)</b></color>", _headerStyle);
+                GUILayout.Label("<color=#ffd700><b>This item has reached maximum enhancement level (+20 MAX)</b></color>", _headerStyle);
                 GUILayout.EndVertical();
                 return;
             }
@@ -516,30 +516,30 @@ namespace Valheim.ItemEnhancements.UI
 
             // Left: Success Chance
             GUILayout.BeginVertical(GUILayout.Width(280f));
-            GUILayout.Label("<b>โอกาสสำเร็จ (Success Rate):</b>", _statLabelStyle);
+            GUILayout.Label("<b>Success Rate:</b>", _statLabelStyle);
             GUILayout.Label($"<color={rateColor}><b>{successRate:F0}%</b></color>", _rateNumberStyle);
             GUILayout.EndVertical();
 
             // Right: Failure Consequence
             GUILayout.BeginVertical();
-            GUILayout.Label("<b>ผลลัพธ์หากล้มเหลว (Failure Risk):</b>", _statLabelStyle);
+            GUILayout.Label("<b>Failure Consequence:</b>", _statLabelStyle);
             if (currentLvl < ModConfig.SafeLevel.Value)
             {
-                GUILayout.Label("<color=#4ade80>✔ ปลอดภัย (Safe) - ระดับไม่ลดลง ไม่แตก</color>", _statLabelStyle);
+                GUILayout.Label("<color=#4ade80>✔ Safe - Level will not decrease and item will not break</color>", _statLabelStyle);
             }
             else
             {
                 if (ModConfig.BreakOnFail.Value)
                 {
-                    GUILayout.Label($"<color=#ef4444>⚠ เสี่ยงลดลง 1 ขั้น (เหลือ +{currentLvl - 1}) หรือแตก ({ModConfig.BreakChanceAboveSafeLevel.Value:F0}%)</color>", _statLabelStyle);
+                    GUILayout.Label($"<color=#ef4444>⚠ Risk: Downgrade by 1 level (+{currentLvl - 1}) or Break ({ModConfig.BreakChanceAboveSafeLevel.Value:F0}%)</color>", _statLabelStyle);
                 }
                 else if (ModConfig.DowngradeOnFail.Value)
                 {
-                    GUILayout.Label($"<color=#f59e0b>⚠ ระดับจะลดลง 1 ขั้น (เหลือ +{currentLvl - 1})</color>", _statLabelStyle);
+                    GUILayout.Label($"<color=#f59e0b>⚠ Risk: Downgrade by 1 level (to +{currentLvl - 1})</color>", _statLabelStyle);
                 }
                 else
                 {
-                    GUILayout.Label("<color=#4ade80>✔ ปลอดภัย (Safe) - ระดับคงเดิม</color>", _statLabelStyle);
+                    GUILayout.Label("<color=#4ade80>✔ Safe - Level remains unchanged</color>", _statLabelStyle);
                 }
             }
 
@@ -554,8 +554,8 @@ namespace Valheim.ItemEnhancements.UI
                 string scrollColor = hasScrolls ? "#4ade80" : "#ef4444";
                 string tierHex = EnhancementManager.GetTierHex(nextLvl);
 
-                GUILayout.Label($"<b>วัตถุดิบที่ต้องใช้:</b> <color={tierHex}>{scrollName}</color> x{neededScrolls}", _statLabelStyle);
-                GUILayout.Label($"<b>จำนวนที่คุณมี:</b> <color={scrollColor}><b>{playerScrolls} ใบ</b></color>" + (hasScrolls ? "" : " <color=#ef4444>(ไม่เพียงพอ)</color>"), _statLabelStyle);
+                GUILayout.Label($"<b>Required Materials:</b> <color={tierHex}>{scrollName}</color> x{neededScrolls}", _statLabelStyle);
+                GUILayout.Label($"<b>You Have:</b> <color={scrollColor}><b>{playerScrolls}</b></color>" + (hasScrolls ? "" : " <color=#ef4444>(Insufficient)</color>"), _statLabelStyle);
             }
 
             if (ModConfig.RequireCoins.Value)
@@ -564,11 +564,11 @@ namespace Valheim.ItemEnhancements.UI
                 int playerCoins = EnhancementManager.GetPlayerCoins(Player.m_localPlayer);
                 bool canAffordCoins = playerCoins >= cost;
                 string coinColor = canAffordCoins ? "#ffd700" : "#ef4444";
-                GUILayout.Label($"<b>ค่าธรรมเนียม:</b> <color={coinColor}>{cost} เหรียญทอง</color> <color=#94a3b8>(คุณมี: {playerCoins})</color>", _statLabelStyle);
+                GUILayout.Label($"<b>Required Coins:</b> <color={coinColor}>{cost} Coins</color> <color=#94a3b8>(You have: {playerCoins})</color>", _statLabelStyle);
             }
             else
             {
-                GUILayout.Label("<b>ค่าธรรมเนียม:</b> <color=#4ade80>ฟรี (ไม่มีค่าธรรมเนียมเหรียญ)</color>", _statLabelStyle);
+                GUILayout.Label("<b>Fee:</b> <color=#4ade80>Free (No coins required)</color>", _statLabelStyle);
             }
             GUILayout.EndVertical();
 
@@ -593,30 +593,30 @@ namespace Valheim.ItemEnhancements.UI
             if (_isForging)
             {
                 GUI.enabled = false;
-                GUILayout.Button("🔨  กำลังหลอมตีเหล็ก... (FORGING...)  🔨", _actionButtonStyle, GUILayout.Height(48f));
+                GUILayout.Button("🔨  FORGING...  🔨", _actionButtonStyle, GUILayout.Height(48f));
                 GUI.enabled = true;
             }
             else if (isMax)
             {
                 GUI.enabled = false;
-                GUILayout.Button("★  ระดับสูงสุดแล้ว (MAX LEVEL +20)  ★", _actionButtonStyle, GUILayout.Height(48f));
+                GUILayout.Button("★  MAX LEVEL REACHED (+20)  ★", _actionButtonStyle, GUILayout.Height(48f));
                 GUI.enabled = true;
             }
             else if (!hasScrolls)
             {
                 GUI.enabled = false;
-                GUILayout.Button($"❌  ต้องการ [ใบตีบวกระดับ {scrollTier}] (คุณมี {playerScrolls}/{neededScrolls} ใบ)  ❌", _actionButtonStyle, GUILayout.Height(48f));
+                GUILayout.Button($"❌  Requires [Scroll Tier {scrollTier}] ({playerScrolls}/{neededScrolls})  ❌", _actionButtonStyle, GUILayout.Height(48f));
                 GUI.enabled = true;
             }
             else if (!hasCoins)
             {
                 GUI.enabled = false;
-                GUILayout.Button($"❌  เหรียญทองไม่เพียงพอ (ต้องการ {cost} Coins)  ❌", _actionButtonStyle, GUILayout.Height(48f));
+                GUILayout.Button($"❌  Insufficient Coins (Requires {cost} Coins)  ❌", _actionButtonStyle, GUILayout.Height(48f));
                 GUI.enabled = true;
             }
             else
             {
-                if (GUILayout.Button("⚡  เริ่มตีบวก (ENHANCE ITEM)  ⚡", _actionButtonStyle, GUILayout.Height(48f)))
+                if (GUILayout.Button("⚡  ENHANCE ITEM  ⚡", _actionButtonStyle, GUILayout.Height(48f)))
                 {
                     StartForging();
                 }
@@ -647,7 +647,7 @@ namespace Valheim.ItemEnhancements.UI
             {
                 _selectedItem = null;
                 _lastResultColor = "#ef4444";
-                _lastResultMessage = "ไม่พบไอเทมในช่องเก็บของ (Item not found in inventory)!";
+                _lastResultMessage = "Item not found in inventory!";
                 return;
             }
 
@@ -677,7 +677,7 @@ namespace Valheim.ItemEnhancements.UI
             {
                 _selectedItem = null;
                 _lastResultColor = "#ef4444";
-                _lastResultMessage = "ไม่พบไอเทมในช่องเก็บของ (Item not found in inventory)!";
+                _lastResultMessage = "Item not found in inventory!";
                 return;
             }
 
@@ -692,32 +692,32 @@ namespace Valheim.ItemEnhancements.UI
                         InventoryGui.instance.m_craftItemDoneEffects.Create(Player.m_localPlayer.transform.position, Quaternion.identity);
                     }
                     _lastResultColor = "#ffd700";
-                    _lastResultMessage = $"★ ตีบวกสำเร็จ! {itemName} กลายเป็น +{newLevel} ★";
-                    Player.m_localPlayer.Message(MessageHud.MessageType.Center, $"<color=#ffd700>★ ตีบวกสำเร็จ! {itemName} (+{newLevel}) ★</color>");
+                    _lastResultMessage = $"★ Enhancement Successful! {itemName} is now +{newLevel} ★";
+                    Player.m_localPlayer.Message(MessageHud.MessageType.Center, $"<color=#ffd700>★ Enhancement Successful! {itemName} (+{newLevel}) ★</color>");
                     break;
 
                 case EnhanceResult.FailedSafe:
                     _lastResultColor = "#94a3b8";
-                    _lastResultMessage = $"✖ ตีบวกล้มเหลว... โชคดีที่ไอเทมปลอดภัย ไม่ลดระดับ (คงที่ +{newLevel}) ✖";
-                    Player.m_localPlayer.Message(MessageHud.MessageType.Center, $"<color=#94a3b8>✖ ตีบวกล้มเหลว... ไอเทมปลอดภัย (+{newLevel}) ✖</color>");
+                    _lastResultMessage = $"✖ Enhancement Failed! Safe: Level remained unchanged (+{newLevel}) ✖";
+                    Player.m_localPlayer.Message(MessageHud.MessageType.Center, $"<color=#94a3b8>✖ Enhancement Failed! Safe (+{newLevel}) ✖</color>");
                     break;
 
                 case EnhanceResult.FailedDowngraded:
                     _lastResultColor = "#f59e0b";
-                    _lastResultMessage = $"✖ ตีบวกล้มเหลว! ระดับลดลงเหลือ +{newLevel} ✖";
-                    Player.m_localPlayer.Message(MessageHud.MessageType.Center, $"<color=#f59e0b>✖ ตีบวกล้มเหลว! ระดับลดลงเหลือ +{newLevel} ✖</color>");
+                    _lastResultMessage = $"✖ Enhancement Failed! Item downgraded to +{newLevel} ✖";
+                    Player.m_localPlayer.Message(MessageHud.MessageType.Center, $"<color=#f59e0b>✖ Enhancement Failed! Downgraded to +{newLevel} ✖</color>");
                     break;
 
                 case EnhanceResult.FailedBroken:
                     _lastResultColor = "#ef4444";
-                    _lastResultMessage = $"✖ ตีบวกล้มเหลว! {itemName} แตกสลายไปแล้ว... ✖";
-                    Player.m_localPlayer.Message(MessageHud.MessageType.Center, $"<color=#ef4444>✖ ตีบวกล้มเหลว! {itemName} แตกสลาย... ✖</color>");
+                    _lastResultMessage = $"✖ Enhancement Failed! {itemName} was destroyed! ✖";
+                    Player.m_localPlayer.Message(MessageHud.MessageType.Center, $"<color=#ef4444>✖ Enhancement Failed! {itemName} destroyed! ✖</color>");
                     _selectedItem = null;
                     break;
 
                 case EnhanceResult.CannotAfford:
                     _lastResultColor = "#ef4444";
-                    _lastResultMessage = "วัตถุดิบคัมภีร์ตีบวกไม่เพียงพอ!";
+                    _lastResultMessage = "Insufficient enhancement materials!";
                     break;
             }
 
@@ -731,7 +731,7 @@ namespace Valheim.ItemEnhancements.UI
         private void DrawEquipmentPickerList()
         {
             GUILayout.BeginVertical(_boxSectionStyle);
-            GUILayout.Label("<b>อุปกรณ์ในตัวที่สามารถตีบวกได้:</b>", _statLabelStyle);
+            GUILayout.Label("<b>Enhanceable Equipment:</b>", _statLabelStyle);
             GUILayout.Space(4f);
 
             List<ItemDrop.ItemData> allItems = Player.m_localPlayer.GetInventory().GetAllItems();
@@ -740,7 +740,7 @@ namespace Valheim.ItemEnhancements.UI
 
             if (enhanceables.Count == 0)
             {
-                GUILayout.Label("<color=#94a3b8>ไม่มีอุปกรณ์ที่สามารถตีบวกได้ในกระเป๋าของคุณ</color>", _statLabelStyle);
+                GUILayout.Label("<color=#94a3b8>No enhanceable equipment found in your inventory.</color>", _statLabelStyle);
             }
             else
             {
@@ -753,10 +753,10 @@ namespace Valheim.ItemEnhancements.UI
                     string localizedName = Localization.instance != null ? Localization.instance.Localize(item.m_shared.m_name) : item.m_shared.m_name;
 
                     GUILayout.BeginHorizontal();
-                    string equippedTag = item.m_equipped ? " <color=#38bdf8>[สวมใส่อยู่]</color>" : "";
+                    string equippedTag = item.m_equipped ? " <color=#38bdf8>[Equipped]</color>" : "";
                     GUILayout.Label($"<b>{localizedName}</b> <color={hex}>+{lvl}</color>{equippedTag}", _statLabelStyle, GUILayout.Width(450f));
 
-                    if (GUILayout.Button("เลือก (Select)", _itemButtonStyle, GUILayout.Width(130f), GUILayout.Height(24f)))
+                    if (GUILayout.Button("Select", _itemButtonStyle, GUILayout.Width(130f), GUILayout.Height(24f)))
                     {
                         _selectedItem = item;
                         _lastResultMessage = "";

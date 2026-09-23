@@ -1,193 +1,193 @@
 # ====================================================================
 # VALHEIM ITEM ENHANCEMENTS - ARMOR & SHIELD ABILITIES CONFIGURATION
-# หมวดหมู่ชุดเกราะ, โล่ และความคล่องตัว (Mobility)
+# Armor, shields, and player mobility modifiers
 # ====================================================================
-# [คำอธิบายระบบการคำนวณ: ผลบวกสะสม (Cumulative Addition)]
-# - แต่ละระดับ ให้ระบุเฉพาะค่าที่ "เพิ่มขึ้นในระดับนั้น" (Value หรือ Percent)
-# - เมื่อไอเทมมีระดับตีบวกถึงระดับใด ระบบจะรวมผลสะสมตั้งแต่ +1 ถึงระดับนั้นให้อัตโนมัติ
-# - หากระดับใดไม่ได้ระบุ Ability ใดไว้ จะยังคงได้ค่าสะสมของ Ability นั้นจากระดับก่อนหน้าต่อไป
+# [Calculation System: Cumulative Addition]
+# - For each level, specify only the incremental value gained at that level.
+# - As an item reaches higher enhancement levels, the system automatically sums
+#   all values from level +1 up to the current level.
+# - If a level does not specify an ability, it retains the accumulated total from previous levels.
 # ====================================================================
-# [การปรับแต่งส่วนตัวโดยไม่ให้การอัปเดต Mod ส่งผลกระทบ (Custom Override)]
-# หากต้องการปรับแต่งเอง ให้สร้างไฟล์ "Armor.override.yml" ในโฟลเดอร์เดียวกันนี้
-# และใส่เฉพาะ Level ที่ต้องการเปลี่ยน เช่น:
+# [Custom Overrides]
+# To customize values without having mod updates overwrite your changes,
+# create a file named "Armor.override.yml" in this same folder
+# and specify only the levels you wish to override, for example:
 #
 # Levels:
 #   2:
 #     - Ability: ArmorFlat
 #       Value: 3.0
-#
-# ระบบจะนำค่าใน Armor.override.yml มาแทนที่เฉพาะระดับนั้น โดยระดับอื่นยังคงเดิม
 # ====================================================================
-# [รายชื่อ Ability ID ที่รองรับในไฟล์นี้]
-# - เกราะ: ArmorFlat, ArmorPercent, ArmorMovementPenaltyReduction, EitrRegen
-# - โล่: ShieldBlockPower, ShieldDeflectionForce, ShieldTimedBlock, ShieldBlockStaminaReduction
-# - ความคล่องตัว: DodgeStaminaReduction, RunStaminaReduction, JumpStaminaReduction
-# [ดูรายชื่อ Ability ID ทั้งหมด → AbilityReference.txt]
+# [Supported Ability IDs in this file]
+# - Armor: ArmorFlat, ArmorPercent, ArmorMovementPenaltyReduction, EitrRegen
+# - Shields: ShieldBlockPower, ShieldDeflectionForce, ShieldTimedBlock, ShieldBlockStaminaReduction
+# - Mobility: DodgeStaminaReduction, RunStaminaReduction, JumpStaminaReduction
+# [Full Ability ID list → AbilityReference.txt]
 # ====================================================================
 
 Levels:
   # ------------------------------------------------------------------
-  # Level +1: ลดการใช้ Stamina กลิ้งหลบเริ่มต้น
+  # Level +1: Initial dodge roll stamina reduction
   # ------------------------------------------------------------------
   1:
     - Ability: DodgeStaminaReduction
-      Value: 1.0      # ลด Stamina กลิ้งหลบ 1%
+      Value: 1.0      # -1% Dodge Stamina
 
   # ------------------------------------------------------------------
-  # Level +2: เริ่มได้รับเกราะคงที่ และพลังบล็อก
+  # Level +2: Initial flat armor and shield block power
   # ------------------------------------------------------------------
   2:
     - Ability: ArmorFlat
-      Value: 1.5      # พลังป้องกันเกราะ +1.5
+      Value: 1.5      # +1.5 Flat Armor
     - Ability: ShieldBlockPower
-      Value: 5.0      # พลังบล็อกของโล่ +5%
+      Value: 5.0      # +5% Shield Block Power
 
   # ------------------------------------------------------------------
-  # Level +3: วิ่งเหนื่อยน้อยลง และลดการใช้ Stamina บล็อก
+  # Level +3: Sprinting and shield block stamina efficiency
   # ------------------------------------------------------------------
   3:
     - Ability: RunStaminaReduction
-      Value: 1.0      # ลด Stamina วิ่ง 1%
+      Value: 1.0      # -1% Run Stamina
     - Ability: ShieldBlockStaminaReduction
-      Value: 2.0      # ลด Stamina บล็อก 2%
+      Value: 2.0      # -2% Block Stamina
 
   # ------------------------------------------------------------------
-  # Level +4: เกราะ % และลดกระโดด
+  # Level +4: Percentage armor and jump stamina reduction
   # ------------------------------------------------------------------
   4:
     - Ability: ArmorPercent
-      Value: 2.0      # พลังป้องกันเกราะ +2%
+      Value: 2.0      # +2% Armor
     - Ability: JumpStaminaReduction
-      Value: 1.0      # ลด Stamina กระโดด 1%
+      Value: 1.0      # -1% Jump Stamina
 
   # ------------------------------------------------------------------
-  # Level +5: ★ MILESTONE: ปลดล็อกระบบ Parry
+  # Level +5: ★ MILESTONE: Parry window & deflection bonus
   # ------------------------------------------------------------------
   5:
     - Ability: ShieldDeflectionForce
-      Value: 5.0      # เพิ่มแรงปัดป้อง 5%
+      Value: 5.0      # +5% Deflection Force
     - Ability: ShieldTimedBlock
-      Value: 2.0      # โบนัส Parry +0.02x
+      Value: 2.0      # +0.02x Parry Bonus
 
   # ------------------------------------------------------------------
-  # Level +6: พลังรับขั้นกลาง
+  # Level +6: Mid-tier defensive reinforcement
   # ------------------------------------------------------------------
   6:
     - Ability: ArmorFlat
-      Value: 1.5      # สะสมเกราะคงที่รวมเป็น +3.0
+      Value: 1.5      # Cumulative +3.0 Flat Armor
     - Ability: ShieldBlockPower
-      Value: 5.0      # สะสมพลังบล็อกรวมเป็น +10%
+      Value: 5.0      # Cumulative +10% Shield Block Power
 
   # ------------------------------------------------------------------
-  # Level +7: กลิ้งหลบคล่อง
+  # Level +7: Agile evasion
   # ------------------------------------------------------------------
   7:
     - Ability: DodgeStaminaReduction
-      Value: 1.0      # สะสม Stamina กลิ้งหลบรวมเป็น -2%
+      Value: 1.0      # Cumulative -2% Dodge Stamina
 
   # ------------------------------------------------------------------
-  # Level +8: เกราะหนา
+  # Level +8: Heavy armor enhancement
   # ------------------------------------------------------------------
   8:
     - Ability: ArmorPercent
-      Value: 2.0      # สะสมเกราะเปอร์เซ็นต์รวมเป็น +4%
+      Value: 2.0      # Cumulative +4% Armor
 
   # ------------------------------------------------------------------
-  # Level +9: กำแพงเหล็ก - พลังป้องกันโล่และการบล็อก
+  # Level +9: Bulwark - Shield defense and block endurance
   # ------------------------------------------------------------------
   9:
     - Ability: ShieldBlockPower
-      Value: 5.0      # สะสมพลังบล็อกรวมเป็น +15%
+      Value: 5.0      # Cumulative +15% Shield Block Power
     - Ability: ShieldBlockStaminaReduction
-      Value: 2.0      # สะสมลด Stamina บล็อกรวมเป็น -4%
+      Value: 2.0      # Cumulative -4% Block Stamina
     - Ability: RunStaminaReduction
-      Value: 1.0      # สะสม Stamina วิ่งรวมเป็น -2%
+      Value: 1.0      # Cumulative -2% Run Stamina
 
   # ------------------------------------------------------------------
-  # Level +10: ★ MILESTONE: Masterwork - สลัดความเชื่องช้า & ฟื้นฟูเวท
+  # Level +10: ★ MILESTONE: Masterwork - Movement penalty relief & Eitr regen
   # ------------------------------------------------------------------
   10:
     - Ability: ArmorMovementPenaltyReduction
-      Value: 15.0     # ลดโทษความเร็วเดิน 15%
+      Value: 15.0     # 15% Movement Penalty Reduction
     - Ability: EitrRegen
-      Value: 10.0     # เพิ่มอัตราฟื้นฟู Eitr 10%
+      Value: 10.0     # +10% Eitr Regen
 
   # ------------------------------------------------------------------
-  # Level +11: ก้าวสู่อุปกรณ์ระดับสูง (Elite Tier)
+  # Level +11: Elite tier progression
   # ------------------------------------------------------------------
   11:
     - Ability: ArmorFlat
-      Value: 2.0      # สะสมเกราะคงที่รวมเป็น +5.0
+      Value: 2.0      # Cumulative +5.0 Flat Armor
 
   # ------------------------------------------------------------------
-  # Level +12: บล็อกแน่น
+  # Level +12: Solid blocking
   # ------------------------------------------------------------------
   12:
     - Ability: ShieldBlockPower
-      Value: 5.0      # สะสมพลังบล็อกรวมเป็น +20%
+      Value: 5.0      # Cumulative +20% Shield Block Power
 
   # ------------------------------------------------------------------
-  # Level +13: พลังการปกป้อง
+  # Level +13: Aegis fortification
   # ------------------------------------------------------------------
   13:
     - Ability: ArmorPercent
-      Value: 2.0      # สะสมเกราะเปอร์เซ็นต์รวมเป็น +6%
+      Value: 2.0      # Cumulative +6% Armor
     - Ability: JumpStaminaReduction
-      Value: 1.0      # สะสม Stamina กระโดดรวมเป็น -2%
+      Value: 1.0      # Cumulative -2% Jump Stamina
 
   # ------------------------------------------------------------------
-  # Level +14: การปัดป้องไร้ช่องโหว่ & กลิ้งพลิ้ว
+  # Level +14: Seamless deflection & nimble rolls
   # ------------------------------------------------------------------
   14:
     - Ability: ShieldTimedBlock
-      Value: 2.0      # สะสม Parry รวมเป็น +0.04x
+      Value: 2.0      # Cumulative +0.04x Parry Bonus
     - Ability: DodgeStaminaReduction
-      Value: 1.0      # สะสม Stamina กลิ้งหลบรวมเป็น -3%
+      Value: 1.0      # Cumulative -3% Dodge Stamina
 
   # ------------------------------------------------------------------
-  # Level +15: ★ MILESTONE: Legendary - วิ่งไวไร้โทษ
+  # Level +15: ★ MILESTONE: Legendary - Weightless stride
   # ------------------------------------------------------------------
   15:
     - Ability: ArmorMovementPenaltyReduction
-      Value: 20.0     # ลดโทษเดินช้าเพิ่ม 20% (เริ่มได้โบนัสสปีด)
+      Value: 20.0     # Additional 20% Movement Penalty Reduction (begins speed bonus)
     - Ability: ShieldDeflectionForce
-      Value: 5.0      # สะสมแรงปัดป้องรวมเป็น +10%
+      Value: 5.0      # Cumulative +10% Deflection Force
 
   # ------------------------------------------------------------------
-  # Level +16: สู่ระดับตำนาน (Mythic Tier)
+  # Level +16: Mythic tier progression
   # ------------------------------------------------------------------
   16:
     - Ability: ArmorFlat
-      Value: 2.0      # สะสมเกราะคงที่รวมเป็น +7.0
+      Value: 2.0      # Cumulative +7.0 Flat Armor
 
   # ------------------------------------------------------------------
-  # Level +17: การบล็อกระดับเทพ
+  # Level +17: Divine blocking mastery
   # ------------------------------------------------------------------
   17:
     - Ability: ShieldBlockPower
-      Value: 5.0      # สะสมพลังบล็อกรวมเป็น +25%
+      Value: 5.0      # Cumulative +25% Shield Block Power
 
   # ------------------------------------------------------------------
-  # Level +18: เกราะขั้นสุดยอด
+  # Level +18: Apex armor plating
   # ------------------------------------------------------------------
   18:
     - Ability: ArmorPercent
-      Value: 2.0      # สะสมเกราะเปอร์เซ็นต์รวมเป็น +8%
+      Value: 2.0      # Cumulative +8% Armor
 
   # ------------------------------------------------------------------
-  # Level +19: ปัดป้องขั้นเทพ & ฟื้นฟู Eitr
+  # Level +19: Godly parry & mystical Eitr regen
   # ------------------------------------------------------------------
   19:
     - Ability: ShieldTimedBlock
-      Value: 2.0      # สะสม Parry รวมเป็น +0.06x
+      Value: 2.0      # Cumulative +0.06x Parry Bonus
     - Ability: EitrRegen
-      Value: 10.0     # สะสม Eitr Regen รวมเป็น +20%
+      Value: 10.0     # Cumulative +20% Eitr Regen
 
   # ------------------------------------------------------------------
-  # Level +20: ★ ULTIMATE AWAKENING: จุดสูงสุดของพลังป้องกัน
+  # Level +20: ★ ULTIMATE AWAKENING: Apex Defensive Power
   # ------------------------------------------------------------------
   20:
     - Ability: ArmorFlat
-      Value: 3.0      # รวมโบนัสเกราะคงที่สะสมทั้งหมด = +10.0
+      Value: 3.0      # Total Cumulative Flat Armor = +10.0
     - Ability: ArmorMovementPenaltyReduction
-      Value: 25.0     # ลบล้างโทษเดินช้าทั้งหมด 100% พร้อมโบนัสวิ่งไว
+      Value: 25.0     # 100% Movement Penalty Elimination with positive speed bonus

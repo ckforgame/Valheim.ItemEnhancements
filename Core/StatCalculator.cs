@@ -8,7 +8,7 @@ namespace Valheim.ItemEnhancements.Core
     public static class StatCalculator
     {
         /// <summary>
-        /// คำนวณเพิ่มค่าความเสียหายทุกประเภทของอาวุธตามระดับการตีบวก
+        /// Applies scaled damage bonus across all weapon damage types based on enhancement level
         /// </summary>
         public static void ApplyDamageBonus(ItemDrop.ItemData item, int level, ref HitData.DamageTypes damages)
         {
@@ -32,7 +32,7 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// คำนวณพลังป้องกันเกราะเพิ่มเติม (ทั้งแบบ Flat และแบบ Percent)
+        /// Calculates additional armor defense bonus (combining Flat and Percent bonuses)
         /// </summary>
         public static float GetArmorBonus(ItemDrop.ItemData item, int level, float baseArmor)
         {
@@ -45,7 +45,7 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// คำนวณพลังบล็อกของโล่
+        /// Calculates additional shield block power bonus
         /// </summary>
         public static float GetBlockPowerBonus(ItemDrop.ItemData item, int level, float baseBlock)
         {
@@ -54,7 +54,7 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// คำนวณแรงปัดป้อง (Deflection force)
+        /// Calculates additional shield deflection force bonus
         /// </summary>
         public static float GetDeflectionBonus(ItemDrop.ItemData item, int level, float baseDeflection)
         {
@@ -63,7 +63,7 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// คำนวณความทนทานสูงสุดเพิ่มเติม
+        /// Calculates additional maximum item durability bonus
         /// </summary>
         public static float GetDurabilityBonus(ItemDrop.ItemData item, int level, float baseDurability)
         {
@@ -72,7 +72,7 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// คำนวณการลดน้ำหนักของอุปกรณ์
+        /// Calculates equipment weight multiplier
         /// </summary>
         public static float GetWeightMultiplier(int level)
         {
@@ -82,7 +82,7 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// คำนวณการลดโทษความเร็วเคลื่อนที่ของเกราะ/โล่ (และเปลี่ยนเป็นโบนัสความเร็วที่ระดับสูง)
+        /// Calculates movement speed penalty reduction (and high-level movement bonus)
         /// </summary>
         public static float GetMovementModifierDelta(ItemDrop.ItemData item, int level)
         {
@@ -117,7 +117,7 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// คำนวณการลดการใช้ Stamina โจมตี
+        /// Calculates attack stamina usage reduction
         /// </summary>
         public static float GetAttackStaminaReduction(int level)
         {
@@ -126,7 +126,7 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// คำนวณการลดการใช้ Eitr ในการร่ายมนตร์
+        /// Calculates magic attack Eitr usage reduction
         /// </summary>
         public static float GetAttackEitrReduction(int level)
         {
@@ -135,7 +135,7 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// คำนวณการลด Stamina ในการบล็อก
+        /// Calculates block stamina usage reduction
         /// </summary>
         public static float GetBlockStaminaReduction(int level)
         {
@@ -144,7 +144,7 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// คำนวณการลด Stamina ในการกลิ้งหลบ
+        /// Calculates dodge stamina usage reduction
         /// </summary>
         public static float GetDodgeStaminaReduction(int level)
         {
@@ -153,7 +153,7 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// คำนวณการลด Stamina ในการวิ่ง
+        /// Calculates sprint stamina usage reduction
         /// </summary>
         public static float GetRunStaminaReduction(int level)
         {
@@ -162,7 +162,7 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// คำนวณการลด Stamina ในการกระโดด
+        /// Calculates jump stamina usage reduction
         /// </summary>
         public static float GetJumpStaminaReduction(int level)
         {
@@ -171,7 +171,7 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// คำนวณโบนัสฟื้นฟู Eitr Regen
+        /// Calculates Eitr regeneration rate bonus
         /// </summary>
         public static float GetEitrRegenBonus(int level)
         {
@@ -180,7 +180,7 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// คำนวณโบนัสเพิ่มน้ำหนักบรรทุก (Carry Weight) สำหรับเข็มขัดหรือเครื่องประดับ
+        /// Calculates maximum carry weight bonus for belts or utility accessories
         /// </summary>
         public static float GetCarryWeightBonus(ItemDrop.ItemData item, int level)
         {
@@ -293,7 +293,7 @@ namespace Valheim.ItemEnhancements.Core
 
         public static float GetCheatItemEitrRegen(ItemDrop.ItemData item, int level)
         {
-            // EitrRegen ใช้ค่าจาก Armor.yml โดยตรง ไม่มี Cheat variant แยก
+            // EitrRegen is sourced directly from Armor.yml, no separate cheat variant
             return 0f;
         }
 

@@ -7,7 +7,7 @@ namespace Valheim.ItemEnhancements.Patches
     public static class GameCameraPatches
     {
         /// <summary>
-        /// ป้องกันไม่ให้ GameCamera ล็อกเมาส์และหมุนมุมกล้องขณะที่หน้าต่างตีบวกเปิดอยู่ (โดยเฉพาะเมื่อไม่ได้เปิด Inventory)
+        /// Prevents GameCamera from capturing mouse and rotating camera when enhancement window is open.
         /// </summary>
         [HarmonyPatch(typeof(GameCamera), "UpdateMouseCapture")]
         public static class UpdateMouseCapture_Patch
@@ -19,7 +19,7 @@ namespace Valheim.ItemEnhancements.Patches
                     ___m_mouseCapture = false;
                     ZCursor.LockState = CursorLockMode.None;
                     ZCursor.Show();
-                    return false; // ข้ามการคำนวณของเกมเพื่อไม่ให้เมาส์ถูกล็อก
+                    return false; // Skip game calculation to prevent mouse capture
                 }
                 return true;
             }

@@ -39,10 +39,10 @@ namespace Valheim.ItemEnhancements
                 }
             }
 
-            // 1. โหลดการตั้งค่าทั้งหมด (Config 1-20 success rates, failure rules, costs, abilities)
+            // 1. Initialize configuration (Config 1-20 success rates, failure rules, costs, abilities)
             ModConfig.Initialize(Config);
 
-            // 2. สร้าง UI GameObject
+            // 2. Create UI GameObject
             GameObject guiObj = new GameObject("Valheim_ItemEnhancement_GUI");
             guiObj.AddComponent<EnhancementGui>();
             DontDestroyOnLoad(guiObj);
@@ -64,11 +64,11 @@ namespace Valheim.ItemEnhancements
         {
             if (Player.m_localPlayer == null) return;
 
-            // ตรวจสอบว่าไม่ได้กำลังพิมพ์ใน Chat หรือกรอกข้อความใน UI
+            // Check if chat input or any text field is focused
             if (Chat.instance != null && Chat.instance.HasFocus()) return;
             if (TextInput.IsVisible()) return;
 
-            // ตรวจสอบปุ่มลัดเพื่อเปิด/ปิดหน้าต่างตีบวก
+            // Check shortcut key to toggle enhancement window
             if (Input.GetKeyDown(ModConfig.ToggleGuiKey.Value))
             {
                 EnhancementGui.Toggle();

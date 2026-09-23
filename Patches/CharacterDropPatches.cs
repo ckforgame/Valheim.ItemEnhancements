@@ -9,7 +9,7 @@ namespace Valheim.ItemEnhancements.Patches
     public static class CharacterDropPatches
     {
         /// <summary>
-        /// Harmony Patch สำหรับ CharacterDrop.GenerateDropList เพื่อสอดแทรก Enhancement Scrolls
+        /// Harmony Patch for CharacterDrop.GenerateDropList to inject Enhancement Scrolls.
         /// </summary>
         [HarmonyPatch(typeof(CharacterDrop), nameof(CharacterDrop.GenerateDropList))]
         public static class CharacterDrop_GenerateDropList_Patch
@@ -26,8 +26,8 @@ namespace Valheim.ItemEnhancements.Patches
         }
 
         /// <summary>
-        /// Harmony Patch สำหรับ CharacterDrop.DropItems เพื่อรับประกันว่า Prefab ไอเทมที่กำลังจะดรอปทุกชิ้นมีสถานะ Active
-        /// เพื่อให้ Object.Instantiate สร้าง GameObject ที่มองเห็นได้และสามารถเก็บขึ้นมาได้
+        /// Harmony Patch for CharacterDrop.DropItems to ensure all dropping prefabs are active,
+        /// ensuring Object.Instantiate creates visible and pickable GameObjects.
         /// </summary>
         [HarmonyPatch(typeof(CharacterDrop), nameof(CharacterDrop.DropItems))]
         public static class CharacterDrop_DropItems_Patch
@@ -47,7 +47,7 @@ namespace Valheim.ItemEnhancements.Patches
         }
 
         /// <summary>
-        /// Harmony Patch เมื่อ ObjectDB ตื่นตัว ให้ลงทะเบียน Prefabs ม้วนคัมภีร์และสูตรคราฟต์
+        /// Harmony Patch for ObjectDB Awake to register scroll prefabs and recipes.
         /// </summary>
         [HarmonyPatch(typeof(ObjectDB), "Awake")]
         public static class ObjectDB_Awake_Patch
@@ -59,7 +59,7 @@ namespace Valheim.ItemEnhancements.Patches
         }
 
         /// <summary>
-        /// Harmony Patch เมื่อ ObjectDB ถูกคัดลอกในฉากโลก
+        /// Harmony Patch for ObjectDB CopyOtherDB.
         /// </summary>
         [HarmonyPatch(typeof(ObjectDB), nameof(ObjectDB.CopyOtherDB))]
         public static class ObjectDB_CopyOtherDB_Patch
@@ -71,7 +71,7 @@ namespace Valheim.ItemEnhancements.Patches
         }
 
         /// <summary>
-        /// Harmony Patch เมื่อ ZNetScene พร้อม ให้ลงทะเบียน Prefabs เพื่อซิงค์ในโลก Multiplayer
+        /// Harmony Patch when ZNetScene is ready to register prefabs for multiplayer synchronization.
         /// </summary>
         [HarmonyPatch(typeof(ZNetScene), "Awake")]
         public static class ZNetScene_Awake_Patch
@@ -84,7 +84,7 @@ namespace Valheim.ItemEnhancements.Patches
         }
 
         /// <summary>
-        /// Harmony Patch ป้องกันไม่ให้ ZNetView ถูกทำลายหรือลงทะเบียน ZDO ในขณะโคลน Prefab ต้นแบบ
+        /// Harmony Patch preventing ZNetView from being destroyed or registering ZDO while cloning template prefab.
         /// </summary>
         [HarmonyPatch(typeof(ZNetView), "Awake")]
         public static class ZNetView_Awake_PrefabGuard_Patch
@@ -93,14 +93,14 @@ namespace Valheim.ItemEnhancements.Patches
             {
                 if (ScrollItemManager.IsCloningCustomPrefab)
                 {
-                    return false; // ข้าม Awake ชั่วคราวเพื่อให้ ZNetView คงอยู่บน Prefab โดยไม่สร้าง ZDO
+                    return false; // Temporarily skip Awake so ZNetView remains on prefab without creating a ZDO
                 }
                 return true;
             }
         }
 
         /// <summary>
-        /// Harmony Patch ป้องกันไม่ให้ ItemDrop ลงทะเบียนเข้า s_instances ในขณะโคลน Prefab ต้นแบบ
+        /// Harmony Patch preventing ItemDrop from registering into s_instances while cloning template prefab.
         /// </summary>
         [HarmonyPatch(typeof(ItemDrop), "Awake")]
         public static class ItemDrop_Awake_PrefabGuard_Patch
@@ -109,14 +109,14 @@ namespace Valheim.ItemEnhancements.Patches
             {
                 if (ScrollItemManager.IsCloningCustomPrefab)
                 {
-                    return false; // ข้าม Awake ชั่วคราวไม่ให้ Prefab เข้าไปอยู่ในรายการไอเทมในโลก
+                    return false; // Temporarily skip Awake so prefab does not enter active world item list
                 }
                 return true;
             }
         }
 
         /// <summary>
-        /// Harmony Patch ป้องกันไม่ให้ Floating ทำงานในขณะโคลน Prefab ต้นแบบ
+        /// Harmony Patch preventing Floating component from running while cloning template prefab.
         /// </summary>
         [HarmonyPatch(typeof(Floating), "Awake")]
         public static class Floating_Awake_PrefabGuard_Patch
@@ -132,8 +132,8 @@ namespace Valheim.ItemEnhancements.Patches
         }
 
         /// <summary>
-        /// Harmony Patch ป้องกัน NullReferenceException ใน Floating.CustomFixedUpdate
-        /// หาก m_nview เป็น null หรือยังไม่ IsValid
+        /// Harmony Patch preventing NullReferenceException in Floating.CustomFixedUpdate
+        /// if m_nview is null or not yet IsValid.
         /// </summary>
         [HarmonyPatch(typeof(Floating), nameof(Floating.CustomFixedUpdate))]
         public static class Floating_CustomFixedUpdate_Patch
@@ -149,7 +149,7 @@ namespace Valheim.ItemEnhancements.Patches
                     ZNetView nview = _nviewRef != null ? _nviewRef(__instance) : __instance.GetComponent<ZNetView>();
                     if (nview == null || !nview.IsValid())
                     {
-                        return false; // ข้ามการคำนวณฟิสิกส์ลอยน้ำหาก ZNetView ไม่สมบูรณ์
+                        return false; // Skip floating physics calculation if ZNetView is not valid
                     }
                 }
                 catch
@@ -170,8 +170,8 @@ namespace Valheim.ItemEnhancements.Patches
         }
 
         /// <summary>
-        /// Harmony Patch ดักจับ NullReferenceException ใน Player.AutoPickup
-        /// เผื่อมีไอเทมผิดปกติหรือไม่มี ZNetView ตกอยู่ในระยะเก็บของ
+        /// Harmony Patch catching NullReferenceException in Player.AutoPickup
+        /// in case an abnormal item or item without ZNetView drops within pickup range.
         /// </summary>
         [HarmonyPatch(typeof(Player), "AutoPickup")]
         public static class Player_AutoPickup_Patch
@@ -180,16 +180,16 @@ namespace Valheim.ItemEnhancements.Patches
             {
                 if (__exception is NullReferenceException)
                 {
-                    return null; // ระงับข้อผิดพลาดและปล่อยให้เกมดำเนินต่อไป
+                    return null; // Suppress exception and let game continue normally
                 }
                 return __exception;
             }
         }
 
         /// <summary>
-        /// Harmony Patch ป้องกัน NullReferenceException ใน ZNetScene.RemoveObjects
-        /// หากมี GameObject ที่ถูกทำลายหรือ ZDO สูญหายหลงเหลืออยู่ใน m_instances
-        /// รองรับทั้งโครงสร้าง ZDO (Valheim เวอร์ชั่นใหม่) และ ZDOID ผ่าน IDictionary อย่างปลอดภัย
+        /// Harmony Patch preventing NullReferenceException in ZNetScene.RemoveObjects
+        /// if destroyed GameObjects or missing ZDOs remain in m_instances.
+        /// Safely supports both ZDO and ZDOID dictionary structures via IDictionary.
         /// </summary>
         [HarmonyPatch(typeof(ZNetScene), "RemoveObjects")]
         public static class ZNetScene_RemoveObjects_Patch

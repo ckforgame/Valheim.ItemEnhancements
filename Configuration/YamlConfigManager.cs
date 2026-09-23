@@ -477,11 +477,11 @@ namespace Valheim.ItemEnhancements.Configuration
 
         private const string DefaultSuccessYaml = @"# ====================================================================
 # VALHEIM ITEM ENHANCEMENTS - SUCCESS & RULES CONFIGURATION
-# หมวดหมู่อัตราความสำเร็จ, กฎการล้มเหลว, ค่าธรรมเนียม และการดรอปคัมภีร์
+# Success rates, failure penalties, coin fees, and scroll requirements
 # ====================================================================
-# หากต้องการปรับแต่งค่าโดยไม่ให้การอัปเดต Mod ส่งผลกระทบ
-# ให้สร้างไฟล์ ""Success.override.yml"" ในโฟลเดอร์เดียวกันนี้
-# และใส่เฉพาะค่าที่ต้องการแก้ไข ระบบจะนำค่า override มาทับค่าเดิมอัตโนมัติ
+# To customize values without having mod updates overwrite your changes,
+# create a file named ""Success.override.yml"" in this same folder
+# and specify only the values you wish to override.
 # ====================================================================
 
 SuccessRates:
@@ -707,7 +707,7 @@ Levels:
 ";
 
         private const string DefaultCheatYaml = @"# ====================================================================
-# VALHEIM ITEM ENHANCEMENTS - CHEAT ABILITIES CONFIGURATION (โหมดโกงเสริม)
+# VALHEIM ITEM ENHANCEMENTS - CHEAT ABILITIES CONFIGURATION
 # ====================================================================
 
 EnableCheatAbilities: false
@@ -732,11 +732,11 @@ Levels:
 
         private const string DefaultDropsYaml = @"# ====================================================================
 # VALHEIM ITEM ENHANCEMENTS - MONSTER SCROLL DROPS CONFIGURATION
-# หมวดหมู่อัตราการดรอปม้วนคัมภีร์จากมอนสเตอร์และบอสอย่างละเอียด
+# Detailed drop rates for enhancement scrolls from monsters and bosses
 # ====================================================================
-# หากต้องการปรับแต่งค่าโดยไม่ให้การอัปเดต Mod ส่งผลกระทบ
-# ให้สร้างไฟล์ ""Drops.override.yml"" ในโฟลเดอร์เดียวกันนี้
-# และใส่เฉพาะค่าที่ต้องการแก้ไข ระบบจะนำค่า override มาทับค่าเดิมอัตโนมัติ
+# To customize values without having mod updates overwrite your changes,
+# create a file named ""Drops.override.yml"" in this same folder
+# and specify only the values you wish to override.
 # ====================================================================
 
 EnableMonsterDrops: true

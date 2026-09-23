@@ -1,178 +1,182 @@
 # Valheim Item Enhancements (MMORPG Refinement Mod)
-ม็อดระบบตีบวกอุปกรณ์สไตล์เกม MMORPG (+1 ถึง +20) สำหรับเกม **Valheim**
+
+A comprehensive MMORPG-style item enhancement system (**+1 to +20**) for **Valheim**. Upgrade your weapons, shields, armor, and utility accessories with custom progression, particle effects, anvil soundscapes, and modular YAML configurations.
 
 ---
 
-## 🌟 ฟีเจอร์หลัก (Key Features)
+## 🌟 Key Features
 
-1. **ระบบตีบวกอุปกรณ์ตั้งแต่ระดับ +1 ถึง +20**:
-   - รองรับอุปกรณ์ทุกชนิดในเกม: ดาบ, ขวาน, ค้อน, กระบอง, มีด, หอก, ง้าว (Atgeir), ธนู, หน้าไม้, คทาเวทมนตร์, โล่ทุกประเภท, ชุดเกราะทุกชิ้น (หมวก, อก, กางเกง, ผ้าคลุม) และเครื่องประดับ/เข็มขัด (Megingjord, Wishbone)
-   - ปลอดภัย 100% ต่อไฟล์เซฟ: บันทึกข้อมูลระดับ +X ผ่านระบบ `m_customData` ของ Valheim ดั้งเดิม ไม่ทำให้เซฟเสียหายและรองรับ Multiplayer สมบูรณ์แบบ
+1. **Full Equipment Enhancement System (+1 to +20)**:
+   - **Supports all equipment in the game**: Swords, axes, maces, clubs, knives, spears, polearms (atgeirs), bows, crossbows, magic staves, all shields, all armor pieces (helmets, chest pieces, leg greaves, cloaks), and utility accessories (e.g. Megingjord, Wishbone).
+   - **100% Vanilla Save-Safe**: Enhancement levels and data are stored directly inside Valheim's native `m_customData` dictionary. Seamlessly works in single-player, dedicated servers, and multiplayer environments without corrupting character or world saves.
 
-2. **ระบบม้วนคัมภีร์ตีบวก (Enhancement Scrolls) & ฟรีค่าธรรมเนียม**:
-   - **ฟรีค่าธรรมเนียม**: ไม่ต้องใช้เหรียญทองใด ๆ ในการตีบวก (`RequireCoins = false` เป็นค่าเริ่มต้น)
-   - **ใช้ม้วนคัมภีร์ตีบวก 4 ระดับ (Tiers)** ที่ดรอปจากการสังหารมอนสเตอร์ในแต่ละ Biome
-   - **สูตรหลอมรวมคัมภีร์ (Scroll Fusion)**: สามารถนำคัมภีร์ระดับต่ำกว่า 3 ใบมารวมเป็นระดับถัดไป 1 ใบที่โต๊ะ Workbench ได้
+2. **Enhancement Scrolls & Free Refinement by Default**:
+   - **No Coin Fees**: Free of coin costs by default (`RequireCoins = false`).
+   - **4 Tiers of Enhancement Scrolls**: Slay monsters across different biomes to acquire enhancement scrolls tailored to each refinement tier.
+   - **Scroll Fusion at Workbench**: Combine 3 lower-tier scrolls at any standard workbench to craft 1 higher-tier scroll.
 
-3. **ดึง Abilities และ Status ดั้งเดิมทั้งหมดของเกมมาใช้อย่างครบครัน**:
-   - **พลังโจมตี (All Damage Types)**: ขยายค่าความเสียหายทุกชนิดที่มีบนอาวุธ (Slash, Pierce, Blunt, Chop, Pickaxe, Fire, Frost, Lightning, Poison, Spirit) +5% ต่อระดับ (+100% ที่ระดับ +20)
-   - **พลังป้องกันเกราะ (Armor)**: เพิ่มเกราะทั้งแบบ Flat (+1.5 ต่อระดับ) และ Percent (+2% ต่อระดับ) รวม +30 เกราะที่ระดับ +20
-   - **พลังป้องกันและการปัดป้องของโล่ (Shield Block & Parry)**: เพิ่ม Block Power, Deflection Force และ Timed Block (Parry Multiplier)
-   - **ลดการใช้ Stamina และ Eitr**:
-     - ลด Stamina ในการโจมตี (Attack Stamina) สูงสุด -20%
-     - ลด Eitr ในการร่ายเวท (Magic Staves) สูงสุด -20%
-     - ลด Stamina ในการบล็อก (Block Stamina) สูงสุด -30%
-     - ลด Stamina ในการกลิ้งหลบ (Dodge), วิ่งสปรินต์ (Run) และกระโดด (Jump)
-   - **ลดโทษความเร็วเดิน (Movement Speed Relief)**: ค่อยๆ ลบล้างโทษติดลบความเร็วเดิน (-5% ถึง -20%) ของเกราะหนักและโล่ทาวเวอร์ และมอบโบนัสความเร็วเดินเพิ่มเติมเมื่อถึงระดับสูง
-   - **ความทนทานและน้ำหนัก**: เพิ่มความทนทานสูงสุด (Max Durability) +5% ต่อระดับ และลดน้ำหนักอุปกรณ์ให้อ่อนตัวลงได้สูงสุด -30%
-   - **โบนัสพิเศษเฉพาะทาง**:
-     - มีด: เพิ่มตัวคูณ Backstab Damage
-     - ชุดนักเวท: เพิ่มอัตราฟื้นฟู Eitr Regen
-     - เข็มขัด Megingjord: เพิ่ม Carry Weight สูงสุด
+3. **Deep Integration with Vanilla Stats & Abilities**:
+   - **All Damage Types**: Scales all native weapon damage components (Slash, Pierce, Blunt, Chop, Pickaxe, Fire, Frost, Lightning, Poison, Spirit) by +5% per level (up to +50% at +20).
+   - **Armor Plating**: Provides both flat armor (+1.5 per level) and percentage armor bonuses (+2% per level), up to +10 flat armor and +8% at +20.
+   - **Shield Mastery**: Boosts Shield Block Power, Deflection Force, and Timed Block (Parry Multiplier).
+   - **Stamina & Eitr Conservation**:
+     - Reduces weapon attack stamina cost (up to -10%).
+     - Reduces magic staff eitr spellcasting cost (up to -4%).
+     - Reduces shield blocking stamina cost (up to -4%).
+     - Reduces dodge roll stamina, sprinting stamina, and jump stamina costs.
+   - **Movement Speed Penalty Relief**: Gradually negates the heavy movement speed penalties (-5% to -20%) of heavy armor and tower shields, granting positive movement speed bonuses at high levels.
+   - **Durability & Weight Reduction**: Increases maximum durability (+5% per tier up to +30%) and reduces equipment carry weight (up to -12%).
+   - **Specialized Perks**:
+     - Knives: Increases backstab / sneak attack damage multiplier (up to +0.20x).
+     - Mage Sets: Increases Eitr regeneration rate (up to +20%).
+     - Utility Belts (e.g., Megingjord): Increases maximum carry weight limit (up to +100).
 
-4. **ระบบกำหนดอัตราและการตั้งค่าผ่านไฟล์ YAML (Modular YAML Configs & Overrides)**:
-   - แยกหมวดหมู่การตั้งค่าอัตราต่าง ๆ ออกเป็นไฟล์ YAML ในโฟลเดอร์ `BepInEx/config/ckforgame.ItemEnhancements/`:
-     - `AbilityReference.txt`: **(ใหม่!)** คู่มืออ้างอิงรายชื่อ Ability ID ทั้งหมด 25 ตัวที่รองรับในระบบ พร้อมคำอธิบายและตัวอย่างไวยากรณ์
-     - `Item.yml`: อาวุธ (Damage, Stamina, Eitr, Backstab), ความทนทาน, น้ำหนัก, เครื่องประดับ พร้อมระบบกำหนดความสามารถรายระดับ `Levels: 1-20` แบบผลรวมสะสม (Cumulative Addition)
-     - `Armor.yml`: พลังป้องกันเกราะ, โล่ (Block, Parry), การลด Stamina เคลื่อนที่ (Dodge, Run, Jump), EitrRegen พร้อมระบบกำหนดความสามารถรายระดับ `Levels: 1-20`
-     - `Cheat.yml`: ตัวเลือกเปิด/ปิดโหมดโกง (`EnableCheatAbilities`), กำหนดความสามารถพิเศษระดับโกงรายระดับ (MaxHealth, MaxStamina, MaxEitr, HealthRegen, StaminaRegen, HealingMultiplier)
-     - `Success.yml`: อัตราความสำเร็จรายระดับ 1 ถึง 20, กฎการล้มเหลว, ค่าธรรมเนียม, ระยะห่างจากโต๊ะคราฟต์ (`RequireCraftingStation`, `CraftingStationRange`)
-     - `Drops.yml`: **(ใหม่!)** อัตราการดรอปม้วนคัมภีร์จากมอนสเตอร์และบอสอย่างละเอียด ปรับแต่งโอกาสดรอป (% Drop Chance) ของคัมภีร์ Tier 1 ถึง 4 แยกตาม Biome, มอนสเตอร์ระดับสูง (Elite) และบอสโลก
-   - **ระบบ Safe Overrides (`*.override.yml`)**: ป้องกันการตั้งค่าสูญหายเมื่ออัปเดตม็อด เพียงสร้างไฟล์ override เช่น `Item.override.yml`, `Armor.override.yml`, `Cheat.override.yml` หรือ `Success.override.yml` แล้วใส่เฉพาะระดับหรือค่าที่ต้องการคัสตอม ระบบจะโหลดค่าทับให้อัตโนมัติและไม่ถูกเขียนทับเมื่อม็อดมีการอัปเดต!
-   - **Hot-Reload ในตัว**: ระบบตรวจจับการบันทึกไฟล์ `.yml` หรือ `.override.yml` และอัปเดตสเตตัสในเกมทันทีแบบ Real-time โดยไม่ต้องรีสตาร์ตเกม
+4. **Modular YAML Configuration System & Safe Overrides**:
+   - Configuration files are neatly organized inside `BepInEx/config/ckforgame.ItemEnhancements/`:
+     - `AbilityReference.txt`: Complete documentation for all 25 supported Ability IDs with syntax examples.
+     - `Item.yml`: Weapons, durability, weight reduction, accessories, and cumulative level rewards (`Levels: 1-20`).
+     - `Armor.yml`: Armor, shields, mobility stamina, movement speed, and eitr regen.
+     - `Cheat.yml`: Optional overpowered abilities (MaxHealth, MaxStamina, MaxEitr, HealthRegen, StaminaRegen, HealingMultiplier).
+     - `Success.yml`: Success rates per level (+1 to +20), safe levels, downgrade/break rules, coin costs, and crafting station requirements.
+     - `Drops.yml`: Granular drop rates per biome and scroll tier, elite monster multipliers, and world boss guarantees.
+   - **Safe Overrides (`*.override.yml`)**: Prevent mod updates from overwriting your personal adjustments. Simply create an override file (e.g., `Item.override.yml`, `Drops.override.yml`) to define only the values you want to modify.
+   - **Live Hot-Reload**: Automatically detects when `.yml` or `.override.yml` files are saved and immediately updates in-game stats without restarting the game.
 
-5. **หน้าต่าง UI ตีบวกสไตล์ MMORPG พร้อมเสียงและเอฟเฟกต์ (Refinement GUI)**:
-   - เปิดได้ด้วยปุ่มลัด **`F8`** หรือคลิกปุ่ม **`[⚡ ตีบวก]`** ในหน้าต่าง Crafting Station
-   - คลิกเลือกหรือคลิกขวาที่ไอเทมในกระเป๋าเพื่อนำเข้าสู่แท่นตีเหล็ก
-   - แสดงม้วนคัมภีร์ที่ต้องใช้และจำนวนที่มีในกระเป๋าแบบเรียลไทม์
-   - หน้าต่างเทียบสเตตัสแบบ Real-time: ปัจจุบัน ➔ ระดับถัดไป พร้อมผลต่าง (+diff)
-   - เกจแสดงโอกาสสำเร็จ (%) แบบชัดเจน และแจ้งเตือนความเสี่ยงหากล้มเหลว
-   - เสียงเอฟเฟกต์ทั่งตีเหล็ก (Anvil SFX), แสงประกายไฟ, อนิเมชันหน่วงเวลาหลอม และข้อความแบนเนอร์แสดงผลลัพธ์
+5. **MMORPG Refinement GUI with Audio & Visual Feedback**:
+   - Open via configurable hotkey **`F8`** or click the **`[⚡ Enhance]`** button located right beside the Repair button on any Crafting Station.
+   - Select equipment from the dropdown menu or simply right-click/left-click any item in your inventory while the window is open.
+   - Real-time stat progression comparison (+diff preview).
+   - Clear success rate gauge and risk warnings.
+   - Dynamic anvil striking sound effects, sparks particles, forging animation delay, and HUD center announcement banners.
 
-6. **ป้ายบอกระดับสีตาม Tier ในกระเป๋า (Item Slot Badges)**:
-   - `+1 ถึง +3`: สีเขียวสดใส (`#4ade80`) Standard
-   - `+4 ถึง +6`: สีฟ้า Cyan (`#22d3ee`) Refined
-   - `+7 ถึง +9`: สีน้ำเงิน Rare (`#3b82f6`) Rare
-   - `+10 ถึง +12`: สีม่วง Epic (`#a855f7`) Epic
-   - `+13 ถึง +15`: สีส้มทอง Legendary (`#f59e0b`) Legendary
-   - `+16 ถึง +19`: สีแดงเลือดหมู Mythic (`#ef4444`) Mythic
-   - `+20`: สีทองรุ้ง Divine Prismatic (`#ffd700`) Divine
+6. **Tier-Colored Inventory Badges**:
+   - `+1 to +3`: **Common** (`#4ade80`, Vibrant Green)
+   - `+4 to +6`: **Refined** (`#22d3ee`, Cyan)
+   - `+7 to +9`: **Rare** (`#3b82f6`, Royal Blue)
+   - `+10 to +12`: **Epic** (`#a855f7`, Purple)
+   - `+13 to +15`: **Legendary** (`#f59e0b`, Amber Gold)
+   - `+16 to +19`: **Mythic** (`#ef4444`, Crimson Red)
+   - `+20`: **Divine** (`#ffd700`, Divine Gold)
 
 ---
 
-## 📜 ตารางม้วนคัมภีร์ตีบวก (Enhancement Scrolls by Tier)
+## 📜 Enhancement Scrolls by Tier
 
-| คัมภีร์ (Scroll Item) | ระดับการตีบวกที่ใช้ | แหล่งดรอปหลัก (Biomes & Monsters) | โอกาสดรอปเริ่มต้น (Default Chance) |
+| Scroll Name | Target Levels | Primary Biomes & Monsters | Default Drop Rate |
 |---|:---:|---|:---:|
-| **ใบตีบวกระดับ 1 (พื้นฐาน)** | **+1 ถึง +5** | มอนสเตอร์ในทุ่งหญ้า (Meadows) และป่าดำ (Black Forest) เช่น หมูป่า, เกรย์ดวาร์ฟ, โครงกระดูก | **15.0%** |
-| **ใบตีบวกระดับ 2 (ขัดเกลา)** | **+6 ถึง +10** | มอนสเตอร์ในหนองน้ำ (Swamp) และภูเขา (Mountain) เช่น ดราวเกอร์, บลอบ, หมาป่า, เดรก, โทรลล์ | **10.0%** |
-| **ใบตีบวกระดับ 3 (ประณีต)** | **+11 ถึง +15** | มอนสเตอร์ในที่ราบ (Plains) และม่านหมอก (Mistlands) เช่น ฟูลิง, ล็อกซ์, ซีกเกอร์, หุ่นหินโกเลม | **6.0%** |
-| **ใบตีบวกระดับ 4 (เทวะ)** | **+16 ถึง +20** | มอนสเตอร์ในแดนเถ้าถ่าน (Ashlands), จยาลล์ (Gjall) และบอสโลกทุกตัว | **3.0%** (บอสโลก 100%) |
+| **Enhancement Scroll Tier 1 (Common)** | **+1 to +5** | Meadows & Black Forest (Boars, Greydwarfs, Skeletons) | **15.0%** |
+| **Enhancement Scroll Tier 2 (Refined)** | **+6 to +10** | Swamp & Mountain (Draugr, Blobs, Wolves, Drakes, Trolls) | **10.0%** |
+| **Enhancement Scroll Tier 3 (Rare)** | **+11 to +15** | Plains & Mistlands (Fulings, Lox, Seekers, Stone Golems) | **6.0%** |
+| **Enhancement Scroll Tier 4 (Divine)** | **+16 to +20** | Ashlands, Gjall, and all World Bosses | **3.0%** (Bosses: 100%) |
 
-> **โบนัสมอนสเตอร์ดาว**: มอนสเตอร์ 1 ดาว และ 2 ดาว จะได้รับตัวคูณโอกาสดรอปเพิ่มขึ้น (+50% ต่อระดับดาว)  
-> **บอสโลก (World Bosses)**: การันตีการดรอปคัมภีร์ 100% สุ่มจำนวน 1 ถึง 3 ใบตามระดับของบอส  
-> **การรวมคัมภีร์ (Scroll Fusion)**: รวมคัมภีร์ระดับต่ำ 3 ใบที่โต๊ะ Workbench ➔ กลายเป็นคัมภีร์ระดับถัดไป 1 ใบ
+> **Starred Monster Multiplier**: 1-star and 2-star creatures receive enhanced drop multipliers (+50% per star level).  
+> **World Bosses**: Guarantee a 100% scroll drop (1 to 3 scrolls depending on the boss).  
+> **Scroll Fusion**: Craft 1 higher-tier scroll from 3 lower-tier scrolls at a Workbench.
 
 ---
 
-## ⚙️ ตารางอัตราความสำเร็จเริ่มต้น (Default Success Rates)
+## ⚙️ Default Success Rates (+1 to +20)
 
-| ระดับเป้าหมาย | โอกาสสำเร็จ (%) | วัตถุดิบที่ใช้ | ค่าธรรมเนียมทอง | ผลลัพธ์หากล้มเหลว |
+| Target Level | Success Rate | Required Scroll | Coin Cost | Result on Failure |
 |:---:|:---:|:---:|:---:|:---:|
-| **+1** | 100% | ใบตีบวกระดับ 1 x 1 | **ฟรี** | ปลอดภัย (Safe) |
-| **+2** | 100% | ใบตีบวกระดับ 1 x 1 | **ฟรี** | ปลอดภัย (Safe) |
-| **+3** | 95% | ใบตีบวกระดับ 1 x 1 | **ฟรี** | ปลอดภัย (Safe) |
-| **+4** | 90% | ใบตีบวกระดับ 1 x 1 | **ฟรี** | ลดเหลือ +2 (หรือ Safe ถ้าตั้ง SafeLevel 4) |
-| **+5** | 80% | ใบตีบวกระดับ 1 x 1 | **ฟรี** | ลดระดับเหลือ +3 |
-| **+6** | 70% | ใบตีบวกระดับ 2 x 1 | **ฟรี** | ลดระดับเหลือ +4 |
-| **+7** | 60% | ใบตีบวกระดับ 2 x 1 | **ฟรี** | ลดระดับเหลือ +5 |
-| **+8** | 50% | ใบตีบวกระดับ 2 x 1 | **ฟรี** | ลดระดับเหลือ +6 |
-| **+9** | 40% | ใบตีบวกระดับ 2 x 1 | **ฟรี** | ลดระดับเหลือ +7 |
-| **+10** | 35% | ใบตีบวกระดับ 2 x 1 | **ฟรี** | ลดระดับเหลือ +8 |
-| **+11** | 30% | ใบตีบวกระดับ 3 x 1 | **ฟรี** | ลดระดับเหลือ +9 |
-| **+12** | 25% | ใบตีบวกระดับ 3 x 1 | **ฟรี** | ลดระดับเหลือ +10 |
-| **+13** | 20% | ใบตีบวกระดับ 3 x 1 | **ฟรี** | ลดระดับเหลือ +11 |
-| **+14** | 15% | ใบตีบวกระดับ 3 x 1 | **ฟรี** | ลดระดับเหลือ +12 |
-| **+15** | 12% | ใบตีบวกระดับ 3 x 1 | **ฟรี** | ลดระดับเหลือ +13 |
-| **+16** | 10% | ใบตีบวกระดับ 4 x 1 | **ฟรี** | ลดระดับเหลือ +14 |
-| **+17** | 8% | ใบตีบวกระดับ 4 x 1 | **ฟรี** | ลดระดับเหลือ +15 |
-| **+18** | 5% | ใบตีบวกระดับ 4 x 1 | **ฟรี** | ลดระดับเหลือ +16 |
-| **+19** | 3% | ใบตีบวกระดับ 4 x 1 | **ฟรี** | ลดระดับเหลือ +17 |
-| **+20** | 1% | ใบตีบวกระดับ 4 x 1 | **ฟรี** | ลดระดับเหลือ +18 |
+| **+1** | 100% | Tier 1 Scroll x 1 | **Free** | Safe (No loss) |
+| **+2** | 100% | Tier 1 Scroll x 1 | **Free** | Safe (No loss) |
+| **+3** | 95% | Tier 1 Scroll x 1 | **Free** | Safe (No loss) |
+| **+4** | 90% | Tier 1 Scroll x 1 | **Free** | Downgrades to +2 |
+| **+5** | 80% | Tier 1 Scroll x 1 | **Free** | Downgrades to +3 |
+| **+6** | 70% | Tier 2 Scroll x 1 | **Free** | Downgrades to +4 |
+| **+7** | 60% | Tier 2 Scroll x 1 | **Free** | Downgrades to +5 |
+| **+8** | 50% | Tier 2 Scroll x 1 | **Free** | Downgrades to +6 |
+| **+9** | 40% | Tier 2 Scroll x 1 | **Free** | Downgrades to +7 |
+| **+10** | 35% | Tier 2 Scroll x 1 | **Free** | Downgrades to +8 |
+| **+11** | 30% | Tier 3 Scroll x 1 | **Free** | Downgrades to +9 |
+| **+12** | 25% | Tier 3 Scroll x 1 | **Free** | Downgrades to +10 |
+| **+13** | 20% | Tier 3 Scroll x 1 | **Free** | Downgrades to +11 |
+| **+14** | 15% | Tier 3 Scroll x 1 | **Free** | Downgrades to +12 |
+| **+15** | 12% | Tier 3 Scroll x 1 | **Free** | Downgrades to +13 |
+| **+16** | 10% | Tier 4 Scroll x 1 | **Free** | Downgrades to +14 |
+| **+17** | 8% | Tier 4 Scroll x 1 | **Free** | Downgrades to +15 |
+| **+18** | 5% | Tier 4 Scroll x 1 | **Free** | Downgrades to +16 |
+| **+19** | 3% | Tier 4 Scroll x 1 | **Free** | Downgrades to +17 |
+| **+20** | 1% | Tier 4 Scroll x 1 | **Free** | Downgrades to +18 |
 
-*(สามารถแก้ไขอัตราความสำเร็จ, อัตราการดรอป และตัวเลขทั้งหมดได้ในไฟล์ `ckforgame.ItemEnhancements.cfg`)*
+*(All rates, penalties, and safe levels can be customized in `Success.yml`)*
 
 ---
 
-## ⚡ คุณสมบัติพิเศษระดับโกง (Cheat Abilities - Optional)
+## ⚡ Optional Cheat Abilities
 
-สำหรับผู้เล่นที่ต้องการประสบการณ์แบบทรงพลังขั้นสุด (Overpowered / Power Fantasy) ม็อดมีระบบ **Cheat Abilities** ที่สามารถเลือก **เปิด/ปิด ได้อย่างอิสระใน Config** (`EnableCheatAbilities: true` / `false` ใน `Cheat.yml` หรือผ่าน Config):
+For players seeking a power-fantasy experience, the mod includes a dedicated set of **Cheat Abilities** that can be toggled ON or OFF in `Cheat.yml` (`EnableCheatAbilities: true / false`):
 
-| สเตตัสพิเศษระดับโกง | Ability ID | อุปกรณ์ที่ได้รับผล | ตัวอย่างใน Cheat.yml (+1) | ผลลัพธ์ที่ระดับ +20 |
+| Cheat Ability | Ability ID | Applicable Equipment | Example at +5 | Example at +20 |
 |---|---|---|:---:|:---:|
-| **Max Health Capacity (เลือดสูงสุด)** | `MaxHealth` | ชุดเกราะ, โล่, เครื่องประดับ | **+5 HP** | **+100 HP** ต่อชิ้น (+400 HP ครบเซ็ต) |
-| **Max Stamina Capacity (สเตมินาสูงสุด)** | `MaxStamina` | ชุดเกราะ, อาวุธ, เครื่องประดับ | **+5 Stamina** | **+100 Stamina** ต่อชิ้น |
-| **Max Eitr Capacity (พลังเวทสูงสุด)** | `MaxEitr` | ชุดเกราะ, อาวุธ, เครื่องประดับ | **+5 Eitr** | **+100 Eitr** ต่อชิ้น (ร่ายเวทได้แม้ไม่กินอาหารเวท!) |
-| **Health Regen Multiplier (ฟื้นฟูเลือด)** | `HealthRegen` | ชุดเกราะ, โล่, เครื่องประดับ | **+5%** | **+100%** ฟื้นฟูเลือดเร็วขึ้น 2 เท่าต่อชิ้น |
-| **Stamina Regen Multiplier (ฟื้นฟูสเตมินา)** | `StaminaRegen` | ชุดเกราะ, โล่, อาวุธ, เครื่องประดับ | **+5%** | **+100%** ฟื้นฟูสเตมินาเร็วขึ้น 2 เท่าต่อชิ้น |
-| **Healing Received Multiplier (โบนัสรับการฮีล)** | `HealingMultiplier` | ชุดเกราะ, โล่, เครื่องประดับ | **+5%** | **+100%** เพิ่มปริมาณเลือดที่ได้รับจากการฮีล 2 เท่า |
+| **Max Health Capacity** | `MaxHealth` | Armor, Shields, Accessories | **+10 HP** | **+100 HP** per piece |
+| **Max Stamina Capacity** | `MaxStamina` | Armor, Weapons, Accessories | **+10 Stamina** | **+100 Stamina** per piece |
+| **Max Eitr Capacity** | `MaxEitr` | Armor, Weapons, Accessories | **+10 Eitr** | **+100 Eitr** per piece |
+| **Health Regen Multiplier** | `HealthRegen` | Armor, Shields, Accessories | **+10%** | **+100%** (+2x health regen per piece) |
+| **Stamina Regen Multiplier** | `StaminaRegen` | Armor, Shields, Weapons, Accessories | **+10%** | **+100%** (+2x stamina regen per piece) |
+| **Healing Received Multiplier** | `HealingMultiplier` | Armor, Shields, Accessories | **+15%** | **+100%** (+2x healing received) |
 
-> **หมายเหตุ**: 
-> 1. ฟื้นฟูพลังเวท (`EitrRegen`) เป็นคุณสมบัติมาตรฐานที่มีอยู่ใน `Armor.yml` อยู่แล้ว จึงไม่จำเป็นต้องมีซ้ำใน Cheat
-> 2. สเตตัสใน `Cheat.yml` จะมีผลเฉพาะเมื่อเปิดใช้งาน `EnableCheatAbilities: true` เท่านั้น หากตั้งค่าเป็น `false` ระบบจะข้ามการคำนวณทั้งหมดทันที ปลอดภัยต่อสมดุลเกม
-
----
-
-## 🎮 วิธีการใช้งานในเกม (How to Play)
-
-1. ออกล่ามอนสเตอร์หรือสังหารบอสในโลกของ Valheim เพื่อฟาร์ม **ม้วนคัมภีร์ตีบวก (Enhancement Scrolls)**
-2. เดินเข้าไปในระยะใกล้โต๊ะคราฟต์หรือเตาตีเหล็ก (ระยะ 5.0 เมตร ไม่จำเป็นต้องกด E เปิดโต๊ะ)
-3. กดปุ่ม **`F8`** บนคีย์บอร์ด หรือคลิกปุ่ม **`[⚡ ตีบวก]`** ในหน้าต่างโต๊ะคราฟต์
-4. คลิกเลือกอุปกรณ์จากรายการ หรือคลิกขวาที่อุปกรณ์ในกระเป๋าของคุณ
-5. กดปุ่ม **`⚡ เริ่มตีบวก (ENHANCE ITEM) ⚡`** เพื่อเริ่มการตีบวก!
+> **Note**:
+> 1. Eitr regeneration (`EitrRegen`) is a standard ability already included in `Armor.yml` and does not require cheat mode.
+> 2. `Cheat.yml` abilities are completely ignored when `EnableCheatAbilities: false`.
 
 ---
 
-## 📁 โครงสร้างไฟล์ Configuration และการใช้งาน Override
+## 🎮 How to Play
 
-การตั้งค่าอัตราต่าง ๆ ถูกแยกเป็นไฟล์ YAML ตามหมวดหมู่อยู่ในโฟลเดอร์:  
-`<โฟลเดอร์เกมหรือโปรไฟล์ r2modman>/BepInEx/config/ckforgame.ItemEnhancements/`
+1. Hunt monsters and bosses across Valheim to farm **Enhancement Scrolls**.
+2. Stand near a Workbench or Forge (within 5.0 meters).
+3. Press **`F8`** or click the **`[⚡ Enhance]`** button in the crafting station window.
+4. Click an equipment from the dropdown menu, or right-click / left-click an item in your inventory.
+5. Click **`⚡ ENHANCE ITEM ⚡`** to begin refinement!
+
+---
+
+## 📁 Configuration & Custom Overrides
+
+YAML configuration files are stored at:  
+`BepInEx/config/ckforgame.ItemEnhancements/`
 
 ```
 BepInEx/config/ckforgame.ItemEnhancements/
-├── AbilityReference.txt # คู่มืออ้างอิงรายชื่อ Ability ID ทั้งหมด 25 ตัวที่รองรับ
-├── Success.yml          # อัตราสำเร็จ +1 ถึง +20, กฎ SafeLevel, ค่าธรรมเนียม, โต๊ะคราฟต์
-├── Drops.yml            # อัตราการดรอปคัมภีร์จากมอนสเตอร์และบอสแยกตาม Biome (Tier 1-4)
-├── Item.yml             # สเตตัสอาวุธ, ความทนทาน, น้ำหนัก, เครื่องประดับ และ Levels
-├── Armor.yml            # สเตตัสเกราะ, โล่, การลด Stamina, EitrRegen และ Levels
-└── Cheat.yml            # โหมดโกง (MaxHealth, MaxStamina, MaxEitr, HealthRegen, StaminaRegen, HealingMultiplier)
+├── AbilityReference.txt # Reference guide for all 25 supported Ability IDs
+├── Success.yml          # Success rates +1 to +20, safe level, penalties, coin fees
+├── Drops.yml            # Monster & boss scroll drop rates across all biomes
+├── Item.yml             # Weapons, durability, weight reduction, and accessories
+├── Armor.yml            # Armor, shields, stamina reduction, and eitr regen
+└── Cheat.yml            # Optional cheat abilities (Health/Stamina/Eitr capacity and regens)
 ```
 
-### 💡 วิธีสร้างไฟล์ Custom Override (ไม่ให้ม็อดอัปเดตทับ)
-1. ไปที่โฟลเดอร์ `BepInEx/config/ckforgame.ItemEnhancements/`
-2. สร้างไฟล์ใหม่โดยเติมคำว่า `.override` คั่นกลาง เช่น:
+### 💡 How to Create Custom Overrides (`*.override.yml`)
+1. Open the folder `BepInEx/config/ckforgame.ItemEnhancements/`.
+2. Create a new file with `.override.` inserted before `.yml`:
    - `Item.override.yml`
    - `Armor.override.yml`
-   - `Cheat.override.yml`
-   - `Success.override.yml`
    - `Drops.override.yml`
-3. ใส่เฉพาะฟิลด์หรือระดับที่ต้องการแก้ไข (ไม่จำเป็นต้องใส่ครบทุกบรรทัด) เช่น:
-   - ตัวอย่างเพิ่มดาเมจแบบคงที่ต่อระดับ:
-     ```yaml
-     WeaponDamageBonusPerLevel: 0.10
-     ```
-   - ตัวอย่างกำหนด Ability รายระดับแบบเฉพาะเจาะจง:
-     ```yaml
-     Levels:
-       1:
-         - Ability: WeaponDamage
-           Value: 10.0
-       5:
-         - Ability: CarryWeightBonus
-           Value: 50.0
-     ```
-4. บันทึกไฟล์: ม็อดจะตรวจจับและโหลดค่าใหม่เข้าสู่เกมทันที (Hot-Reload) โดยไม่ต้องปิดเกม
-5. **เมื่อมีการอัปเดตม็อดในอนาคต**: ตัวติดตั้งม็อดจะอัปเดตเฉพาะไฟล์ `.yml` พื้นฐาน แต่ไฟล์ `*.override.yml` ของคุณจะยังคงอยู่และมีผลบังคับใช้เสมอ!
+   - `Success.override.yml`
+   - `Cheat.override.yml`
+3. Specify only the settings or levels you wish to modify:
+   ```yaml
+   Levels:
+     1:
+       - Ability: WeaponDamage
+         Value: 10.0
+     5:
+       - Ability: CarryWeightBonus
+         Value: 50.0
+   ```
+4. Save the file: The mod automatically hot-reloads the changes immediately without restarting the game.
+5. **Future-Proof**: Whenever the mod is updated, base `.yml` files may be refreshed, but your `*.override.yml` files are never replaced!
 
+---
 
+## 🇹🇭 สรุปสำหรับผู้เล่นชาวไทย (Thai Summary)
 
+ม็อดระบบตีบวกอุปกรณ์สไตล์ MMORPG (+1 ถึง +20) สำหรับเกม Valheim:
+- รองรับอาวุธ ชุดเกราะ โล่ และเครื่องประดับทุกชนิด ปลอดภัยต่อไฟล์เซฟ 100%
+- ปรับภาษาหลักของ UI, ข้อความแจ้งเตือน, ชื่อคัมภีร์ และ Config ทั้งหมดเป็น **ภาษาอังกฤษ** โดยหากเปิดเกมด้วยภาษาไทย ตัวเกมจะแสดงคำแปลภาษาไทยให้อัตโนมัติผ่านระบบ Localization ของ Valheim
+- ฟาร์มม้วนคัมภีร์ตีบวก 4 ระดับ (Tier 1-4) ได้จากการกำจัดมอนสเตอร์และบอสในแต่ละไบโอม
+- รวมคัมภีร์ระดับต่ำ 3 ใบเป็นระดับถัดไป 1 ใบได้ที่โต๊ะ Workbench
+- เปิดหน้าต่างตีบวกได้ด้วยปุ่ม **`F8`** หรือกดปุ่ม **`[⚡ Enhance]`** ที่โต๊ะคราฟต์
+- สามารถปรับแต่งอัตราสำเร็จ ค่าสเตตัส และการดรอปได้อย่างอิสระผ่านไฟล์ YAML ในโฟลเดอร์ `BepInEx/config/ckforgame.ItemEnhancements/`

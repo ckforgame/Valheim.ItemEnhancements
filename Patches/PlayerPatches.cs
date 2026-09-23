@@ -11,7 +11,7 @@ namespace Valheim.ItemEnhancements.Patches
 {
     public static class PlayerPatches
     {
-        // 1. Movement Speed Modifier (ลดโทษความเร็วเดินของเกราะหนักและโล่)
+        // 1. Movement Speed Modifier (Reduces movement penalty of heavy armor and shields)
         [HarmonyPatch(typeof(Player), nameof(Player.GetEquipmentMovementModifier))]
         public static class GetEquipmentMovementModifier_Patch
         {
@@ -39,7 +39,7 @@ namespace Valheim.ItemEnhancements.Patches
             }
         }
 
-        // 2. Dodge Stamina Modifier (ลด Stamina กลิ้งหลบ)
+        // 2. Dodge Stamina Modifier (Reduces dodge roll stamina cost)
         [HarmonyPatch(typeof(Player), nameof(Player.GetEquipmentDodgeStaminaModifier))]
         public static class GetEquipmentDodgeStaminaModifier_Patch
         {
@@ -63,12 +63,12 @@ namespace Valheim.ItemEnhancements.Patches
                     }
                 }
 
-                // ค่า modifier ติดลบแปลว่าลดการใช้ stamina ใน Valheim
+                // Negative modifier indicates reduced stamina cost in Valheim
                 __result -= Mathf.Clamp(reduction, 0f, 0.50f);
             }
         }
 
-        // 3. Run Stamina Modifier (ลด Stamina วิ่งสปรินต์)
+        // 3. Run Stamina Modifier (Reduces sprinting stamina cost)
         [HarmonyPatch(typeof(Player), nameof(Player.GetEquipmentRunStaminaModifier))]
         public static class GetEquipmentRunStaminaModifier_Patch
         {
@@ -96,7 +96,7 @@ namespace Valheim.ItemEnhancements.Patches
             }
         }
 
-        // 4. Jump Stamina Modifier (ลด Stamina กระโดด)
+        // 4. Jump Stamina Modifier (Reduces jump stamina cost)
         [HarmonyPatch(typeof(Player), nameof(Player.GetEquipmentJumpStaminaModifier))]
         public static class GetEquipmentJumpStaminaModifier_Patch
         {
@@ -124,7 +124,7 @@ namespace Valheim.ItemEnhancements.Patches
             }
         }
 
-        // 5. Block Stamina Modifier (ลด Stamina ในการบล็อก)
+        // 5. Block Stamina Modifier (Reduces block stamina cost)
         [HarmonyPatch(typeof(Player), nameof(Player.GetEquipmentBlockStaminaModifier))]
         public static class GetEquipmentBlockStaminaModifier_Patch
         {
@@ -152,7 +152,7 @@ namespace Valheim.ItemEnhancements.Patches
             }
         }
 
-        // 6. Eitr Regen Modifier (เพิ่มการฟื้นฟูพลังเวทมนตร์)
+        // 6. Eitr Regen Modifier (Increases magical energy regeneration)
         [HarmonyPatch(typeof(Player), nameof(Player.GetEquipmentEitrRegenModifier))]
         public static class GetEquipmentEitrRegenModifier_Patch
         {
@@ -177,7 +177,7 @@ namespace Valheim.ItemEnhancements.Patches
             }
         }
 
-        // 7. Carry Weight Modifier (เพิ่มน้ำหนักบรรทุกสูงสุด เช่น Megingjord)
+        // 7. Carry Weight Modifier (Increases maximum carry weight, e.g. Megingjord)
         [HarmonyPatch(typeof(Player), nameof(Player.GetMaxCarryWeight))]
         public static class GetMaxCarryWeight_Patch
         {
@@ -202,7 +202,7 @@ namespace Valheim.ItemEnhancements.Patches
             }
         }
 
-        // 8. Weapon Attack Stamina Reduction (ลด Stamina ต่อการโจมตีของอาวุธ)
+        // 8. Weapon Attack Stamina Reduction (Reduces stamina cost per weapon attack)
         [HarmonyPatch(typeof(Attack), "GetAttackStamina")]
         public static class GetAttackStamina_Patch
         {
@@ -219,7 +219,7 @@ namespace Valheim.ItemEnhancements.Patches
             }
         }
 
-        // 9. Weapon Attack Eitr Reduction (ลด Eitr ต่อการร่ายเวทของคทา)
+        // 9. Weapon Attack Eitr Reduction (Reduces eitr cost per staff spellcast)
         [HarmonyPatch(typeof(Attack), nameof(Attack.GetAttackEitr), typeof(Character), typeof(ItemDrop.ItemData))]
         public static class GetAttackEitr_Patch
         {
@@ -236,7 +236,7 @@ namespace Valheim.ItemEnhancements.Patches
             }
         }
 
-        // 10. Backstab Bonus (เพิ่มความรุนแรงเมื่อลอบโจมตีข้างหลัง)
+        // 10. Backstab Bonus (Increases sneak attack multiplier)
         [HarmonyPatch(typeof(Attack), "ModifyDamage")]
         public static class ModifyDamage_Patch
         {
@@ -252,7 +252,7 @@ namespace Valheim.ItemEnhancements.Patches
             }
         }
 
-        // 11. Timed Block / Parry Bonus Multiplier (เพิ่มโบนัสการปัดป้องตรงจังหวะ)
+        // 11. Timed Block / Parry Bonus Multiplier (Increases parry window bonus multiplier)
         [HarmonyPatch(typeof(SEMan), nameof(SEMan.ModifyTimedBlockBonus))]
         public static class ModifyTimedBlockBonus_Patch
         {

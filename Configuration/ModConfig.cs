@@ -50,17 +50,17 @@ namespace Valheim.ItemEnhancements.Configuration
 
             // Core UI & Controls bindings in BepInEx CFG
             ToggleGuiKey = config.Bind(
-                "1. General & UI (การตั้งค่าทั่วไปและปุ่มลัด)",
+                "1. General & UI",
                 "ToggleGuiKey",
                 KeyCode.F8,
-                "ปุ่มลัดสำหรับเปิด/ปิดหน้าต่างตีบวก (Shortcut key to toggle enhancement window)"
+                "Shortcut key to toggle the item enhancement window."
             );
 
             ShowInventoryBadges = config.Bind(
-                "1. General & UI (การตั้งค่าทั่วไปและปุ่มลัด)",
+                "1. General & UI",
                 "ShowInventoryBadges",
                 true,
-                "แสดงป้ายระดับ +X สีตามเทียร์บนไอคอนในกระเป๋า (Show tier-colored level badge on inventory icons)"
+                "Display tier-colored enhancement level badges (+X) on inventory icons."
             );
         }
 
@@ -84,7 +84,7 @@ namespace Valheim.ItemEnhancements.Configuration
     }
 
     /// <summary>
-    /// Wrapper struct เพื่อให้โค้ดส่วนอื่นสามารถเรียกใช้ .Value และแปลงค่าเป็น Primitive types ได้อย่างราบรื่น
+    /// Wrapper struct allowing callers to access .Value and seamlessly cast to primitive types.
     /// </summary>
     public readonly struct ConfigValue<T>
     {

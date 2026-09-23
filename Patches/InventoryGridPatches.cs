@@ -11,7 +11,7 @@ namespace Valheim.ItemEnhancements.Patches
     public static class InventoryGridPatches
     {
         /// <summary>
-        /// แสดงป้ายระดับ +X สีตามเทียร์บนไอคอนในช่องเก็บของ
+        /// Displays colored +X enhancement tier badge on item icon in inventory grid.
         /// </summary>
         [HarmonyPatch(typeof(InventoryGrid), "UpdateGui", typeof(Player), typeof(ItemDrop.ItemData))]
         public static class UpdateGui_Patch
@@ -65,7 +65,7 @@ namespace Valheim.ItemEnhancements.Patches
         }
 
         /// <summary>
-        /// เมื่อคลิกซ้ายที่ไอเทมขณะเปิดหน้าต่างตีบวก ให้เลือกไอเทมนั้นเข้าสู่ช่องตีบวก แทนการหยิบย้ายช่องไอเทม
+        /// When left-clicking an item while enhancement window is open, selects that item into enhancement slot instead of moving it.
         /// </summary>
         [HarmonyPatch(typeof(InventoryGrid), "OnLeftDown")]
         public static class OnLeftDown_Patch
@@ -86,18 +86,18 @@ namespace Valheim.ItemEnhancements.Patches
                             }
                             else
                             {
-                                Player.m_localPlayer?.Message(MessageHud.MessageType.Center, "<color=#f59e0b>ไอเทมนี้ไม่สามารถตีบวกได้ (Cannot be enhanced)</color>");
+                                Player.m_localPlayer?.Message(MessageHud.MessageType.Center, "<color=#f59e0b>This item cannot be enhanced!</color>");
                             }
                         }
                     }
-                    return false; // ป้องกันการหยิบ/ลากย้ายช่องไอเทมขณะเปิดหน้าต่างตีบวก
+                    return false; // Prevent moving/dragging item slot while enhancement window is open
                 }
                 return true;
             }
         }
 
         /// <summary>
-        /// ป้องกัน event คลิกปล่อย (Left Click) ทำงานซ้ำซ้อนขณะเปิดหน้าต่างตีบวก
+        /// Prevents redundant left click release events while enhancement window is open.
         /// </summary>
         [HarmonyPatch(typeof(InventoryGrid), "OnLeftClick")]
         public static class OnLeftClick_Patch
@@ -113,7 +113,7 @@ namespace Valheim.ItemEnhancements.Patches
         }
 
         /// <summary>
-        /// เมื่อคลิกขวาที่ไอเทมขณะเปิดหน้าต่างตีบวก ให้เลือกไอเทมนั้นเข้าสู่ช่องตีบวกแทนการกดสวมใส่
+        /// When right-clicking an item while enhancement window is open, selects that item into enhancement slot instead of equipping/using it.
         /// </summary>
         [HarmonyPatch(typeof(InventoryGrid), "OnRightDown")]
         public static class OnRightDown_Patch
@@ -134,11 +134,11 @@ namespace Valheim.ItemEnhancements.Patches
                             }
                             else
                             {
-                                Player.m_localPlayer?.Message(MessageHud.MessageType.Center, "<color=#f59e0b>ไอเทมนี้ไม่สามารถตีบวกได้ (Cannot be enhanced)</color>");
+                                Player.m_localPlayer?.Message(MessageHud.MessageType.Center, "<color=#f59e0b>This item cannot be enhanced!</color>");
                             }
                         }
                     }
-                    return false; // ไม่เรียกการใช้งาน/สวมใส่ไอเทม
+                    return false; // Prevent using or equipping item
                 }
                 return true;
             }

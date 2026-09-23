@@ -1,61 +1,61 @@
 ====================================================================
  VALHEIM ITEM ENHANCEMENTS - ABILITY ID REFERENCE
- รายชื่อ Ability ID ทั้งหมดที่รองรับในระบบ
+ Complete list of supported Ability IDs across configuration files
 ====================================================================
 
-─── Item.yml (อาวุธ / ทั่วไป / เครื่องประดับ) ───
+─── Item.yml (Weapons / Tools / General / Accessories) ───
 
-  WeaponDamage              โบนัสพลังโจมตีทุกประเภท (%)
-  WeaponBackstab            โบนัสตัวคูณ Backstab (+x)
-  WeaponAttackStamina       ลดการใช้ Stamina โจมตี (%)
-  WeaponAttackEitr          ลดการใช้ Eitr ร่ายมนตร์ (%)
-  MaxDurability             เพิ่มความทนทานสูงสุด (%)
-  WeightReduction           ลดน้ำหนักอุปกรณ์ (%)
-  CarryWeightBonus          เพิ่มขีดจำกัดน้ำหนักบรรทุก (หน่วยตรง)
+  WeaponDamage              All damage types bonus (%)
+  WeaponBackstab            Sneak attack / backstab multiplier (+x)
+  WeaponAttackStamina       Attack stamina cost reduction (%)
+  WeaponAttackEitr          Staff spellcast eitr cost reduction (%)
+  MaxDurability             Maximum durability increase (%)
+  WeightReduction           Item weight reduction (%)
+  CarryWeightBonus          Maximum carry weight bonus (flat units)
 
-─── Armor.yml (เกราะ / โล่ / ความคล่องตัว) ───
+─── Armor.yml (Armor / Shields / Mobility) ───
 
-  ArmorFlat                 พลังป้องกันเกราะคงที่ (+หน่วยตรง)
-  ArmorPercent              พลังป้องกันเกราะแบบ % (%)
-  ArmorMovementPenaltyReduction  ลดโทษความเร็วเดินของเกราะหนัก (%)
-  EitrRegen                 เพิ่มอัตราฟื้นฟู Eitr (%)
+  ArmorFlat                 Flat armor bonus (+flat units)
+  ArmorPercent              Percentage armor bonus (%)
+  ArmorMovementPenaltyReduction  Heavy armor movement speed penalty reduction (%)
+  EitrRegen                 Eitr regeneration rate bonus (%)
 
-  ShieldBlockPower          โบนัสพลังบล็อกของโล่ (%)
-  ShieldDeflectionForce     โบนัสแรงปัดป้อง (%)
-  ShieldTimedBlock          โบนัสตัวคูณ Parry (+x)
-  ShieldBlockStaminaReduction  ลด Stamina ที่ใช้ในการบล็อก (%)
+  ShieldBlockPower          Shield block power bonus (%)
+  ShieldDeflectionForce     Shield deflection force bonus (%)
+  ShieldTimedBlock          Parry bonus multiplier (+x)
+  ShieldBlockStaminaReduction  Block stamina cost reduction (%)
 
-  DodgeStaminaReduction     ลด Stamina กลิ้งหลบ (%)
-  RunStaminaReduction       ลด Stamina วิ่งสปรินต์ (%)
-  JumpStaminaReduction      ลด Stamina กระโดด (%)
+  DodgeStaminaReduction     Dodge roll stamina cost reduction (%)
+  RunStaminaReduction       Sprint stamina cost reduction (%)
+  JumpStaminaReduction      Jump stamina cost reduction (%)
 
-─── Cheat.yml (โหมดโกง — ทำงานเมื่อเปิด EnableCheatAbilities) ───
+─── Cheat.yml (Cheat Mode — Active only when EnableCheatAbilities: true) ───
 
-  MaxHealth                 เพิ่ม Max Health (หน่วยตรง)
-  MaxStamina                เพิ่ม Max Stamina (หน่วยตรง)
-  MaxEitr                   เพิ่ม Max Eitr (หน่วยตรง)
-  HealthRegen               เพิ่มอัตราฟื้นฟู Health (%)
-  StaminaRegen              เพิ่มอัตราฟื้นฟู Stamina (%)
-  HealingMultiplier         เพิ่มประสิทธิภาพการฮีล (%)
+  MaxHealth                 Maximum health capacity bonus (flat units)
+  MaxStamina                Maximum stamina capacity bonus (flat units)
+  MaxEitr                   Maximum eitr capacity bonus (flat units)
+  HealthRegen               Health regeneration multiplier (%)
+  StaminaRegen              Stamina regeneration multiplier (%)
+  HealingMultiplier         Healing received multiplier (%)
 
 ====================================================================
- รูปแบบการใช้งาน (YAML Syntax)
+ YAML Syntax & Usage Example
 ====================================================================
 
   Levels:
-    <ระดับ>:
+    <LevelNumber>:
       - Ability: <Ability ID>
-        Value: <ค่าที่เพิ่มขึ้นในระดับนั้น>
+        Value: <Incremental value gained at this level>
 
-  ตัวอย่าง:
+  Example:
     Levels:
       1:
         - Ability: WeaponDamage
-          Value: 5.0        # เพิ่มดาเมจ 5%
+          Value: 5.0        # +5% Weapon Damage
         - Ability: MaxDurability
-          Value: 10.0       # เพิ่มความทนทาน 10%
+          Value: 10.0       # +10% Max Durability
       5:
         - Ability: CarryWeightBonus
-          Value: 25.0       # เพิ่มน้ำหนักบรรทุก +25
+          Value: 25.0       # +25 Max Carry Weight
 
 ====================================================================

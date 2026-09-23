@@ -25,7 +25,7 @@ namespace Valheim.ItemEnhancements.Core
         public const string CrafterDataKey = "ValheimEnhancement_Crafter";
 
         /// <summary>
-        /// ดึงระดับการตีบวกของไอเทม (0 - 20)
+        /// Gets the enhancement level of an item (0 - 20)
         /// </summary>
         public static int GetEnhancementLevel(ItemDrop.ItemData item)
         {
@@ -39,7 +39,7 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// บันทึกระดับการตีบวกของไอเทมลงใน m_customData (ระบบเซฟอัตโนมัติของ Valheim)
+        /// Saves the enhancement level into m_customData (Valheim's native persistence system)
         /// </summary>
         public static void SetEnhancementLevel(ItemDrop.ItemData item, int level)
         {
@@ -59,13 +59,13 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// ตรวจสอบว่าไอเทมนี้สามารถนำมาตีบวกได้หรือไม่
+        /// Checks whether the item can be enhanced
         /// </summary>
         public static bool IsEnhanceable(ItemDrop.ItemData item)
         {
             if (item?.m_shared == null) return false;
 
-            // ตรวจสอบประเภทไอเทมที่อนุญาตให้ตีบวกได้
+            // Check permitted item types
             switch (item.m_shared.m_itemType)
             {
                 case ItemDrop.ItemData.ItemType.OneHandedWeapon:
@@ -86,7 +86,7 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// ดึงจำนวนเหรียญทอง (Coins) ทั้งหมดในตัวผู้เล่น
+        /// Gets the total amount of Coins in player inventory
         /// </summary>
         public static int GetPlayerCoins(Player player)
         {
@@ -95,7 +95,7 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// หักเหรียญทองออกจากตัวผู้เล่น
+        /// Deducts coins from player inventory
         /// </summary>
         public static bool DeductPlayerCoins(Player player, int amount)
         {
@@ -109,11 +109,11 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// กำหนด Tier ของคัมภีร์ที่ต้องใช้ตามระดับเป้าหมาย (1-20)
-        /// +1 ถึง +5: Tier 1
-        /// +6 ถึง +10: Tier 2
-        /// +11 ถึง +15: Tier 3
-        /// +16 ถึง +20: Tier 4
+        /// Determines the required scroll tier based on target level (1-20)
+        /// +1 to +5: Tier 1
+        /// +6 to +10: Tier 2
+        /// +11 to +15: Tier 3
+        /// +16 to +20: Tier 4
         /// </summary>
         public static int GetRequiredScrollTier(int targetLevel)
         {
@@ -124,7 +124,7 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// ดึงจำนวนม้วนคัมภีร์ Tier นั้น ๆ ที่ผู้เล่นมีอยู่ในช่องเก็บของ
+        /// Gets the count of scrolls of the specified tier in player inventory
         /// </summary>
         public static int GetPlayerScrollCount(Player player, int tier)
         {
@@ -147,7 +147,7 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// หักม้วนคัมภีร์ออกจากช่องเก็บของของผู้เล่น
+        /// Deducts scrolls from player inventory
         /// </summary>
         public static bool DeductPlayerScrolls(Player player, int tier, int amount)
         {
@@ -187,13 +187,13 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// ตรวจสอบว่าผู้เล่นสามารถจ่ายค่าธรรมเนียมและมีวัตถุดิบเพียงพอหรือไม่
+        /// Checks whether the player can afford the enhancement attempt
         /// </summary>
         public static bool CanAfford(Player player, int targetLevel)
         {
             if (player == null) return false;
 
-            // ตรวจสอบม้วนคัมภีร์
+            // Check enhancement scrolls
             if (ModConfig.RequireScrolls.Value)
             {
                 int tier = GetRequiredScrollTier(targetLevel);
@@ -204,7 +204,7 @@ namespace Valheim.ItemEnhancements.Core
                 }
             }
 
-            // ตรวจสอบเหรียญทอง (หากเปิดใช้งาน)
+            // Check coins (if enabled)
             if (ModConfig.RequireCoins.Value)
             {
                 int cost = ModConfig.GetCoinCost(targetLevel);
@@ -218,7 +218,7 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// ดำเนินการตีบวกไอเทม
+        /// Executes enhancement attempt on the target item
         /// </summary>
         public static EnhanceResult TryEnhance(Player player, ItemDrop.ItemData item, out int newLevel)
         {
@@ -244,7 +244,7 @@ namespace Valheim.ItemEnhancements.Core
                 return EnhanceResult.CannotAfford;
             }
 
-            // หักม้วนคัมภีร์
+            // Deduct enhancement scrolls
             if (ModConfig.RequireScrolls.Value)
             {
                 int tier = GetRequiredScrollTier(targetLevel);
@@ -256,12 +256,12 @@ namespace Valheim.ItemEnhancements.Core
                 }
             }
 
-            // หักค่าธรรมเนียมเหรียญทอง (หากเปิดใช้งาน)
+            // Deduct coins (if enabled)
             if (ModConfig.RequireCoins.Value && cost > 0)
             {
                 if (!DeductPlayerCoins(player, cost))
                 {
-                    // Rollback คัมภีร์ที่หักไปแล้วหากหักเหรียญไม่สำเร็จ
+                    // Rollback deducted scrolls if coin deduction fails
                     if (ModConfig.RequireScrolls.Value)
                     {
                         int tier = GetRequiredScrollTier(targetLevel);
@@ -277,35 +277,35 @@ namespace Valheim.ItemEnhancements.Core
                 }
             }
 
-            // สุ่มความสำเร็จ
+            // Roll success rate
             float roll = UnityEngine.Random.Range(0f, 100f);
             float successRate = ModConfig.GetSuccessRate(targetLevel);
 
             if (roll < successRate)
             {
-                // สำเร็จ!
+                // Success!
                 newLevel = targetLevel;
                 SetEnhancementLevel(item, newLevel);
                 PostEnhanceUpdate(player, item);
                 return EnhanceResult.Success;
             }
 
-            // ล้มเหลว!
+            // Failed!
             if (currentLevel <= ModConfig.SafeLevel.Value)
             {
-                // อยู่ในระดับปลอดภัย ระดับไม่ลดลง
+                // In safe zone, level does not decrease
                 newLevel = currentLevel;
                 PostEnhanceUpdate(player, item);
                 return EnhanceResult.FailedSafe;
             }
 
-            // เกินระดับปลอดภัย
+            // Above safe zone
             if (ModConfig.BreakOnFail.Value)
             {
                 float breakRoll = UnityEngine.Random.Range(0f, 100f);
                 if (breakRoll < ModConfig.BreakChanceAboveSafeLevel.Value)
                 {
-                    // แตกสลาย!
+                    // Item broken!
                     if (player != null)
                     {
                         if (item.m_equipped)
@@ -313,7 +313,7 @@ namespace Valheim.ItemEnhancements.Core
                             player.UnequipItem(item, true);
                         }
 
-                        // ค้นหาและลบออกจาก Inventory ที่แท้จริง (กระเป๋าผู้เล่น หรือกล่องเก็บของ)
+                        // Remove from the actual inventory (player inventory or container)
                         if (player.GetInventory() != null && player.GetInventory().ContainsItem(item))
                         {
                             player.GetInventory().RemoveItem(item);
@@ -341,7 +341,7 @@ namespace Valheim.ItemEnhancements.Core
 
             if (ModConfig.DowngradeOnFail.Value)
             {
-                // ลดระดับลง 1 ขั้น
+                // Downgrade 1 level
                 newLevel = Mathf.Max(0, currentLevel - 1);
                 SetEnhancementLevel(item, newLevel);
                 PostEnhanceUpdate(player, item);
@@ -380,7 +380,7 @@ namespace Valheim.ItemEnhancements.Core
         #region UI & Presentation Helpers
 
         /// <summary>
-        /// ดึงรหัสสี Hex ประจำแต่ละระดับการตีบวก
+        /// Gets the Hex color string corresponding to the enhancement level
         /// </summary>
         public static string GetTierHex(int level)
         {
@@ -395,7 +395,7 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// ดึงสี Color สำหรับ IMGUI หรือ Canvas
+        /// Gets the Color object for IMGUI or Canvas
         /// </summary>
         public static Color GetTierColor(int level)
         {
@@ -407,22 +407,22 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// ชื่อระดับฉายาของเทียร์
+        /// Tier rank title based on enhancement level
         /// </summary>
         public static string GetTierRankName(int level)
         {
             if (level <= 0) return "Normal";
-            if (level <= 3) return "Standard (พื้นฐาน)";
-            if (level <= 6) return "Refined (ขัดเกลา)";
-            if (level <= 9) return "Rare (หายาก)";
-            if (level <= 12) return "Epic (มหากาพย์)";
-            if (level <= 15) return "Legendary (ตำนาน)";
-            if (level <= 19) return "Mythic (เทวตำนาน)";
-            return "Divine (เทวะสูงสุด)";
+            if (level <= 3) return "Standard";
+            if (level <= 6) return "Refined";
+            if (level <= 9) return "Rare";
+            if (level <= 12) return "Epic";
+            if (level <= 15) return "Legendary";
+            if (level <= 19) return "Mythic";
+            return "Divine";
         }
 
         /// <summary>
-        /// จัดรูปแบบชื่อไอเทมพร้อมแสดงระดับ +X
+        /// Formats item display name with +X level tag
         /// </summary>
         public static string FormatItemNameWithLevel(ItemDrop.ItemData item, string originalName, int level)
         {
@@ -432,7 +432,7 @@ namespace Valheim.ItemEnhancements.Core
         }
 
         /// <summary>
-        /// สร้างข้อความ Tooltip สไตล์ MMORPG แสดงข้อมูลการตีบวกอย่างละเอียด
+        /// Builds detailed MMORPG-style enhancement tooltip for an item
         /// </summary>
         public static string BuildEnhancementTooltip(ItemDrop.ItemData item, int level)
         {
@@ -443,10 +443,9 @@ namespace Valheim.ItemEnhancements.Core
             sb.AppendLine();
             sb.AppendLine($"<color=#ffd700>═══════════════</color>");
             sb.AppendLine($"<color={hex}><b>★ MMORPG ENHANCEMENT (+{level}/{ModConfig.MaxLevel}) ★</b></color>");
-            sb.AppendLine($"<color=#94a3b8>ระดับ: {GetTierRankName(level)}</color>");
+            sb.AppendLine($"<color=#94a3b8>Rank: {GetTierRankName(level)}</color>");
 
-            // แสดงโบนัสตามประเภทไอเทม
-            // 1. อาวุธ
+            // 1. Weapon Bonuses
             if (item.m_shared.m_itemType == ItemDrop.ItemData.ItemType.OneHandedWeapon ||
                 item.m_shared.m_itemType == ItemDrop.ItemData.ItemType.TwoHandedWeapon ||
                 item.m_shared.m_itemType == ItemDrop.ItemData.ItemType.TwoHandedWeaponLeft ||
@@ -455,7 +454,7 @@ namespace Valheim.ItemEnhancements.Core
                 float dmgBonusPct = YamlConfigManager.GetCumulativeAbilityValue("WeaponDamage", level);
                 if (dmgBonusPct > 0f)
                 {
-                    sb.AppendLine($"<color=#4ade80>• พลังโจมตีทุกธาตุ (All Damage): +{dmgBonusPct:F0}%</color>");
+                    sb.AppendLine($"<color=#4ade80>• All Damage: +{dmgBonusPct:F0}%</color>");
                 }
 
                 if (item.m_shared.m_backstabBonus > 1f)
@@ -463,24 +462,24 @@ namespace Valheim.ItemEnhancements.Core
                     float bsBonus = StatCalculator.GetBackstabBonus(level);
                     if (bsBonus > 0f)
                     {
-                        sb.AppendLine($"<color=#4ade80>• โบนัสแทงข้างหลัง (Backstab): +{bsBonus:F2}x</color>");
+                        sb.AppendLine($"<color=#4ade80>• Backstab Bonus: +{bsBonus:F2}x</color>");
                     }
                 }
 
                 float atkStam = StatCalculator.GetAttackStaminaReduction(level) * 100f;
                 if (atkStam > 0f)
                 {
-                    sb.AppendLine($"<color=#38bdf8>• ลดการใช้ Stamina โจมตี: -{atkStam:F0}%</color>");
+                    sb.AppendLine($"<color=#38bdf8>• Attack Stamina Usage: -{atkStam:F0}%</color>");
                 }
 
                 float atkEitr = StatCalculator.GetAttackEitrReduction(level) * 100f;
                 if (atkEitr > 0f && item.m_shared.m_attack.m_attackEitr > 0f)
                 {
-                    sb.AppendLine($"<color=#c084fc>• ลดการใช้ Eitr ร่ายเวท: -{atkEitr:F0}%</color>");
+                    sb.AppendLine($"<color=#c084fc>• Attack Eitr Usage: -{atkEitr:F0}%</color>");
                 }
             }
 
-            // 2. ชุดเกราะ
+            // 2. Armor Bonuses
             if (item.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Helmet ||
                 item.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Chest ||
                 item.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Legs ||
@@ -489,80 +488,80 @@ namespace Valheim.ItemEnhancements.Core
                 float armorBonus = StatCalculator.GetArmorBonus(item, level, item.m_shared.m_armor);
                 if (armorBonus > 0f)
                 {
-                    sb.AppendLine($"<color=#4ade80>• พลังป้องกันเกราะ (Armor): +{armorBonus:F1}</color>");
+                    sb.AppendLine($"<color=#4ade80>• Armor: +{armorBonus:F1}</color>");
                 }
 
                 float moveDelta = StatCalculator.GetMovementModifierDelta(item, level) * 100f;
                 if (moveDelta > 0f)
                 {
-                    sb.AppendLine($"<color=#38bdf8>• ลดโทษความเร็วเดิน / โบนัส: +{moveDelta:F1}%</color>");
+                    sb.AppendLine($"<color=#38bdf8>• Movement Speed Bonus: +{moveDelta:F1}%</color>");
                 }
 
                 float dodgeRed = StatCalculator.GetDodgeStaminaReduction(level) * 100f;
                 if (dodgeRed > 0f)
                 {
-                    sb.AppendLine($"<color=#38bdf8>• ลด Stamina กลิ้งหลบ: -{dodgeRed:F0}%</color>");
+                    sb.AppendLine($"<color=#38bdf8>• Dodge Stamina Cost: -{dodgeRed:F0}%</color>");
                 }
 
                 float eitrRegen = StatCalculator.GetEitrRegenBonus(level) * 100f;
                 if (eitrRegen > 0f && item.m_shared.m_eitrRegenModifier > 0f)
                 {
-                    sb.AppendLine($"<color=#c084fc>• โบนัสฟื้นฟู Eitr: +{eitrRegen:F0}%</color>");
+                    sb.AppendLine($"<color=#c084fc>• Eitr Regeneration: +{eitrRegen:F0}%</color>");
                 }
             }
 
-            // 3. โล่
+            // 3. Shield Bonuses
             if (item.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Shield)
             {
                 float blkPct = YamlConfigManager.GetCumulativeAbilityValue("ShieldBlockPower", level);
                 if (blkPct > 0f)
                 {
-                    sb.AppendLine($"<color=#4ade80>• พลังบล็อก (Block Power): +{blkPct:F0}%</color>");
+                    sb.AppendLine($"<color=#4ade80>• Block Power: +{blkPct:F0}%</color>");
                 }
 
                 float defPct = YamlConfigManager.GetCumulativeAbilityValue("ShieldDeflectionForce", level);
                 if (defPct > 0f)
                 {
-                    sb.AppendLine($"<color=#4ade80>• แรงปัดป้อง (Parry Force): +{defPct:F0}%</color>");
+                    sb.AppendLine($"<color=#4ade80>• Parry Force: +{defPct:F0}%</color>");
                 }
 
                 float blkStam = StatCalculator.GetBlockStaminaReduction(level) * 100f;
                 if (blkStam > 0f)
                 {
-                    sb.AppendLine($"<color=#38bdf8>• ลด Stamina ในการบล็อก: -{blkStam:F0}%</color>");
+                    sb.AppendLine($"<color=#38bdf8>• Block Stamina Cost: -{blkStam:F0}%</color>");
                 }
 
                 float moveDelta = StatCalculator.GetMovementModifierDelta(item, level) * 100f;
                 if (moveDelta > 0f)
                 {
-                    sb.AppendLine($"<color=#38bdf8>• ลดโทษความเร็วเดินของโล่: +{moveDelta:F1}%</color>");
+                    sb.AppendLine($"<color=#38bdf8>• Shield Movement Penalty Reduction: +{moveDelta:F1}%</color>");
                 }
             }
 
-            // 4. เข็มขัด / ยูทิลิตี้
+            // 4. Utility / Belt Bonuses
             if (item.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Utility)
             {
                 float carry = StatCalculator.GetCarryWeightBonus(item, level);
                 if (carry > 0f)
                 {
-                    sb.AppendLine($"<color=#f59e0b>• เพิ่มน้ำหนักบรรทุก (Max Carry): +{carry:F0}</color>");
+                    sb.AppendLine($"<color=#f59e0b>• Max Carry Weight: +{carry:F0}</color>");
                 }
             }
 
-            // 5. คุณสมบัติทั่วไป
+            // 5. General Attributes
             float durPct = YamlConfigManager.GetCumulativeAbilityValue("MaxDurability", level);
             if (durPct > 0f)
             {
-                sb.AppendLine($"<color=#94a3b8>• ความทนทานสูงสุด (Durability): +{durPct:F0}%</color>");
+                sb.AppendLine($"<color=#94a3b8>• Max Durability: +{durPct:F0}%</color>");
             }
 
             float wtPct = Mathf.Clamp(YamlConfigManager.GetCumulativeAbilityValue("WeightReduction", level), 0f, 60f);
             if (wtPct > 0f)
             {
-                sb.AppendLine($"<color=#94a3b8>• น้ำหนักอุปกรณ์ (Weight): -{wtPct:F1}%</color>");
+                sb.AppendLine($"<color=#94a3b8>• Item Weight: -{wtPct:F1}%</color>");
             }
 
-            // 6. Cheat Abilities (หากเปิดใช้งานใน Config)
+            // 6. Cheat Abilities (If enabled in config)
             if (StatCalculator.IsCheatEnabled)
             {
                 float cheatHp = StatCalculator.GetCheatItemMaxHealth(item, level);
@@ -575,21 +574,21 @@ namespace Valheim.ItemEnhancements.Core
 
                 if (cheatHp > 0f || cheatStam > 0f || cheatEitr > 0f || cheatHpRegen > 0f || cheatStamRegen > 0f || cheatEitrRegen > 0f || cheatHeal > 0f)
                 {
-                    sb.AppendLine($"<color=#f43f5e>--- [CHEAT ABILITIES (โหมดโกง)] ---</color>");
-                    if (cheatHp > 0f) sb.AppendLine($"<color=#fb7185>★ เพิ่มพลังชีวิตสูงสุด (Max HP): +{cheatHp:F0}</color>");
-                    if (cheatStam > 0f) sb.AppendLine($"<color=#fb7185>★ เพิ่มสเตมินาสูงสุด (Max Stamina): +{cheatStam:F0}</color>");
-                    if (cheatEitr > 0f) sb.AppendLine($"<color=#fb7185>★ เพิ่มพลังเวทสูงสุด (Max Eitr): +{cheatEitr:F0}</color>");
-                    if (cheatHpRegen > 0f) sb.AppendLine($"<color=#fb7185>★ ฟื้นฟูพลังชีวิต (HP Regen): +{cheatHpRegen:F0}%</color>");
-                    if (cheatStamRegen > 0f) sb.AppendLine($"<color=#fb7185>★ ฟื้นฟูสเตมินา (Stamina Regen): +{cheatStamRegen:F0}%</color>");
-                    if (cheatEitrRegen > 0f) sb.AppendLine($"<color=#fb7185>★ ฟื้นฟูพลังเวท (Eitr Regen): +{cheatEitrRegen:F0}%</color>");
-                    if (cheatHeal > 0f) sb.AppendLine($"<color=#fb7185>★ ประสิทธิภาพการฮีล (Healing): +{cheatHeal:F0}%</color>");
+                    sb.AppendLine($"<color=#f43f5e>--- [CHEAT ABILITIES] ---</color>");
+                    if (cheatHp > 0f) sb.AppendLine($"<color=#fb7185>★ Max Health: +{cheatHp:F0}</color>");
+                    if (cheatStam > 0f) sb.AppendLine($"<color=#fb7185>★ Max Stamina: +{cheatStam:F0}</color>");
+                    if (cheatEitr > 0f) sb.AppendLine($"<color=#fb7185>★ Max Eitr: +{cheatEitr:F0}</color>");
+                    if (cheatHpRegen > 0f) sb.AppendLine($"<color=#fb7185>★ Health Regen: +{cheatHpRegen:F0}%</color>");
+                    if (cheatStamRegen > 0f) sb.AppendLine($"<color=#fb7185>★ Stamina Regen: +{cheatStamRegen:F0}%</color>");
+                    if (cheatEitrRegen > 0f) sb.AppendLine($"<color=#fb7185>★ Eitr Regen: +{cheatEitrRegen:F0}%</color>");
+                    if (cheatHeal > 0f) sb.AppendLine($"<color=#fb7185>★ Healing Bonus: +{cheatHeal:F0}%</color>");
                 }
             }
 
             // Crafter
             if (item.m_customData != null && item.m_customData.TryGetValue(CrafterDataKey, out string crafter) && !string.IsNullOrEmpty(crafter))
             {
-                sb.AppendLine($"<color=#64748b>ช่างตีบวก: {crafter}</color>");
+                sb.AppendLine($"<color=#64748b>Enhanced by: {crafter}</color>");
             }
 
             sb.AppendLine($"<color=#ffd700>═══════════════</color>");
