@@ -13,9 +13,34 @@ namespace Valheim.ItemEnhancements.Patches
         /// <summary>
         /// Displays colored +X enhancement tier badge on item icon in inventory grid.
         /// </summary>
+        /// <summary>
+        /// Displays colored +X enhancement tier badge on item icon in inventory grid.
+        /// Precalculates badge strings and avoids redundant text mesh rebuilds.
+        /// </summary>
         [HarmonyPatch(typeof(InventoryGrid), "UpdateGui", typeof(Player), typeof(ItemDrop.ItemData))]
         public static class UpdateGui_Patch
         {
+            private static readonly string[] s_badgeStrings = new string[ModConfig.MaxLevel + 1];
+
+            static UpdateGui_Patch()
+            {
+                for (int lvl = 1; lvl <= ModConfig.MaxLevel; lvl++)
+                {
+                    string hex = EnhancementManager.GetTierHex(lvl);
+                    s_badgeStrings[lvl] = $"<color={hex}><b>+{lvl}</b></color>";
+                }
+            }
+
+            private static string GetBadgeString(int level)
+            {
+                if (level >= 1 && level <= ModConfig.MaxLevel)
+                {
+                    return s_badgeStrings[level];
+                }
+                string hex = EnhancementManager.GetTierHex(level);
+                return $"<color={hex}><b>+{level}</b></color>";
+            }
+
             public static void Postfix(InventoryGrid __instance, System.Collections.Generic.List<InventoryElement> ___m_elements, int ___m_width, int ___m_height)
             {
                 if (!ModConfig.ShowInventoryBadges.Value || ___m_elements == null) return;
@@ -38,9 +63,15 @@ namespace Valheim.ItemEnhancements.Patches
                                 var element = ___m_elements[index];
                                 if (element?.m_quality != null)
                                 {
-                                    string hex = EnhancementManager.GetTierHex(level);
-                                    element.m_quality.gameObject.SetActive(true);
-                                    element.m_quality.text = $"<color={hex}><b>+{level}</b></color>";
+                                    string badge = GetBadgeString(level);
+                                    if (element.m_quality.text != badge)
+                                    {
+                                        element.m_quality.text = badge;
+                                    }
+                                    if (!element.m_quality.gameObject.activeSelf)
+                                    {
+                                        element.m_quality.gameObject.SetActive(true);
+                                    }
                                 }
                             }
                         }
