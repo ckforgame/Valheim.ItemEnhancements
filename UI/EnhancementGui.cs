@@ -14,8 +14,22 @@ namespace Valheim.ItemEnhancements.UI
         public static EnhancementGui Instance { get; private set; }
         public static bool IsOpen { get; set; } = false;
 
-        private static readonly FieldInfo s_allStationsField =
-            AccessTools.Field(typeof(CraftingStation), "m_allStations");
+        private static readonly Func<List<CraftingStation>> s_getAllStations = CreateStaticFieldGetter<List<CraftingStation>>(typeof(CraftingStation), "m_allStations");
+
+        private static Func<T> CreateStaticFieldGetter<T>(Type type, string fieldName)
+        {
+            try
+            {
+                FieldInfo field = AccessTools.Field(type, fieldName);
+                if (field == null) return () => default(T);
+                var expr = System.Linq.Expressions.Expression.Field(null, field);
+                return System.Linq.Expressions.Expression.Lambda<Func<T>>(expr).Compile();
+            }
+            catch
+            {
+                return () => default(T);
+            }
+        }
 
         private static readonly AccessTools.FieldRef<GameCamera, bool> s_mouseCaptureRef =
             AccessTools.FieldRefAccess<GameCamera, bool>("m_mouseCapture");
@@ -23,6 +37,10 @@ namespace Valheim.ItemEnhancements.UI
         private Rect _windowRect = new Rect(Screen.width / 2f - 340f, Screen.height / 2f - 310f, 680f, 620f);
         private ItemDrop.ItemData _selectedItem;
         private Vector2 _scrollPosition = Vector2.zero;
+
+        private readonly List<ItemDrop.ItemData> _cachedEnhanceableItems = new List<ItemDrop.ItemData>();
+        private bool _isEnhanceablesDirty = true;
+        private float _stationCheckTimer = 0f;
 
         private bool _isForging = false;
         private float _forgeTimer = 0f;
@@ -75,15 +93,16 @@ namespace Valheim.ItemEnhancements.UI
                 return true;
             }
 
-            var stations = s_allStationsField?.GetValue(null) as List<CraftingStation>;
+            List<CraftingStation> stations = s_getAllStations?.Invoke();
             if (stations != null)
             {
                 Vector3 playerPos = Player.m_localPlayer.transform.position;
                 float maxRange = ModConfig.CraftingStationRange.Value;
+                float maxRangeSqr = maxRange * maxRange;
                 for (int i = 0; i < stations.Count; i++)
                 {
                     CraftingStation station = stations[i];
-                    if (station != null && Vector3.Distance(station.transform.position, playerPos) <= maxRange)
+                    if (station != null && (station.transform.position - playerPos).sqrMagnitude <= maxRangeSqr)
                     {
                         return true;
                     }
@@ -119,6 +138,7 @@ namespace Valheim.ItemEnhancements.UI
             if (Instance != null)
             {
                 Instance._lastResultMessage = "";
+                Instance._isEnhanceablesDirty = true;
                 // Auto-select equipped item if empty
                 if (Instance._selectedItem == null)
                 {
@@ -187,6 +207,7 @@ namespace Valheim.ItemEnhancements.UI
             {
                 Instance._selectedItem = item;
                 Instance._lastResultMessage = "";
+                Instance._isEnhanceablesDirty = true;
             }
         }
 
@@ -217,12 +238,17 @@ namespace Valheim.ItemEnhancements.UI
                 }
             }
 
-            // Close if player moves away from station
-            if (ModConfig.RequireCraftingStation.Value && Player.m_localPlayer != null)
+            // Close if player moves away from station (throttled check every 0.25s)
+            _stationCheckTimer -= Time.deltaTime;
+            if (_stationCheckTimer <= 0f)
             {
-                if (!IsNearCraftingStation())
+                _stationCheckTimer = 0.25f;
+                if (ModConfig.RequireCraftingStation.Value && Player.m_localPlayer != null)
                 {
-                    Close();
+                    if (!IsNearCraftingStation())
+                    {
+                        Close();
+                    }
                 }
             }
 
@@ -747,11 +773,34 @@ namespace Valheim.ItemEnhancements.UI
                     break;
             }
 
+            _isEnhanceablesDirty = true;
+
             // Sync Inventory
             if (InventoryGui.instance != null)
             {
                 HarmonyLib.AccessTools.Method(typeof(InventoryGui), "UpdateCraftingPanel")?.Invoke(InventoryGui.instance, new object[] { false });
             }
+        }
+
+        private void RefreshEnhanceablesList()
+        {
+            _cachedEnhanceableItems.Clear();
+            if (Player.m_localPlayer != null && Player.m_localPlayer.GetInventory() != null)
+            {
+                List<ItemDrop.ItemData> allItems = Player.m_localPlayer.GetInventory().GetAllItems();
+                if (allItems != null)
+                {
+                    for (int i = 0; i < allItems.Count; i++)
+                    {
+                        ItemDrop.ItemData item = allItems[i];
+                        if (item != null && EnhancementManager.IsEnhanceable(item))
+                        {
+                            _cachedEnhanceableItems.Add(item);
+                        }
+                    }
+                }
+            }
+            _isEnhanceablesDirty = false;
         }
 
         private void DrawEquipmentPickerList()
@@ -760,11 +809,12 @@ namespace Valheim.ItemEnhancements.UI
             GUILayout.Label("<b>Enhanceable Equipment:</b>", _statLabelStyle);
             GUILayout.Space(4f);
 
-            List<ItemDrop.ItemData> allItems = Player.m_localPlayer.GetInventory().GetAllItems();
+            if (_isEnhanceablesDirty)
+            {
+                RefreshEnhanceablesList();
+            }
 
-            List<ItemDrop.ItemData> enhanceables = allItems.FindAll(EnhancementManager.IsEnhanceable);
-
-            if (enhanceables.Count == 0)
+            if (_cachedEnhanceableItems.Count == 0)
             {
                 GUILayout.Label("<color=#94a3b8>No enhanceable equipment found in your inventory.</color>", _statLabelStyle);
             }
@@ -772,8 +822,11 @@ namespace Valheim.ItemEnhancements.UI
             {
                 _scrollPosition = GUILayout.BeginScrollView(_scrollPosition, GUILayout.Height(300f));
 
-                foreach (var item in enhanceables)
+                for (int i = 0; i < _cachedEnhanceableItems.Count; i++)
                 {
+                    ItemDrop.ItemData item = _cachedEnhanceableItems[i];
+                    if (item == null) continue;
+
                     int lvl = EnhancementManager.GetEnhancementLevel(item);
                     string hex = EnhancementManager.GetTierHex(lvl);
                     string localizedName = Localization.instance != null ? Localization.instance.Localize(item.m_shared.m_name) : item.m_shared.m_name;
@@ -786,6 +839,7 @@ namespace Valheim.ItemEnhancements.UI
                     {
                         _selectedItem = item;
                         _lastResultMessage = "";
+                        _isEnhanceablesDirty = true;
                     }
                     GUILayout.EndHorizontal();
                     GUILayout.Space(2f);
