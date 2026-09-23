@@ -82,11 +82,11 @@ namespace Valheim.ItemEnhancements.Configuration
             OnConfigReloaded?.Invoke();
         }
 
-        private static readonly Dictionary<string, float[]> _cumulativeCache = new Dictionary<string, float[]>(StringComparer.OrdinalIgnoreCase);
+        private static volatile Dictionary<string, float[]> _cumulativeCache = new Dictionary<string, float[]>(StringComparer.OrdinalIgnoreCase);
 
         private static void RebuildCumulativeCache()
         {
-            _cumulativeCache.Clear();
+            var newCache = new Dictionary<string, float[]>(StringComparer.OrdinalIgnoreCase);
 
             HashSet<string> abilities = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             CollectAbilities(Item?.Levels, abilities);
@@ -110,8 +110,10 @@ namespace Valheim.ItemEnhancements.Configuration
                     values[l] = runningSum;
                 }
 
-                _cumulativeCache[ability] = values;
+                newCache[ability] = values;
             }
+
+            _cumulativeCache = newCache;
         }
 
         private static void CollectAbilities(Dictionary<int, List<AbilityEntry>> levels, HashSet<string> set)
@@ -152,7 +154,8 @@ namespace Valheim.ItemEnhancements.Configuration
         {
             if (level <= 0 || string.IsNullOrEmpty(abilityName)) return 0f;
 
-            if (_cumulativeCache.TryGetValue(abilityName, out float[] values))
+            var cache = _cumulativeCache;
+            if (cache != null && cache.TryGetValue(abilityName, out float[] values))
             {
                 int clampedLevel = Mathf.Clamp(level, 1, ModConfig.MaxLevel);
                 return values[clampedLevel];
