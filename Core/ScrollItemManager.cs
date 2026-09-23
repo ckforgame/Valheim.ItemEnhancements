@@ -29,6 +29,9 @@ namespace Valheim.ItemEnhancements.Core
             return _prefabContainer;
         }
 
+        private static readonly System.Reflection.FieldInfo s_itemDropInstancesField =
+            HarmonyLib.AccessTools.Field(typeof(ItemDrop), "s_instances");
+
         /// <summary>
         /// Cleans up orphaned or corrupted scroll instances in the scene lacking valid ZDO/ZNetView
         /// </summary>
@@ -36,6 +39,40 @@ namespace Valheim.ItemEnhancements.Core
         {
             try
             {
+                var instances = s_itemDropInstancesField?.GetValue(null) as List<ItemDrop>;
+                if (instances != null)
+                {
+                    for (int i = instances.Count - 1; i >= 0; i--)
+                    {
+                        if (i >= instances.Count) continue;
+                        ItemDrop item = instances[i];
+                        if (item == null || item.gameObject == null) continue;
+
+                        string name = item.gameObject.name;
+                        if (!name.StartsWith(PrefabTier1) && !name.StartsWith(PrefabTier2) && 
+                            !name.StartsWith(PrefabTier3) && !name.StartsWith(PrefabTier4))
+                        {
+                            continue;
+                        }
+
+                        // Preserve valid prefab templates in container
+                        if (_prefabContainer != null && item.transform.IsChildOf(_prefabContainer.transform))
+                        {
+                            continue;
+                        }
+
+                        // Destroy corrupted ground instance lacking ZNetView or ZDO to prevent NRE
+                        ZNetView znv = item.GetComponent<ZNetView>();
+                        if (znv == null || znv.GetZDO() == null)
+                        {
+                            Plugin.Log.LogWarning($"[ScrollItemManager] Cleaning up orphaned/corrupted scroll instance '{name}' from scene.");
+                            UnityEngine.Object.Destroy(item.gameObject);
+                        }
+                    }
+                    return;
+                }
+
+                // Fallback only if s_instances reflection failed
                 var items = UnityEngine.Object.FindObjectsByType<ItemDrop>(FindObjectsSortMode.None);
                 if (items == null) return;
 
@@ -50,13 +87,11 @@ namespace Valheim.ItemEnhancements.Core
                         continue;
                     }
 
-                    // Preserve valid prefab templates in container
                     if (_prefabContainer != null && item.transform.IsChildOf(_prefabContainer.transform))
                     {
                         continue;
                     }
 
-                    // Destroy corrupted ground instance lacking ZNetView or ZDO to prevent NRE
                     ZNetView znv = item.GetComponent<ZNetView>();
                     if (znv == null || znv.GetZDO() == null)
                     {
