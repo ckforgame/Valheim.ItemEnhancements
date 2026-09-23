@@ -441,7 +441,7 @@ namespace Valheim.ItemEnhancements.Core
             string hex = GetTierHex(level);
             StringBuilder sb = new StringBuilder();
             sb.AppendLine();
-            sb.AppendLine($"<color=#ffd700>══════════════════════════════</color>");
+            sb.AppendLine($"<color=#ffd700>═══════════════</color>");
             sb.AppendLine($"<color={hex}><b>★ MMORPG ENHANCEMENT (+{level}/{ModConfig.MaxLevel}) ★</b></color>");
             sb.AppendLine($"<color=#94a3b8>ระดับ: {GetTierRankName(level)}</color>");
 
@@ -592,7 +592,7 @@ namespace Valheim.ItemEnhancements.Core
                 sb.AppendLine($"<color=#64748b>ช่างตีบวก: {crafter}</color>");
             }
 
-            sb.AppendLine($"<color=#ffd700>══════════════════════════════</color>");
+            sb.AppendLine($"<color=#ffd700>═══════════════</color>");
             return sb.ToString();
         }
 
