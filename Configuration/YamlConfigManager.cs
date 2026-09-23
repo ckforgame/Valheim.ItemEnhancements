@@ -76,39 +76,89 @@ namespace Valheim.ItemEnhancements.Configuration
             Drops = LoadWithOverride<DropsConfigData>("Drops.yml", "Drops.override.yml");
 
 
+            RebuildCumulativeCache();
+
             LogInfo($"[Valheim.ItemEnhancements] YAML Configurations loaded successfully from '{ConfigDirectory}'.");
             OnConfigReloaded?.Invoke();
         }
 
-        public static float GetCumulativeAbilityValue(string abilityName, int level)
+        private static readonly Dictionary<string, float[]> _cumulativeCache = new Dictionary<string, float[]>(StringComparer.OrdinalIgnoreCase);
+
+        private static void RebuildCumulativeCache()
         {
-            if (level <= 0) return 0f;
-            float total = 0f;
-            total += SumFromLevels(Item?.Levels, abilityName, level);
-            total += SumFromLevels(Armor?.Levels, abilityName, level);
-            if (Cheat?.EnableCheatAbilities == true)
-                total += SumFromLevels(Cheat.Levels, abilityName, level);
-            return total;
+            _cumulativeCache.Clear();
+
+            HashSet<string> abilities = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            CollectAbilities(Item?.Levels, abilities);
+            CollectAbilities(Armor?.Levels, abilities);
+            CollectAbilities(Cheat?.Levels, abilities);
+
+            int maxLevel = ModConfig.MaxLevel;
+            foreach (var ability in abilities)
+            {
+                float[] values = new float[maxLevel + 1];
+                float runningSum = 0f;
+
+                for (int l = 1; l <= maxLevel; l++)
+                {
+                    runningSum += GetLevelAddition(Item?.Levels, ability, l);
+                    runningSum += GetLevelAddition(Armor?.Levels, ability, l);
+                    if (Cheat?.EnableCheatAbilities == true)
+                    {
+                        runningSum += GetLevelAddition(Cheat?.Levels, ability, l);
+                    }
+                    values[l] = runningSum;
+                }
+
+                _cumulativeCache[ability] = values;
+            }
         }
 
-        private static float SumFromLevels(Dictionary<int, List<AbilityEntry>> levels, string abilityName, int level)
+        private static void CollectAbilities(Dictionary<int, List<AbilityEntry>> levels, HashSet<string> set)
         {
-            if (levels == null) return 0f;
-            float total = 0f;
-            for (int l = 1; l <= level; l++)
+            if (levels == null) return;
+            foreach (var kvp in levels)
             {
-                if (levels.TryGetValue(l, out var list) && list != null)
+                if (kvp.Value == null) continue;
+                foreach (var entry in kvp.Value)
                 {
-                    foreach (var entry in list)
+                    if (!string.IsNullOrEmpty(entry?.Ability))
                     {
-                        if (string.Equals(entry.Ability, abilityName, StringComparison.OrdinalIgnoreCase))
-                        {
-                            total += entry.EffectiveValue;
-                        }
+                        set.Add(entry.Ability);
                     }
                 }
             }
-            return total;
+        }
+
+        private static float GetLevelAddition(Dictionary<int, List<AbilityEntry>> levels, string abilityName, int level)
+        {
+            if (levels == null) return 0f;
+            if (levels.TryGetValue(level, out var list) && list != null)
+            {
+                float sum = 0f;
+                foreach (var entry in list)
+                {
+                    if (string.Equals(entry.Ability, abilityName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        sum += entry.EffectiveValue;
+                    }
+                }
+                return sum;
+            }
+            return 0f;
+        }
+
+        public static float GetCumulativeAbilityValue(string abilityName, int level)
+        {
+            if (level <= 0 || string.IsNullOrEmpty(abilityName)) return 0f;
+
+            if (_cumulativeCache.TryGetValue(abilityName, out float[] values))
+            {
+                int clampedLevel = Mathf.Clamp(level, 1, ModConfig.MaxLevel);
+                return values[clampedLevel];
+            }
+
+            return 0f;
         }
 
         public static bool HasAbilityAtLevel(string abilityName, int level)
