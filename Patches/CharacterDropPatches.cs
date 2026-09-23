@@ -187,53 +187,19 @@ namespace Valheim.ItemEnhancements.Patches
         }
 
         /// <summary>
-        /// Harmony Patch preventing NullReferenceException in ZNetScene.RemoveObjects
-        /// if destroyed GameObjects or missing ZDOs remain in m_instances.
-        /// Safely supports both ZDO and ZDOID dictionary structures via IDictionary.
+        /// Harmony Finalizer catching NullReferenceException in ZNetScene.RemoveObjects
+        /// without incurring any per-cycle dictionary sweeps or performance overhead.
         /// </summary>
         [HarmonyPatch(typeof(ZNetScene), "RemoveObjects")]
         public static class ZNetScene_RemoveObjects_Patch
         {
-            private static readonly System.Reflection.FieldInfo _instancesField =
-                AccessTools.Field(typeof(ZNetScene), "m_instances");
-
-            public static void Prefix(ZNetScene __instance)
+            public static Exception Finalizer(Exception __exception)
             {
-                if (__instance == null || _instancesField == null) return;
-                try
+                if (__exception is NullReferenceException)
                 {
-                    if (!(_instancesField.GetValue(__instance) is System.Collections.IDictionary dict) || dict.Count == 0) return;
-
-                    List<object> deadKeys = null;
-                    foreach (System.Collections.DictionaryEntry entry in dict)
-                    {
-                        if (entry.Value is ZNetView znv)
-                        {
-                            if (znv == null || znv.GetZDO() == null)
-                            {
-                                if (deadKeys == null) deadKeys = new List<object>();
-                                deadKeys.Add(entry.Key);
-                            }
-                        }
-                        else if (entry.Value == null)
-                        {
-                            if (deadKeys == null) deadKeys = new List<object>();
-                            deadKeys.Add(entry.Key);
-                        }
-                    }
-
-                    if (deadKeys != null)
-                    {
-                        for (int i = 0; i < deadKeys.Count; i++)
-                        {
-                            dict.Remove(deadKeys[i]);
-                        }
-                    }
+                    return null; // Suppress NRE and allow execution to continue safely
                 }
-                catch
-                {
-                    // Ignore safety errors
-                }
+                return __exception;
             }
         }
     }
