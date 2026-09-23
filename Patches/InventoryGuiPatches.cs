@@ -40,9 +40,15 @@ namespace Valheim.ItemEnhancements.Patches
 
                     if (rt != null && repairRt != null)
                     {
-                        float btnWidth = repairRt.rect.width > 0 ? repairRt.rect.width : 44f;
-                        float offsetX = btnWidth + 8f;
-                        rt.anchoredPosition = new Vector2(repairRt.anchoredPosition.x + offsetX, repairRt.anchoredPosition.y);
+                        rt.anchorMin = repairRt.anchorMin;
+                        rt.anchorMax = repairRt.anchorMax;
+                        rt.pivot = repairRt.pivot;
+                        rt.sizeDelta = repairRt.sizeDelta;
+                        rt.localScale = repairRt.localScale;
+
+                        float btnHeight = repairRt.rect.height > 0 ? repairRt.rect.height : 44f;
+                        float offsetY = btnHeight + 6f;
+                        rt.anchoredPosition = new Vector2(repairRt.anchoredPosition.x, repairRt.anchoredPosition.y - offsetY);
                     }
 
                     // ปิดเอฟเฟกต์เรืองแสงของปุ่มซ่อมแซมที่ถูกโคลนมา
