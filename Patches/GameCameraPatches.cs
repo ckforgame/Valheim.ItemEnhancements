@@ -30,5 +30,22 @@ namespace Valheim.ItemEnhancements.Patches
                 return true;
             }
         }
+
+        /// <summary>
+        /// Prevents game camera zoom and hotkey bar scrolling while the enhancement window is open.
+        /// </summary>
+        [HarmonyPatch(typeof(ZInput), nameof(ZInput.GetMouseScrollWheel))]
+        public static class GetMouseScrollWheel_Patch
+        {
+            public static bool Prefix(ref float __result)
+            {
+                if (EnhancementGui.IsOpen)
+                {
+                    __result = 0f;
+                    return false;
+                }
+                return true;
+            }
+        }
     }
 }

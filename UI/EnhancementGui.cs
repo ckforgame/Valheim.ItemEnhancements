@@ -34,7 +34,7 @@ namespace Valheim.ItemEnhancements.UI
         private static readonly AccessTools.FieldRef<GameCamera, bool> s_mouseCaptureRef =
             AccessTools.FieldRefAccess<GameCamera, bool>("m_mouseCapture");
 
-        private Rect _windowRect = new Rect(Screen.width / 2f - 340f, Screen.height / 2f - 310f, 680f, 620f);
+        private Rect _windowRect = new Rect(Screen.width / 2f - 340f, Screen.height / 2f - 330f, 680f, 660f);
         private ItemDrop.ItemData _selectedItem;
         private Vector2 _scrollPosition = Vector2.zero;
 
@@ -67,12 +67,30 @@ namespace Valheim.ItemEnhancements.UI
         private Texture2D _texButtonHover;
         private Texture2D _texButtonActive;
         private Texture2D _texButtonDisabled;
+        private Texture2D _texScrollbarTrack;
+        private Texture2D _texScrollbarThumb;
+        private Texture2D _texScrollbarThumbHover;
 
         private void Awake()
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
             CreateTextures();
+        }
+
+        private void UpdateWindowDimensions()
+        {
+            float maxWindowHeight = Mathf.Min(Screen.height - 40f, 740f);
+            float winHeight = Mathf.Clamp(660f, 400f, maxWindowHeight);
+            float winWidth = Mathf.Min(Screen.width - 40f, 680f);
+
+            _windowRect.width = winWidth;
+            _windowRect.height = winHeight;
+
+            float maxX = Mathf.Max(10f, Screen.width - _windowRect.width - 10f);
+            float maxY = Mathf.Max(10f, Screen.height - _windowRect.height - 10f);
+            _windowRect.x = Mathf.Clamp(_windowRect.x, 10f, maxX);
+            _windowRect.y = Mathf.Clamp(_windowRect.y, 10f, maxY);
         }
 
         private void OnDisable()
@@ -139,6 +157,8 @@ namespace Valheim.ItemEnhancements.UI
             {
                 Instance._lastResultMessage = "";
                 Instance._isEnhanceablesDirty = true;
+                Instance._scrollPosition = Vector2.zero;
+                Instance.UpdateWindowDimensions();
                 // Auto-select equipped item if empty
                 if (Instance._selectedItem == null)
                 {
@@ -208,6 +228,7 @@ namespace Valheim.ItemEnhancements.UI
                 Instance._selectedItem = item;
                 Instance._lastResultMessage = "";
                 Instance._isEnhanceablesDirty = true;
+                Instance._scrollPosition = Vector2.zero;
             }
         }
 
@@ -264,16 +285,21 @@ namespace Valheim.ItemEnhancements.UI
             if (!IsOpen || Player.m_localPlayer == null) return;
 
             InitStyles();
-
-            // Center window if resolution changed
-            _windowRect.x = Mathf.Clamp(_windowRect.x, 0f, Screen.width - _windowRect.width);
-            _windowRect.y = Mathf.Clamp(_windowRect.y, 0f, Screen.height - _windowRect.height);
+            UpdateWindowDimensions();
 
             _windowRect = GUI.Window(987654, _windowRect, DrawWindowContent, "", _windowStyle);
         }
 
         private void DrawWindowContent(int windowID)
         {
+            // Handle mouse wheel scrolling anywhere inside the window
+            if (Event.current.type == EventType.ScrollWheel)
+            {
+                _scrollPosition.y += Event.current.delta.y * 35f;
+                if (_scrollPosition.y < 0f) _scrollPosition.y = 0f;
+                Event.current.Use();
+            }
+
             // Title Bar
             GUILayout.BeginHorizontal();
             GUILayout.Label("✦  MMORPG ITEM ENHANCEMENT  ✦", _headerStyle);
@@ -283,26 +309,29 @@ namespace Valheim.ItemEnhancements.UI
             }
             GUILayout.EndHorizontal();
 
-            GUILayout.Space(10f);
+            GUILayout.Space(8f);
 
             // Item Selection Area
             DrawItemSelectionArea();
 
-            GUILayout.Space(10f);
+            GUILayout.Space(8f);
 
             if (_selectedItem != null && EnhancementManager.IsEnhanceable(_selectedItem))
             {
-                // Stats Comparison (Current vs Next)
+                // Scrollable Area: Stats Comparison + Rules & Cost
+                _scrollPosition = GUILayout.BeginScrollView(_scrollPosition, false, false, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
+
                 DrawStatsComparison();
 
-                GUILayout.Space(10f);
+                GUILayout.Space(8f);
 
-                // Chances, Rules, and Cost Section
                 DrawRulesAndCostSection();
 
-                GUILayout.Space(10f);
+                GUILayout.EndScrollView();
 
-                // Action Button & Result Banner
+                GUILayout.Space(8f);
+
+                // Action Button & Result Banner (Pinned at bottom)
                 DrawActionButtonSection();
             }
             else
@@ -334,6 +363,7 @@ namespace Valheim.ItemEnhancements.UI
                 {
                     _selectedItem = null;
                     _lastResultMessage = "";
+                    _scrollPosition = Vector2.zero;
                 }
                 GUILayout.EndHorizontal();
             }
@@ -805,7 +835,7 @@ namespace Valheim.ItemEnhancements.UI
 
         private void DrawEquipmentPickerList()
         {
-            GUILayout.BeginVertical(_boxSectionStyle);
+            GUILayout.BeginVertical(_boxSectionStyle, GUILayout.ExpandHeight(true));
             GUILayout.Label("<b>Enhanceable Equipment:</b>", _statLabelStyle);
             GUILayout.Space(4f);
 
@@ -820,7 +850,7 @@ namespace Valheim.ItemEnhancements.UI
             }
             else
             {
-                _scrollPosition = GUILayout.BeginScrollView(_scrollPosition, GUILayout.Height(300f));
+                _scrollPosition = GUILayout.BeginScrollView(_scrollPosition, false, false, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
 
                 for (int i = 0; i < _cachedEnhanceableItems.Count; i++)
                 {
@@ -840,6 +870,7 @@ namespace Valheim.ItemEnhancements.UI
                         _selectedItem = item;
                         _lastResultMessage = "";
                         _isEnhanceablesDirty = true;
+                        _scrollPosition = Vector2.zero;
                     }
                     GUILayout.EndHorizontal();
                     GUILayout.Space(2f);
@@ -920,6 +951,20 @@ namespace Valheim.ItemEnhancements.UI
             _rateNumberStyle.fontSize = 28;
             _rateNumberStyle.fontStyle = FontStyle.Bold;
             _rateNumberStyle.alignment = TextAnchor.MiddleLeft;
+
+            // Scrollbar Styles
+            if (GUI.skin.verticalScrollbar != null)
+            {
+                GUI.skin.verticalScrollbar.normal.background = _texScrollbarTrack;
+                GUI.skin.verticalScrollbar.fixedWidth = 12f;
+            }
+            if (GUI.skin.verticalScrollbarThumb != null)
+            {
+                GUI.skin.verticalScrollbarThumb.normal.background = _texScrollbarThumb;
+                GUI.skin.verticalScrollbarThumb.hover.background = _texScrollbarThumbHover;
+                GUI.skin.verticalScrollbarThumb.active.background = _texScrollbarThumbHover;
+                GUI.skin.verticalScrollbarThumb.fixedWidth = 12f;
+            }
         }
 
         private void CreateTextures()
@@ -930,6 +975,9 @@ namespace Valheim.ItemEnhancements.UI
             _texButtonHover = MakeBorderedTexture(16, 16, new Color(0.40f, 0.28f, 0.10f, 1f), new Color(1.00f, 0.85f, 0.30f, 1f));
             _texButtonActive = MakeBorderedTexture(16, 16, new Color(0.55f, 0.38f, 0.12f, 1f), new Color(1.00f, 0.95f, 0.50f, 1f));
             _texButtonDisabled = MakeBorderedTexture(16, 16, new Color(0.18f, 0.18f, 0.20f, 0.8f), new Color(0.30f, 0.30f, 0.35f, 0.6f));
+            _texScrollbarTrack = MakeBorderedTexture(12, 12, new Color(0.08f, 0.09f, 0.12f, 0.90f), new Color(0.22f, 0.24f, 0.30f, 0.7f));
+            _texScrollbarThumb = MakeBorderedTexture(12, 12, new Color(0.55f, 0.40f, 0.12f, 0.95f), new Color(0.85f, 0.65f, 0.20f, 1f));
+            _texScrollbarThumbHover = MakeBorderedTexture(12, 12, new Color(0.75f, 0.55f, 0.18f, 1f), new Color(1.00f, 0.85f, 0.35f, 1f));
         }
 
         private Texture2D MakeBorderedTexture(int width, int height, Color background, Color border)

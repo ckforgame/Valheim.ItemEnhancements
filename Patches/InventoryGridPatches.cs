@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using HarmonyLib;
 using TMPro;
 using UnityEngine;
@@ -64,6 +64,18 @@ namespace Valheim.ItemEnhancements.Patches
                         var element = ___m_elements[index];
                         if (element?.m_quality != null)
                         {
+                            if (element.m_quality.textWrappingMode != TextWrappingModes.NoWrap)
+                            {
+                                element.m_quality.textWrappingMode = TextWrappingModes.NoWrap;
+                                element.m_quality.overflowMode = TextOverflowModes.Overflow;
+                            }
+
+                            RectTransform rt = element.m_quality.rectTransform;
+                            if (rt != null && rt.sizeDelta.x < 45f)
+                            {
+                                rt.sizeDelta = new Vector2(45f, rt.sizeDelta.y);
+                            }
+
                             string badge = GetBadgeString(level);
                             if (element.m_quality.text != badge)
                             {
