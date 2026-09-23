@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using HarmonyLib;
 using TMPro;
 using UnityEngine;
@@ -47,32 +47,31 @@ namespace Valheim.ItemEnhancements.Patches
                 Inventory inv = __instance.GetInventory();
                 if (inv == null) return;
 
-                for (int y = 0; y < ___m_height; y++)
-                {
-                    for (int x = 0; x < ___m_width; x++)
-                    {
-                        int index = y * ___m_width + x;
-                        if (index >= ___m_elements.Count) break;
+                System.Collections.Generic.List<ItemDrop.ItemData> allItems = inv.GetAllItems();
+                if (allItems == null) return;
 
-                        ItemDrop.ItemData item = inv.GetItemAt(x, y);
-                        if (item != null)
+                for (int i = 0; i < allItems.Count; i++)
+                {
+                    ItemDrop.ItemData item = allItems[i];
+                    if (item == null) continue;
+
+                    int level = EnhancementManager.GetEnhancementLevel(item);
+                    if (level <= 0) continue;
+
+                    int index = item.m_gridPos.y * ___m_width + item.m_gridPos.x;
+                    if (index >= 0 && index < ___m_elements.Count)
+                    {
+                        var element = ___m_elements[index];
+                        if (element?.m_quality != null)
                         {
-                            int level = EnhancementManager.GetEnhancementLevel(item);
-                            if (level > 0)
+                            string badge = GetBadgeString(level);
+                            if (element.m_quality.text != badge)
                             {
-                                var element = ___m_elements[index];
-                                if (element?.m_quality != null)
-                                {
-                                    string badge = GetBadgeString(level);
-                                    if (element.m_quality.text != badge)
-                                    {
-                                        element.m_quality.text = badge;
-                                    }
-                                    if (!element.m_quality.gameObject.activeSelf)
-                                    {
-                                        element.m_quality.gameObject.SetActive(true);
-                                    }
-                                }
+                                element.m_quality.text = badge;
+                            }
+                            if (!element.m_quality.gameObject.activeSelf)
+                            {
+                                element.m_quality.gameObject.SetActive(true);
                             }
                         }
                     }
