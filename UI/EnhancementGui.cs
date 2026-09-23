@@ -126,6 +126,15 @@ namespace Valheim.ItemEnhancements.UI
             // Unlock cursor for GUI interaction
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+            ZCursor.LockState = CursorLockMode.None;
+            ZCursor.Show();
+
+            // Cancel any active drag item in Inventory if present
+            if (InventoryGui.instance != null)
+            {
+                var setupDrag = AccessTools.Method(typeof(InventoryGui), "SetupDragItem", new[] { typeof(ItemDrop.ItemData), typeof(Inventory), typeof(int) });
+                setupDrag?.Invoke(InventoryGui.instance, new object[] { null, null, 0 });
+            }
         }
 
         public static void Close()
@@ -139,12 +148,15 @@ namespace Valheim.ItemEnhancements.UI
 
             // Restore cursor lock if no other UI is open
             bool otherGuiVisible = (InventoryGui.instance != null && InventoryGui.IsVisible())
-                                || (Menu.instance != null && Menu.IsVisible());
+                                || (Menu.instance != null && Menu.IsVisible())
+                                || (StoreGui.instance != null && StoreGui.IsVisible());
 
             if (!otherGuiVisible)
             {
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
+                ZCursor.LockState = CursorLockMode.Locked;
+                ZCursor.Hide();
             }
         }
 

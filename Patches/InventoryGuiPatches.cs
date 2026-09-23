@@ -9,35 +9,53 @@ namespace Valheim.ItemEnhancements.Patches
 {
     public static class InventoryGuiPatches
     {
-        private static GameObject _tabEnhanceObj;
+        private static GameObject _enhanceButtonObj;
 
         /// <summary>
-        /// แทรกปุ่ม [⚡ ตีบวก] ไว้ข้างๆ แท็บ Craft และ Upgrade ในหน้าต่างโต๊ะคราฟต์
+        /// สร้างปุ่ม [⚡ ตีบวก] วางข้างๆ ปุ่มซ่อมแซม (Repair Button) บนโต๊ะคราฟต์
         /// </summary>
         [HarmonyPatch(typeof(InventoryGui), "Awake")]
         public static class Awake_Patch
         {
             public static void Postfix(InventoryGui __instance)
             {
-                if (__instance?.m_tabUpgrade == null || __instance.m_tabUpgrade.transform.parent == null) return;
+                if (__instance?.m_repairButton == null || __instance.m_repairButton.transform.parent == null) return;
 
                 try
                 {
-                    if (_tabEnhanceObj != null) return;
+                    if (_enhanceButtonObj != null) return;
 
-                    _tabEnhanceObj = UnityEngine.Object.Instantiate(__instance.m_tabUpgrade.gameObject, __instance.m_tabUpgrade.transform.parent);
-                    _tabEnhanceObj.name = "TabEnhance";
+                    // โคลนปุ่มจาก m_repairButton ให้อยู่ใน parent เดียวกัน (m_repairPanel)
+                    _enhanceButtonObj = UnityEngine.Object.Instantiate(__instance.m_repairButton.gameObject, __instance.m_repairButton.transform.parent);
+                    _enhanceButtonObj.name = "EnhanceButton";
 
-                    RectTransform rt = _tabEnhanceObj.GetComponent<RectTransform>();
-                    RectTransform upgradeRt = __instance.m_tabUpgrade.GetComponent<RectTransform>();
+                    // ปลดล็อก Mask เพื่อไม่ให้ปุ่มที่วางเพิ่มถูก Clip
+                    var mask = __instance.m_repairButton.transform.parent.GetComponent<Mask>();
+                    if (mask != null) mask.enabled = false;
+                    var mask2d = __instance.m_repairButton.transform.parent.GetComponent<RectMask2D>();
+                    if (mask2d != null) mask2d.enabled = false;
 
-                    if (rt != null && upgradeRt != null)
+                    RectTransform repairRt = __instance.m_repairButton.GetComponent<RectTransform>();
+                    RectTransform rt = _enhanceButtonObj.GetComponent<RectTransform>();
+
+                    if (rt != null && repairRt != null)
                     {
-                        float offsetX = upgradeRt.rect.width > 0 ? upgradeRt.rect.width + 10f : 110f;
-                        rt.anchoredPosition = new Vector2(upgradeRt.anchoredPosition.x + offsetX, upgradeRt.anchoredPosition.y);
+                        float btnWidth = repairRt.rect.width > 0 ? repairRt.rect.width : 44f;
+                        float offsetX = btnWidth + 8f;
+                        rt.anchoredPosition = new Vector2(repairRt.anchoredPosition.x + offsetX, repairRt.anchoredPosition.y);
                     }
 
-                    Button btn = _tabEnhanceObj.GetComponent<Button>();
+                    // ปิดเอฟเฟกต์เรืองแสงของปุ่มซ่อมแซมที่ถูกโคลนมา
+                    foreach (Transform child in _enhanceButtonObj.transform)
+                    {
+                        if (child.name.ToLower().Contains("glow"))
+                        {
+                            child.gameObject.SetActive(false);
+                        }
+                    }
+
+                    // ตั้งค่า Event เมื่อคลิกปุ่ม
+                    Button btn = _enhanceButtonObj.GetComponent<Button>();
                     if (btn != null)
                     {
                         btn.onClick = new Button.ButtonClickedEvent();
@@ -45,28 +63,85 @@ namespace Valheim.ItemEnhancements.Patches
                         {
                             EnhancementGui.Toggle();
                         });
+                        btn.interactable = true;
                     }
 
-                    TMP_Text tmp = _tabEnhanceObj.GetComponentInChildren<TMP_Text>();
-                    if (tmp != null)
+                    // ตั้งค่า Tooltip แสดงชื่อระบบตีบวก
+                    UITooltip tooltip = _enhanceButtonObj.GetComponent<UITooltip>();
+                    if (tooltip == null)
                     {
-                        tmp.text = "⚡ ตีบวก";
+                        tooltip = _enhanceButtonObj.AddComponent<UITooltip>();
                     }
-                    else
+                    tooltip.m_text = "เปิดหน้าต่างตีบวกอุปกรณ์ (Item Enhancement)";
+                    tooltip.m_topic = "⚡ ตีบวกอุปกรณ์";
+
+                    // ปรับสีไอคอนให้เป็นสีทอง
+                    Image[] images = _enhanceButtonObj.GetComponentsInChildren<Image>(true);
+                    foreach (var img in images)
                     {
-                        Text txt = _tabEnhanceObj.GetComponentInChildren<Text>();
-                        if (txt != null)
+                        if (img.gameObject != _enhanceButtonObj && !img.name.ToLower().Contains("glow"))
                         {
-                            txt.text = "⚡ ตีบวก";
+                            img.color = new Color(1f, 0.85f, 0.25f, 1f);
                         }
                     }
 
-                    _tabEnhanceObj.SetActive(true);
+                    // เพิ่มป้ายสัญลักษณ์สายฟ้า ⚡ ตรงกลางปุ่ม
+                    GameObject labelObj = new GameObject("EnhanceIconBadge");
+                    labelObj.transform.SetParent(_enhanceButtonObj.transform, false);
+                    RectTransform labelRt = labelObj.AddComponent<RectTransform>();
+                    labelRt.anchorMin = Vector2.zero;
+                    labelRt.anchorMax = Vector2.one;
+                    labelRt.offsetMin = Vector2.zero;
+                    labelRt.offsetMax = Vector2.zero;
+
+                    if (__instance.m_craftingStationName != null)
+                    {
+                        TextMeshProUGUI tmp = labelObj.AddComponent<TextMeshProUGUI>();
+                        tmp.font = __instance.m_craftingStationName.font;
+                        tmp.text = "<color=#ffd700><b>⚡</b></color>";
+                        tmp.fontSize = 24;
+                        tmp.alignment = TextAlignmentOptions.Center;
+                        tmp.raycastTarget = false;
+                    }
+                    else
+                    {
+                        Text txt = labelObj.AddComponent<Text>();
+                        txt.text = "⚡";
+                        txt.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+                        txt.fontSize = 20;
+                        txt.alignment = TextAnchor.MiddleCenter;
+                        txt.color = new Color(1f, 0.85f, 0.25f, 1f);
+                        txt.raycastTarget = false;
+                    }
+
+                    _enhanceButtonObj.SetActive(true);
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogWarning($"[Valheim.ItemEnhancements] Could not create TabEnhance button: {ex.Message}");
+                    Debug.LogWarning($"[Valheim.ItemEnhancements] Could not create EnhanceButton: {ex.Message}");
                 }
+            }
+        }
+
+        /// <summary>
+        /// อัปเดตสถานะการแสดงผลและความพร้อมใช้งานของปุ่มตีบวกให้ตรงกับการเปิดโต๊ะคราฟต์
+        /// </summary>
+        [HarmonyPatch(typeof(InventoryGui), "UpdateRepair")]
+        public static class UpdateRepair_Patch
+        {
+            public static void Postfix(InventoryGui __instance)
+            {
+                if (_enhanceButtonObj == null) return;
+
+                // ปุ่มตีบวกพร้อมใช้งานตลอดเมื่ออยู่ที่โต๊ะคราฟต์ (ไม่ต้อง Gray out ตามปุ่มซ่อม)
+                Button btn = _enhanceButtonObj.GetComponent<Button>();
+                if (btn != null)
+                {
+                    btn.interactable = true;
+                }
+
+                bool shouldShow = __instance.m_repairButton != null && __instance.m_repairButton.gameObject.activeInHierarchy;
+                _enhanceButtonObj.SetActive(shouldShow);
             }
         }
 

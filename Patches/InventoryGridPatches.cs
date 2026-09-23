@@ -49,23 +49,96 @@ namespace Valheim.ItemEnhancements.Patches
             }
         }
 
+        private static readonly System.Reflection.MethodInfo s_getButtonPos =
+            AccessTools.Method(typeof(InventoryGrid), "GetButtonPos", new[] { typeof(GameObject) });
+
+        private static Vector2i GetGridPos(InventoryGrid grid, UIInputHandler handler)
+        {
+            if (handler == null) return new Vector2i(-1, -1);
+            var elem = handler.GetComponentInParent<InventoryElement>();
+            if (elem != null) return elem.Position;
+            if (s_getButtonPos != null && grid != null)
+            {
+                return (Vector2i)s_getButtonPos.Invoke(grid, new object[] { handler.gameObject });
+            }
+            return new Vector2i(-1, -1);
+        }
+
+        /// <summary>
+        /// เมื่อคลิกซ้ายที่ไอเทมขณะเปิดหน้าต่างตีบวก ให้เลือกไอเทมนั้นเข้าสู่ช่องตีบวก แทนการหยิบย้ายช่องไอเทม
+        /// </summary>
+        [HarmonyPatch(typeof(InventoryGrid), "OnLeftDown")]
+        public static class OnLeftDown_Patch
+        {
+            public static bool Prefix(InventoryGrid __instance, UIInputHandler clickHandler)
+            {
+                if (EnhancementGui.IsOpen && clickHandler != null)
+                {
+                    Vector2i pos = GetGridPos(__instance, clickHandler);
+                    if (pos.x >= 0 && pos.y >= 0)
+                    {
+                        ItemDrop.ItemData item = __instance.GetInventory()?.GetItemAt(pos.x, pos.y);
+                        if (item != null)
+                        {
+                            if (EnhancementManager.IsEnhanceable(item))
+                            {
+                                EnhancementGui.SetSelectedItem(item);
+                            }
+                            else
+                            {
+                                Player.m_localPlayer?.Message(MessageHud.MessageType.Center, "<color=#f59e0b>ไอเทมนี้ไม่สามารถตีบวกได้ (Cannot be enhanced)</color>");
+                            }
+                        }
+                    }
+                    return false; // ป้องกันการหยิบ/ลากย้ายช่องไอเทมขณะเปิดหน้าต่างตีบวก
+                }
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// ป้องกัน event คลิกปล่อย (Left Click) ทำงานซ้ำซ้อนขณะเปิดหน้าต่างตีบวก
+        /// </summary>
+        [HarmonyPatch(typeof(InventoryGrid), "OnLeftClick")]
+        public static class OnLeftClick_Patch
+        {
+            public static bool Prefix()
+            {
+                if (EnhancementGui.IsOpen)
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
+
         /// <summary>
         /// เมื่อคลิกขวาที่ไอเทมขณะเปิดหน้าต่างตีบวก ให้เลือกไอเทมนั้นเข้าสู่ช่องตีบวกแทนการกดสวมใส่
         /// </summary>
         [HarmonyPatch(typeof(InventoryGrid), "OnRightDown")]
         public static class OnRightDown_Patch
         {
-            public static bool Prefix(InventoryGrid __instance, InventoryElement element)
+            public static bool Prefix(InventoryGrid __instance, UIInputHandler element)
             {
                 if (EnhancementGui.IsOpen && element != null)
                 {
-                    Vector2i pos = element.Position;
-                    ItemDrop.ItemData item = __instance.GetInventory()?.GetItemAt(pos.x, pos.y);
-                    if (item != null && EnhancementManager.IsEnhanceable(item))
+                    Vector2i pos = GetGridPos(__instance, element);
+                    if (pos.x >= 0 && pos.y >= 0)
                     {
-                        EnhancementGui.SetSelectedItem(item);
-                        return false; // ไม่เรียกการใช้งาน/สวมใส่ไอเทม
+                        ItemDrop.ItemData item = __instance.GetInventory()?.GetItemAt(pos.x, pos.y);
+                        if (item != null)
+                        {
+                            if (EnhancementManager.IsEnhanceable(item))
+                            {
+                                EnhancementGui.SetSelectedItem(item);
+                            }
+                            else
+                            {
+                                Player.m_localPlayer?.Message(MessageHud.MessageType.Center, "<color=#f59e0b>ไอเทมนี้ไม่สามารถตีบวกได้ (Cannot be enhanced)</color>");
+                            }
+                        }
                     }
+                    return false; // ไม่เรียกการใช้งาน/สวมใส่ไอเทม
                 }
                 return true;
             }
