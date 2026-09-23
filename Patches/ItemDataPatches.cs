@@ -20,35 +20,9 @@ namespace Valheim.ItemEnhancements.Patches
             }
         }
 
-        [HarmonyPatch(typeof(ItemDrop.ItemData), nameof(ItemDrop.ItemData.GetDamage), new Type[0])]
-        public static class GetDamageSimple_Patch
-        {
-            public static void Postfix(ItemDrop.ItemData __instance, ref HitData.DamageTypes __result)
-            {
-                int level = EnhancementManager.GetEnhancementLevel(__instance);
-                if (level > 0)
-                {
-                    StatCalculator.ApplyDamageBonus(__instance, level, ref __result);
-                }
-            }
-        }
-
         // 2. Armor scaling
         [HarmonyPatch(typeof(ItemDrop.ItemData), nameof(ItemDrop.ItemData.GetArmor), typeof(int), typeof(float))]
         public static class GetArmor_Patch
-        {
-            public static void Postfix(ItemDrop.ItemData __instance, ref float __result)
-            {
-                int level = EnhancementManager.GetEnhancementLevel(__instance);
-                if (level > 0)
-                {
-                    __result += StatCalculator.GetArmorBonus(__instance, level, __result);
-                }
-            }
-        }
-
-        [HarmonyPatch(typeof(ItemDrop.ItemData), nameof(ItemDrop.ItemData.GetArmor), new Type[0])]
-        public static class GetArmorSimple_Patch
         {
             public static void Postfix(ItemDrop.ItemData __instance, ref float __result)
             {
@@ -74,19 +48,6 @@ namespace Valheim.ItemEnhancements.Patches
             }
         }
 
-        [HarmonyPatch(typeof(ItemDrop.ItemData), nameof(ItemDrop.ItemData.GetBlockPower), typeof(float))]
-        public static class GetBlockPowerSimple_Patch
-        {
-            public static void Postfix(ItemDrop.ItemData __instance, ref float __result)
-            {
-                int level = EnhancementManager.GetEnhancementLevel(__instance);
-                if (level > 0)
-                {
-                    __result += StatCalculator.GetBlockPowerBonus(__instance, level, __result);
-                }
-            }
-        }
-
         // 4. Deflection Force (Parry) scaling
         [HarmonyPatch(typeof(ItemDrop.ItemData), nameof(ItemDrop.ItemData.GetDeflectionForce), typeof(int))]
         public static class GetDeflectionForce_Patch
@@ -101,35 +62,9 @@ namespace Valheim.ItemEnhancements.Patches
             }
         }
 
-        [HarmonyPatch(typeof(ItemDrop.ItemData), nameof(ItemDrop.ItemData.GetDeflectionForce), new Type[0])]
-        public static class GetDeflectionForceSimple_Patch
-        {
-            public static void Postfix(ItemDrop.ItemData __instance, ref float __result)
-            {
-                int level = EnhancementManager.GetEnhancementLevel(__instance);
-                if (level > 0)
-                {
-                    __result += StatCalculator.GetDeflectionBonus(__instance, level, __result);
-                }
-            }
-        }
-
         // 5. Max Durability scaling
         [HarmonyPatch(typeof(ItemDrop.ItemData), nameof(ItemDrop.ItemData.GetMaxDurability), typeof(int))]
         public static class GetMaxDurability_Patch
-        {
-            public static void Postfix(ItemDrop.ItemData __instance, ref float __result)
-            {
-                int level = EnhancementManager.GetEnhancementLevel(__instance);
-                if (level > 0)
-                {
-                    __result += StatCalculator.GetDurabilityBonus(__instance, level, __result);
-                }
-            }
-        }
-
-        [HarmonyPatch(typeof(ItemDrop.ItemData), nameof(ItemDrop.ItemData.GetMaxDurability), new Type[0])]
-        public static class GetMaxDurabilitySimple_Patch
         {
             public static void Postfix(ItemDrop.ItemData __instance, ref float __result)
             {

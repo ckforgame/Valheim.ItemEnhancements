@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
+using HarmonyLib;
 using UnityEngine;
 using Valheim.ItemEnhancements.Configuration;
 
@@ -173,7 +175,7 @@ namespace Valheim.ItemEnhancements.Core
                     }
                     else
                     {
-                        item.m_stack -= remaining;
+                        player.GetInventory().RemoveItem(item, remaining);
                         remaining = 0;
                     }
 
@@ -247,13 +249,32 @@ namespace Valheim.ItemEnhancements.Core
             {
                 int tier = GetRequiredScrollTier(targetLevel);
                 int scrollAmount = ModConfig.ScrollsRequiredPerAttempt.Value;
-                DeductPlayerScrolls(player, tier, scrollAmount);
+                if (!DeductPlayerScrolls(player, tier, scrollAmount))
+                {
+                    newLevel = currentLevel;
+                    return EnhanceResult.CannotAfford;
+                }
             }
 
             // หักค่าธรรมเนียมเหรียญทอง (หากเปิดใช้งาน)
             if (ModConfig.RequireCoins.Value && cost > 0)
             {
-                DeductPlayerCoins(player, cost);
+                if (!DeductPlayerCoins(player, cost))
+                {
+                    // Rollback คัมภีร์ที่หักไปแล้วหากหักเหรียญไม่สำเร็จ
+                    if (ModConfig.RequireScrolls.Value)
+                    {
+                        int tier = GetRequiredScrollTier(targetLevel);
+                        int scrollAmount = ModConfig.ScrollsRequiredPerAttempt.Value;
+                        GameObject scrollPrefab = ScrollItemManager.GetScrollPrefab(tier);
+                        if (scrollPrefab != null)
+                        {
+                            player?.GetInventory()?.AddItem(scrollPrefab, scrollAmount);
+                        }
+                    }
+                    newLevel = currentLevel;
+                    return EnhanceResult.CannotAfford;
+                }
             }
 
             // สุ่มความสำเร็จ
@@ -265,6 +286,7 @@ namespace Valheim.ItemEnhancements.Core
                 // สำเร็จ!
                 newLevel = targetLevel;
                 SetEnhancementLevel(item, newLevel);
+                PostEnhanceUpdate(player, item);
                 return EnhanceResult.Success;
             }
 
@@ -273,6 +295,7 @@ namespace Valheim.ItemEnhancements.Core
             {
                 // อยู่ในระดับปลอดภัย ระดับไม่ลดลง
                 newLevel = currentLevel;
+                PostEnhanceUpdate(player, item);
                 return EnhanceResult.FailedSafe;
             }
 
@@ -283,11 +306,35 @@ namespace Valheim.ItemEnhancements.Core
                 if (breakRoll < ModConfig.BreakChanceAboveSafeLevel.Value)
                 {
                     // แตกสลาย!
-                    if (player?.GetInventory() != null)
+                    if (player != null)
                     {
-                        player.GetInventory().RemoveItem(item);
+                        if (item.m_equipped)
+                        {
+                            player.UnequipItem(item, true);
+                        }
+
+                        // ค้นหาและลบออกจาก Inventory ที่แท้จริง (กระเป๋าผู้เล่น หรือกล่องเก็บของ)
+                        if (player.GetInventory() != null && player.GetInventory().ContainsItem(item))
+                        {
+                            player.GetInventory().RemoveItem(item);
+                        }
+                        else
+                        {
+                            Inventory containerInv = (InventoryGui.instance != null && InventoryGui.instance.IsContainerOpen())
+                                ? InventoryGui.instance.ContainerGrid?.GetInventory()
+                                : null;
+                            if (containerInv != null && containerInv.ContainsItem(item))
+                            {
+                                containerInv.RemoveItem(item);
+                            }
+                            else
+                            {
+                                player.GetInventory()?.RemoveItem(item);
+                            }
+                        }
                     }
                     newLevel = 0;
+                    PostEnhanceUpdate(player, item);
                     return EnhanceResult.FailedBroken;
                 }
             }
@@ -297,11 +344,37 @@ namespace Valheim.ItemEnhancements.Core
                 // ลดระดับลง 1 ขั้น
                 newLevel = Mathf.Max(0, currentLevel - 1);
                 SetEnhancementLevel(item, newLevel);
+                PostEnhanceUpdate(player, item);
                 return EnhanceResult.FailedDowngraded;
             }
 
             newLevel = currentLevel;
+            PostEnhanceUpdate(player, item);
             return EnhanceResult.FailedSafe;
+        }
+
+        private static readonly MethodInfo s_updateTotalWeightMethod =
+            AccessTools.Method(typeof(Inventory), "UpdateTotalWeight");
+
+        private static readonly MethodInfo s_updateModifiersMethod =
+            AccessTools.Method(typeof(Player), "UpdateModifiers");
+
+        private static void PostEnhanceUpdate(Player player, ItemDrop.ItemData item)
+        {
+            if (player == null) return;
+            try
+            {
+                Inventory inv = player.GetInventory();
+                if (inv != null)
+                {
+                    s_updateTotalWeightMethod?.Invoke(inv, null);
+                }
+                s_updateModifiersMethod?.Invoke(player, null);
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogWarning($"[EnhancementManager] PostEnhanceUpdate error: {ex.Message}");
+            }
         }
 
         #region UI & Presentation Helpers

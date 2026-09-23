@@ -5,6 +5,7 @@ using HarmonyLib;
 using UnityEngine;
 using Valheim.ItemEnhancements.Configuration;
 using Valheim.ItemEnhancements.Core;
+using Valheim.ItemEnhancements.UI;
 
 namespace Valheim.ItemEnhancements.Patches
 {
@@ -24,10 +25,13 @@ namespace Valheim.ItemEnhancements.Patches
                 float bonus = 0f;
                 foreach (var item in equipped)
                 {
-                    int level = EnhancementManager.GetEnhancementLevel(item);
-                    if (level > 0)
+                    if (StatCalculator.IsArmor(item) || StatCalculator.IsShield(item))
                     {
-                        bonus += StatCalculator.GetMovementModifierDelta(item, level);
+                        int level = EnhancementManager.GetEnhancementLevel(item);
+                        if (level > 0)
+                        {
+                            bonus += StatCalculator.GetMovementModifierDelta(item, level);
+                        }
                     }
                 }
 
@@ -49,10 +53,13 @@ namespace Valheim.ItemEnhancements.Patches
                 float reduction = 0f;
                 foreach (var item in equipped)
                 {
-                    int level = EnhancementManager.GetEnhancementLevel(item);
-                    if (level > 0)
+                    if (StatCalculator.IsArmor(item))
                     {
-                        reduction += StatCalculator.GetDodgeStaminaReduction(level);
+                        int level = EnhancementManager.GetEnhancementLevel(item);
+                        if (level > 0)
+                        {
+                            reduction += StatCalculator.GetDodgeStaminaReduction(level);
+                        }
                     }
                 }
 
@@ -75,10 +82,13 @@ namespace Valheim.ItemEnhancements.Patches
                 float reduction = 0f;
                 foreach (var item in equipped)
                 {
-                    int level = EnhancementManager.GetEnhancementLevel(item);
-                    if (level > 0)
+                    if (StatCalculator.IsArmor(item))
                     {
-                        reduction += StatCalculator.GetRunStaminaReduction(level);
+                        int level = EnhancementManager.GetEnhancementLevel(item);
+                        if (level > 0)
+                        {
+                            reduction += StatCalculator.GetRunStaminaReduction(level);
+                        }
                     }
                 }
 
@@ -100,10 +110,13 @@ namespace Valheim.ItemEnhancements.Patches
                 float reduction = 0f;
                 foreach (var item in equipped)
                 {
-                    int level = EnhancementManager.GetEnhancementLevel(item);
-                    if (level > 0)
+                    if (StatCalculator.IsArmor(item))
                     {
-                        reduction += StatCalculator.GetJumpStaminaReduction(level);
+                        int level = EnhancementManager.GetEnhancementLevel(item);
+                        if (level > 0)
+                        {
+                            reduction += StatCalculator.GetJumpStaminaReduction(level);
+                        }
                     }
                 }
 
@@ -243,14 +256,22 @@ namespace Valheim.ItemEnhancements.Patches
         [HarmonyPatch(typeof(SEMan), nameof(SEMan.ModifyTimedBlockBonus))]
         public static class ModifyTimedBlockBonus_Patch
         {
+            private static readonly MethodInfo _getCurrentBlockerMethod =
+                AccessTools.Method(typeof(Humanoid), "GetCurrentBlocker");
+
             public static void Postfix(Character ___m_character, ref float timedBlockBonus)
             {
                 if (___m_character is Humanoid humanoid)
                 {
-                    ItemDrop.ItemData shieldOrWeapon = humanoid.LeftItem ?? humanoid.RightItem;
-                    if (shieldOrWeapon != null)
+                    ItemDrop.ItemData blocker = _getCurrentBlockerMethod?.Invoke(humanoid, null) as ItemDrop.ItemData;
+                    if (blocker == null)
                     {
-                        int level = EnhancementManager.GetEnhancementLevel(shieldOrWeapon);
+                        blocker = humanoid.LeftItem ?? humanoid.RightItem;
+                    }
+
+                    if (blocker != null)
+                    {
+                        int level = EnhancementManager.GetEnhancementLevel(blocker);
                         if (level > 0)
                         {
                             timedBlockBonus += StatCalculator.GetTimedBlockBonus(level);
@@ -263,7 +284,7 @@ namespace Valheim.ItemEnhancements.Patches
         #region Cheat Abilities Patches (Capacity, Regens, Healing)
 
         // 12. Cheat Ability: Max Health Capacity
-        [HarmonyPatch(typeof(Player), nameof(Player.SetMaxHealth))]
+        [HarmonyPatch(typeof(Player), nameof(Player.SetMaxHealth), typeof(float), typeof(bool))]
         public static class Player_SetMaxHealth_Patch
         {
             public static void Prefix(Player __instance, ref float health)
@@ -278,7 +299,7 @@ namespace Valheim.ItemEnhancements.Patches
         }
 
         // 13. Cheat Ability: Max Stamina Capacity
-        [HarmonyPatch(typeof(Player), nameof(Player.SetMaxStamina))]
+        [HarmonyPatch(typeof(Player), nameof(Player.SetMaxStamina), typeof(float), typeof(bool))]
         public static class Player_SetMaxStamina_Patch
         {
             public static void Prefix(Player __instance, ref float stamina)
@@ -293,7 +314,7 @@ namespace Valheim.ItemEnhancements.Patches
         }
 
         // 14. Cheat Ability: Max Eitr Capacity
-        [HarmonyPatch(typeof(Player), "SetMaxEitr")]
+        [HarmonyPatch(typeof(Player), "SetMaxEitr", typeof(float), typeof(bool))]
         public static class Player_SetMaxEitr_Patch
         {
             public static void Prefix(Player __instance, ref float eitr)
@@ -311,15 +332,12 @@ namespace Valheim.ItemEnhancements.Patches
         [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.EquipItem))]
         public static class Humanoid_EquipItem_Patch
         {
-            private static MethodInfo _updateFoodMethod;
+            private static readonly MethodInfo _updateFoodMethod =
+                AccessTools.Method(typeof(Player), "UpdateFood", new Type[] { typeof(float), typeof(bool) });
 
             public static void Postfix(Humanoid __instance)
             {
                 if (!StatCalculator.IsCheatEnabled || !(__instance is Player player)) return;
-                if (_updateFoodMethod == null)
-                {
-                    _updateFoodMethod = typeof(Player).GetMethod("UpdateFood", BindingFlags.NonPublic | BindingFlags.Instance);
-                }
                 _updateFoodMethod?.Invoke(player, new object[] { 0f, true });
             }
         }
@@ -327,15 +345,12 @@ namespace Valheim.ItemEnhancements.Patches
         [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.UnequipItem))]
         public static class Humanoid_UnequipItem_Patch
         {
-            private static MethodInfo _updateFoodMethod;
+            private static readonly MethodInfo _updateFoodMethod =
+                AccessTools.Method(typeof(Player), "UpdateFood", new Type[] { typeof(float), typeof(bool) });
 
             public static void Postfix(Humanoid __instance)
             {
                 if (!StatCalculator.IsCheatEnabled || !(__instance is Player player)) return;
-                if (_updateFoodMethod == null)
-                {
-                    _updateFoodMethod = typeof(Player).GetMethod("UpdateFood", BindingFlags.NonPublic | BindingFlags.Instance);
-                }
                 _updateFoodMethod?.Invoke(player, new object[] { 0f, true });
             }
         }
@@ -408,6 +423,19 @@ namespace Valheim.ItemEnhancements.Patches
                     {
                         hp *= (1f + bonus);
                     }
+                }
+            }
+        }
+
+        // 20. Prevent player actions while Enhancement UI is open
+        [HarmonyPatch(typeof(Player), "TakeInput")]
+        public static class Player_TakeInput_Patch
+        {
+            public static void Postfix(ref bool __result)
+            {
+                if (EnhancementGui.IsOpen)
+                {
+                    __result = false;
                 }
             }
         }

@@ -54,6 +54,42 @@ namespace Valheim.ItemEnhancements.UI
             CreateTextures();
         }
 
+        private void OnDisable()
+        {
+            if (IsOpen)
+            {
+                Close();
+            }
+        }
+
+        public static bool IsNearCraftingStation()
+        {
+            if (Player.m_localPlayer == null) return false;
+            if (!ModConfig.RequireCraftingStation.Value) return true;
+
+            if (Player.m_localPlayer.GetCurrentCraftingStation() != null)
+            {
+                return true;
+            }
+
+            var stations = s_allStationsField?.GetValue(null) as List<CraftingStation>;
+            if (stations != null)
+            {
+                Vector3 playerPos = Player.m_localPlayer.transform.position;
+                float maxRange = ModConfig.CraftingStationRange.Value;
+                for (int i = 0; i < stations.Count; i++)
+                {
+                    CraftingStation station = stations[i];
+                    if (station != null && Vector3.Distance(station.transform.position, playerPos) <= maxRange)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         public static void Toggle()
         {
             if (IsOpen)
@@ -70,37 +106,10 @@ namespace Valheim.ItemEnhancements.UI
         {
             if (Player.m_localPlayer == null) return;
 
-            if (ModConfig.RequireCraftingStation.Value)
+            if (ModConfig.RequireCraftingStation.Value && !IsNearCraftingStation())
             {
-                bool nearStation = false;
-                if (Player.m_localPlayer.GetCurrentCraftingStation() != null)
-                {
-                    nearStation = true;
-                }
-                else
-                {
-                    var stations = s_allStationsField?.GetValue(null) as List<CraftingStation>;
-                    if (stations != null)
-                    {
-                        Vector3 playerPos = Player.m_localPlayer.transform.position;
-                        float maxRange = ModConfig.CraftingStationRange.Value;
-                        for (int i = 0; i < stations.Count; i++)
-                        {
-                            CraftingStation station = stations[i];
-                            if (station != null && Vector3.Distance(station.transform.position, playerPos) <= maxRange)
-                            {
-                                nearStation = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if (!nearStation)
-                {
-                    Player.m_localPlayer.Message(MessageHud.MessageType.Center, "<color=#f59e0b>ต้องอยู่ใกล้โต๊ะคราฟต์หรือเตาตีเหล็กเพื่อตีบวก! (Must be near a crafting station)</color>");
-                    return;
-                }
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "<color=#f59e0b>ต้องอยู่ใกล้โต๊ะคราฟต์หรือเตาตีเหล็กเพื่อตีบวก! (Must be near a crafting station)</color>");
+                return;
             }
 
             IsOpen = true;
@@ -113,11 +122,30 @@ namespace Valheim.ItemEnhancements.UI
                     Instance._selectedItem = Player.m_localPlayer.GetInventory()?.GetEquippedItems()?.Find(EnhancementManager.IsEnhanceable);
                 }
             }
+
+            // Unlock cursor for GUI interaction
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
         }
 
         public static void Close()
         {
             IsOpen = false;
+            if (Instance != null)
+            {
+                Instance._isForging = false;
+                Instance._forgeTimer = 0f;
+            }
+
+            // Restore cursor lock if no other UI is open
+            bool otherGuiVisible = (InventoryGui.instance != null && InventoryGui.IsVisible())
+                                || (Menu.instance != null && Menu.IsVisible());
+
+            if (!otherGuiVisible)
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
         }
 
         public static void SetSelectedItem(ItemDrop.ItemData item)
@@ -133,6 +161,13 @@ namespace Valheim.ItemEnhancements.UI
         {
             if (!IsOpen) return;
 
+            // Keep cursor unlocked while UI is open
+            if (Cursor.lockState != CursorLockMode.None)
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
+
             // Handle forging timer
             if (_isForging)
             {
@@ -147,7 +182,7 @@ namespace Valheim.ItemEnhancements.UI
             // Close if player moves away from station
             if (ModConfig.RequireCraftingStation.Value && Player.m_localPlayer != null)
             {
-                if (Player.m_localPlayer.GetCurrentCraftingStation() == null)
+                if (!IsNearCraftingStation())
                 {
                     Close();
                 }
@@ -589,6 +624,21 @@ namespace Valheim.ItemEnhancements.UI
         {
             if (_selectedItem == null || Player.m_localPlayer == null) return;
 
+            Inventory playerInv = Player.m_localPlayer.GetInventory();
+            Inventory containerInv = (InventoryGui.instance != null && InventoryGui.instance.IsContainerOpen())
+                ? InventoryGui.instance.ContainerGrid?.GetInventory()
+                : null;
+            bool itemExists = (playerInv != null && playerInv.ContainsItem(_selectedItem))
+                           || (containerInv != null && containerInv.ContainsItem(_selectedItem));
+
+            if (!itemExists)
+            {
+                _selectedItem = null;
+                _lastResultColor = "#ef4444";
+                _lastResultMessage = "ไม่พบไอเทมในช่องเก็บของ (Item not found in inventory)!";
+                return;
+            }
+
             _isForging = true;
             _forgeTimer = ForgeDuration;
             _lastResultMessage = "";
@@ -603,6 +653,21 @@ namespace Valheim.ItemEnhancements.UI
         private void ExecuteEnhancement()
         {
             if (_selectedItem == null || Player.m_localPlayer == null) return;
+
+            Inventory playerInv = Player.m_localPlayer.GetInventory();
+            Inventory containerInv = (InventoryGui.instance != null && InventoryGui.instance.IsContainerOpen())
+                ? InventoryGui.instance.ContainerGrid?.GetInventory()
+                : null;
+            bool itemExists = (playerInv != null && playerInv.ContainsItem(_selectedItem))
+                           || (containerInv != null && containerInv.ContainsItem(_selectedItem));
+
+            if (!itemExists)
+            {
+                _selectedItem = null;
+                _lastResultColor = "#ef4444";
+                _lastResultMessage = "ไม่พบไอเทมในช่องเก็บของ (Item not found in inventory)!";
+                return;
+            }
 
             string itemName = Localization.instance != null ? Localization.instance.Localize(_selectedItem.m_shared.m_name) : _selectedItem.m_shared.m_name;
             EnhanceResult result = EnhancementManager.TryEnhance(Player.m_localPlayer, _selectedItem, out int newLevel);
