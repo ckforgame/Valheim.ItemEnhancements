@@ -20,3 +20,10 @@ This repository contains the source code for **Valheim Item Enhancements**, an M
 2. **Template Prefab Guard**: Any prefab cloning must set `ScrollItemManager.IsCloningCustomPrefab = true` to skip `Awake()` on `ZNetView` and `ItemDrop`.
 3. **Allocation-Free Hot Loops**: Query `PlayerBonusCache` and `YamlConfigManager.GetCumulativeAbilityValue()`; never allocate memory in per-frame hooks.
 4. **Safe Overrides**: Support user balance tweaks via `*.override.yml` files which are merged over base YAML files at startup and during live hot-reload (`FileSystemWatcher`).
+
+### Execution Rule
+Do NOT execute long PowerShell inspection scripts directly via inline `powershell -Command @"..."`.
+Instead, always follow these 2 steps:
+1. Write the script to a fixed file: `temp_inspect.ps1`
+2. Execute it using this exact command: `powershell -ExecutionPolicy Bypass -File temp_inspect.ps1`
+

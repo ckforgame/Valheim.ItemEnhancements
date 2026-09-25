@@ -148,6 +148,12 @@ namespace Valheim.ItemEnhancements.Patches
 
                 bool shouldShow = __instance.m_repairButton != null && __instance.m_repairButton.gameObject.activeInHierarchy;
                 _enhanceButtonObj.SetActive(shouldShow);
+
+                UITooltip tooltip = _enhanceButtonObj.GetComponent<UITooltip>();
+                if (tooltip != null)
+                {
+                    tooltip.m_text = EnhancementGui.IsOpen ? "Close Item Enhancement Window [F8]" : "Open Item Enhancement Window [F8]";
+                }
             }
         }
 

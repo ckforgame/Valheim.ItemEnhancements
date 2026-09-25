@@ -128,7 +128,8 @@ namespace Valheim.ItemEnhancements.Patches
                             }
                             else
                             {
-                                Player.m_localPlayer?.Message(MessageHud.MessageType.Center, "<color=#f59e0b>This item cannot be enhanced!</color>");
+                                string localized = Localization.instance != null ? Localization.instance.Localize(item.m_shared.m_name) : item.m_shared.m_name;
+                                Player.m_localPlayer?.Message(MessageHud.MessageType.Center, $"<color=#f59e0b>{localized} cannot be enhanced!</color>");
                             }
                         }
                     }
@@ -176,7 +177,8 @@ namespace Valheim.ItemEnhancements.Patches
                             }
                             else
                             {
-                                Player.m_localPlayer?.Message(MessageHud.MessageType.Center, "<color=#f59e0b>This item cannot be enhanced!</color>");
+                                string localized = Localization.instance != null ? Localization.instance.Localize(item.m_shared.m_name) : item.m_shared.m_name;
+                                Player.m_localPlayer?.Message(MessageHud.MessageType.Center, $"<color=#f59e0b>{localized} cannot be enhanced!</color>");
                             }
                         }
                     }

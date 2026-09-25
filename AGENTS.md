@@ -363,5 +363,13 @@ To verify features in-game:
 5. Select equipment, verify stat progression diffs, and execute enhancements.
 6. Verify tier-colored badges (`+1` to `+20`) in the inventory grid and tooltips.
 
+### 9.3 AI Agent Rules
+
+### Execution Rule
+Do NOT execute long PowerShell inspection scripts directly via inline `powershell -Command @"..."`.
+Instead, always follow these 2 steps:
+1. Write the script to a fixed file: `temp_inspect.ps1`
+2. Execute it using this exact command: `powershell -ExecutionPolicy Bypass -File temp_inspect.ps1`
+
 ---
 *Document Version: 1.0.0 | Synchronized with Valheim.ItemEnhancements codebase.*

@@ -37,3 +37,7 @@ Thumbs.db
 dist/
 staging/
 *.zip
+
+# Temporary inspection scripts
+temp_inspect.ps1
+
