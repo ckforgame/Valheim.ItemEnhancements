@@ -171,6 +171,38 @@ BepInEx/config/ckforgame.ItemEnhancements/
 
 ---
 
+## 📦 Building & Thunderstore Distribution
+
+To package this mod for release on [Thunderstore](https://valheim.thunderstore.io/):
+
+### Option 1: Double-click Batch File (Windows)
+Double-click **`export-dist.bat`** in the project root folder.
+
+### Option 2: PowerShell Script
+```powershell
+# Standard release packaging
+.\export-dist.ps1
+
+# Custom version bump and clean build
+.\export-dist.ps1 -Version 1.0.1 -Clean
+```
+
+### Option 3: Dotnet MSBuild Integration
+```bash
+dotnet build -c Release -p:PackageThunderstore=true
+```
+
+The automated pipeline performs:
+1. Version synchronization between `Valheim.ItemEnhancements.csproj` and `manifest.json`.
+2. Validation of required Thunderstore metadata, semver, and exact 256x256 `icon.png`.
+3. Fresh Release compilation of mod binaries and packaging of `YamlDotNet.dll`.
+4. Staging of all default configuration files (`.cfg` and `.yml`).
+5. Generating POSIX-compliant `.zip` archives inside `dist/`:
+   - `dist/ItemEnhancements-<Version>.zip`
+   - `dist/ckforgame-ItemEnhancements-<Version>.zip`
+
+---
+
 ## 💖 Credits & Acknowledgements
 
 - **[BepInEx Team](https://github.com/BepInEx/BepInEx)** — Unity/Valheim modding framework.
@@ -178,6 +210,12 @@ BepInEx/config/ckforgame.ItemEnhancements/
 - **[YamlDotNet](https://github.com/aaubry/YamlDotNet)** — Configuration serialization and hot-reloading support.
 - **Iron Gate Studio** — For creating the incredible world of Valheim.
 - **Valheim Modding Community** — For continuous documentation, tools, and support.
+
+---
+
+## 📄 License
+
+This project is licensed under the **GNU General Public License v3.0** (GPL-3.0). See the [LICENSE](file:///d:/GameCustoms/ValheimCustoms/Valheim.ItemEnhancements/LICENSE) file for details.
 
 ---
 
@@ -190,9 +228,14 @@ BepInEx/config/ckforgame.ItemEnhancements/
 - รวมคัมภีร์ระดับต่ำ 3 ใบเป็นระดับถัดไป 1 ใบได้ที่โต๊ะ Workbench
 - เปิดหน้าต่างตีบวกได้ด้วยปุ่ม **`F8`** หรือกดปุ่ม **`[⚡ Enhance]`** ที่โต๊ะคราฟต์
 - สามารถปรับแต่งอัตราสำเร็จ ค่าสเตตัส และการดรอปได้อย่างอิสระผ่านไฟล์ YAML ในโฟลเดอร์ `BepInEx/config/ckforgame.ItemEnhancements/`
+- สามารถ Export และจัดแพ็กเกจสำหรับอัปโหลดขึ้น **Thunderstore** ได้ทันทีด้วยการดับเบิลคลิกไฟล์ **`export-dist.bat`** หรือรันสคริปต์ `.\export-dist.ps1`
 
 ### 💖 เครดิตและขอบคุณพิเศษ
 - **ทีมผู้พัฒนาเครื่องมือ**: BepInEx, Harmony และ YamlDotNet
 - **Iron Gate Studio**: ผู้สร้างสรรค์เกม Valheim
 - **Valheim Modding Community**: สำหรับความรู้และเครื่องมือสนับสนุนการพัฒนาม็อด
+
+### 📄 สิทธิ์การใช้งาน (License)
+โปรเจกต์นี้เผยแพร่ภายใต้สัญญาอนุญาต **GNU General Public License v3.0 (GPL-3.0)** ดูรายละเอียดเพิ่มเติมได้ที่ไฟล์ [LICENSE](file:///d:/GameCustoms/ValheimCustoms/Valheim.ItemEnhancements/LICENSE)
+
 

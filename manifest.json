@@ -1,0 +1,9 @@
+{
+  "name": "ItemEnhancements",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/ckforgame/Valheim.ItemEnhancements",
+  "description": "MMORPG-style item enhancement system (+1 to +20) for weapons, armor, and shields with custom scrolls, effects, sounds, and modular YAML configurations.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2202"
+  ]
+}

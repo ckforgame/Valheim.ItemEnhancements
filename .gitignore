@@ -32,3 +32,8 @@ Environment.props
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Distribution and packaging
+dist/
+staging/
+*.zip

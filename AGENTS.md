@@ -157,13 +157,20 @@ Valheim.ItemEnhancements/
 ├── docs/
 │   ├── implementation_plan.md     # Development history and architectural blueprint
 │   └── walkthrough.md             # Functional verification report and gameplay testing guide
+├── manifest.json                  # Thunderstore mod metadata, versioning & dependencies
+├── icon.png                       # Thunderstore package icon (exact 256x256 PNG)
+├── CHANGELOG.md                   # Mod release history and version notes
+├── export-dist.ps1                # Automated Thunderstore export & packaging PowerShell script
+├── export-dist.bat                # Windows 1-click batch runner for Thunderstore export
+├── package.ps1                    # Shorthand alias for export-dist.ps1
+├── package.bat                    # Shorthand alias for export-dist.bat
 ├── Environment.props              # Local build paths for Valheim installation and r2modman profiles
 ├── Plugin.cs                      # Mod entry point (BaseUnityPlugin), Harmony bootstrap, GUI spawner, hotkey poll
 ├── README.md                      # End-user documentation (English & Thai)
 ├── AGENTS.md                      # This document (AI knowledge base)
 ├── CLAUDE.md                      # Claude Code CLI quick reference
 ├── .cursorrules                   # Cursor IDE workspace rules
-└── Valheim.ItemEnhancements.csproj# MSBuild project definition with automated dual-deployment targets
+└── Valheim.ItemEnhancements.csproj# MSBuild project definition with automated dual-deployment & packaging targets
 ```
 
 ---

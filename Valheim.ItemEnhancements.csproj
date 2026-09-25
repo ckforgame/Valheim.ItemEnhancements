@@ -13,6 +13,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>disable</Nullable>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
     
     <!-- Valheim Game & Modding Paths (defaults fallback if not defined in Environment.props) -->
     <ValheimPath Condition="'$(ValheimPath)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Valheim</ValheimPath>
@@ -117,6 +118,11 @@
     <Copy SourceFiles="@(ConfigFiles)" DestinationFolder="$(SteamConfigDir)" Condition="Exists('$(ValheimPath)\BepInEx\plugins')" />
     <MakeDir Directories="$(SteamConfigDir)\ckforgame.ItemEnhancements" Condition="Exists('$(ValheimPath)\BepInEx\plugins')" />
     <Copy SourceFiles="@(YamlFiles)" DestinationFolder="$(SteamConfigDir)\ckforgame.ItemEnhancements" Condition="Exists('$(ValheimPath)\BepInEx\plugins')" />
+  </Target>
+
+  <!-- Optional MSBuild target to create Thunderstore distribution package: dotnet build -c Release -p:PackageThunderstore=true -->
+  <Target Name="PackageThunderstore" AfterTargets="PostBuild" Condition="'$(PackageThunderstore)' == 'true'">
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)export-dist.ps1&quot; -SkipBuild -Configuration $(Configuration)" />
   </Target>
 
 </Project>

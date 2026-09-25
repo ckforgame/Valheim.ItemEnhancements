@@ -9,6 +9,9 @@ This repository contains the source code for **Valheim Item Enhancements**, an M
 ## Common Build & Verification Commands
 - **Build Release**: `dotnet build -c Release`
 - **Build Debug**: `dotnet build -c Debug`
+- **Thunderstore Export & Package**:
+  - `.\export-dist.ps1` (or double-click `export-dist.bat`)
+  - `dotnet build -c Release -p:PackageThunderstore=true`
 - Target Framework: `.NETFramework,Version=v4.8` (`net48`), C# 10.0
 - Build outputs automatically deploy to Steam and r2modman BepInEx plugin folders via MSBuild post-build targets.
 
