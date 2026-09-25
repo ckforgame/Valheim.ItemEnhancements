@@ -171,6 +171,16 @@ BepInEx/config/ckforgame.ItemEnhancements/
 
 ---
 
+## 💖 Credits & Acknowledgements
+
+- **[BepInEx Team](https://github.com/BepInEx/BepInEx)** — Unity/Valheim modding framework.
+- **[Harmony](https://github.com/pardeike/Harmony)** — Runtime method patching and detours.
+- **[YamlDotNet](https://github.com/aaubry/YamlDotNet)** — Configuration serialization and hot-reloading support.
+- **Iron Gate Studio** — For creating the incredible world of Valheim.
+- **Valheim Modding Community** — For continuous documentation, tools, and support.
+
+---
+
 ## 🇹🇭 สรุปสำหรับผู้เล่นชาวไทย (Thai Summary)
 
 ม็อดระบบตีบวกอุปกรณ์สไตล์ MMORPG (+1 ถึง +20) สำหรับเกม Valheim:
@@ -180,3 +190,9 @@ BepInEx/config/ckforgame.ItemEnhancements/
 - รวมคัมภีร์ระดับต่ำ 3 ใบเป็นระดับถัดไป 1 ใบได้ที่โต๊ะ Workbench
 - เปิดหน้าต่างตีบวกได้ด้วยปุ่ม **`F8`** หรือกดปุ่ม **`[⚡ Enhance]`** ที่โต๊ะคราฟต์
 - สามารถปรับแต่งอัตราสำเร็จ ค่าสเตตัส และการดรอปได้อย่างอิสระผ่านไฟล์ YAML ในโฟลเดอร์ `BepInEx/config/ckforgame.ItemEnhancements/`
+
+### 💖 เครดิตและขอบคุณพิเศษ
+- **ทีมผู้พัฒนาเครื่องมือ**: BepInEx, Harmony และ YamlDotNet
+- **Iron Gate Studio**: ผู้สร้างสรรค์เกม Valheim
+- **Valheim Modding Community**: สำหรับความรู้และเครื่องมือสนับสนุนการพัฒนาม็อด
+
