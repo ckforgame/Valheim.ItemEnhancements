@@ -1,0 +1,5 @@
+# Workspace skill directory – track all files
+# (If you want to ignore everything, uncomment the line below)
+# *
+
+!.gitignore

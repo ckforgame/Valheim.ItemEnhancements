@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--
+    =======================================================================
+    Environment.props.example - Local Developer Configuration Template
+    =======================================================================
+    INSTRUCTIONS:
+    1. Copy this file to 'Environment.props' in your project root:
+       cp Environment.props.example Environment.props
+    2. Update the paths below to match your machine's setup.
+    3. Ensure 'Environment.props' is added to your .gitignore so local paths
+       are never committed to version control.
+    =======================================================================
+  -->
+  <PropertyGroup>
+    <!--
+      ValheimPath:
+      Absolute path to your local game installation directory.
+      Examples:
+        Default Steam (Windows): C:\Program Files (x86)\Steam\steamapps\common\Valheim
+        Custom Drive (Windows):  D:\Games\SteamLibrary\steamapps\common\Valheim
+        Linux / Steam Deck:      /home/deck/.local/share/Steam/steamapps/common/Valheim
+    -->
+    <ValheimPath>C:\Program Files (x86)\Steam\steamapps\common\Valheim</ValheimPath>
+
+    <!--
+      R2ModmanProfileDir (Optional):
+      Path to your active r2modman or Thunderstore Mod Manager profile directory.
+      If configured, the build will automatically copy the mod DLL, PDB, and configs
+      directly into this profile for instant testing with mod managers.
+      Example: $(AppData)\r2modmanPlus-local\Valheim\profiles\Default
+    -->
+    <R2ModmanProfileDir>$(AppData)\r2modmanPlus-local\Valheim\profiles\Default</R2ModmanProfileDir>
+
+    <!--
+      Custom Overrides (Optional):
+      Uncomment and adjust only if your Managed or BepInEx directories are in non-standard locations.
+    -->
+    <!-- <ValheimManaged>$(ValheimPath)\valheim_Data\Managed</ValheimManaged> -->
+    <!-- <BepInExCore>$(R2ModmanProfileDir)\BepInEx\core</BepInExCore> -->
+    <!-- <BepInExCore Condition="'$(BepInExCore)' == ''">$(ValheimPath)\BepInEx\core</BepInExCore> -->
+
+    <!--
+      Deployment Toggles (Optional):
+      Set to 'false' if you want to skip copying to specific locations during build.
+    -->
+    <!-- <DeployToSteam>true</DeployToSteam> -->
+    <!-- <DeployToR2Modman>true</DeployToR2Modman> -->
+  </PropertyGroup>
+</Project>

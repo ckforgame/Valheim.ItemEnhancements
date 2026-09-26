@@ -1,0 +1,102 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    =======================================================================
+    Step 1: Import Environment.props (Local machine overrides, git-ignored)
+    =======================================================================
+  -->
+  <Import Project="$(ProjectDir)Environment.props" Condition="Exists('$(ProjectDir)Environment.props')" />
+  <Import Project="$(MSBuildProjectFullPath).user" Condition="Exists('$(MSBuildProjectFullPath).user')" />
+
+  <!--
+    =======================================================================
+    Step 2: Define Fallback Defaults with MSBuild Conditions
+    =======================================================================
+  -->
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <AssemblyName>MyValheimMod</AssemblyName>
+    <RootNamespace>MyValheimMod</RootNamespace>
+    <Version>1.0.0</Version>
+    <LangVersion>10.0</LangVersion>
+    <Nullable>disable</Nullable>
+
+    <!-- Default Game Path if Environment.props did not define it -->
+    <ValheimPath Condition="'$(ValheimPath)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Valheim</ValheimPath>
+    <ValheimManaged Condition="'$(ValheimManaged)' == ''">$(ValheimPath)\valheim_Data\Managed</ValheimManaged>
+
+    <!-- Optional r2modman Profile directory -->
+    <R2ModmanProfileDir Condition="'$(R2ModmanProfileDir)' == ''"></R2ModmanProfileDir>
+
+    <!-- BepInEx Core resolution -->
+    <BepInExCore Condition="'$(BepInExCore)' == '' and '$(R2ModmanProfileDir)' != '' and Exists('$(R2ModmanProfileDir)\BepInEx\core')">$(R2ModmanProfileDir)\BepInEx\core</BepInExCore>
+    <BepInExCore Condition="'$(BepInExCore)' == ''">$(ValheimPath)\BepInEx\core</BepInExCore>
+
+    <!-- Deployment target destinations -->
+    <SteamPluginDir Condition="'$(SteamPluginDir)' == ''">$(ValheimPath)\BepInEx\plugins\$(AssemblyName)</SteamPluginDir>
+    <R2ModmanPluginDir Condition="'$(R2ModmanPluginDir)' == '' and '$(R2ModmanProfileDir)' != ''">$(R2ModmanProfileDir)\BepInEx\plugins\$(AssemblyName)</R2ModmanPluginDir>
+  </PropertyGroup>
+
+  <!--
+    =======================================================================
+    Step 3: Assembly References (Game, Unity, and BepInEx)
+    IMPORTANT: Always set <Private>false</Private> to avoid copying game DLLs!
+    =======================================================================
+  -->
+  <ItemGroup>
+    <!-- Game Assemblies -->
+    <Reference Include="assembly_valheim">
+      <HintPath>$(ValheimManaged)\assembly_valheim.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="assembly_guiutils">
+      <HintPath>$(ValheimManaged)\assembly_guiutils.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <!-- Unity Engine Modules -->
+    <Reference Include="UnityEngine">
+      <HintPath>$(ValheimManaged)\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(ValheimManaged)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(ValheimManaged)\UnityEngine.UI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <!-- BepInEx & Harmony -->
+    <Reference Include="BepInEx">
+      <HintPath>$(BepInExCore)\BepInEx.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(BepInExCore)\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!--
+    =======================================================================
+    Step 4: Automated Post-Build Deployment to Steam & r2modman
+    =======================================================================
+  -->
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <ItemGroup>
+      <PluginFiles Include="$(TargetDir)$(TargetName).dll" />
+      <PluginFiles Include="$(TargetDir)$(TargetName).pdb" Condition="Exists('$(TargetDir)$(TargetName).pdb')" />
+    </ItemGroup>
+
+    <!-- Deploy to r2modman Profile if configured and exists -->
+    <MakeDir Directories="$(R2ModmanPluginDir)" Condition="'$(R2ModmanProfileDir)' != '' and Exists('$(R2ModmanProfileDir)')" />
+    <Copy SourceFiles="@(PluginFiles)" DestinationFolder="$(R2ModmanPluginDir)" Condition="'$(R2ModmanProfileDir)' != '' and Exists('$(R2ModmanProfileDir)')" SkipUnchangedFiles="true" />
+
+    <!-- Deploy to Steam BepInEx if plugins folder exists -->
+    <MakeDir Directories="$(SteamPluginDir)" Condition="Exists('$(ValheimPath)\BepInEx\plugins')" />
+    <Copy SourceFiles="@(PluginFiles)" DestinationFolder="$(SteamPluginDir)" Condition="Exists('$(ValheimPath)\BepInEx\plugins')" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>

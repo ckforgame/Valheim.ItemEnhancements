@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <!--
+    Directory.Build.props
+    Place this file in the root folder of a multi-project solution.
+    MSBuild automatically imports this file into all projects in the directory tree.
+  -->
+
+  <!-- Import root Environment.props if present -->
+  <Import Project="$(MSBuildThisFileDirectory)Environment.props" Condition="Exists('$(MSBuildThisFileDirectory)Environment.props')" />
+
+  <PropertyGroup>
+    <!-- Common Game & Tooling Defaults if not set in Environment.props -->
+    <ValheimPath Condition="'$(ValheimPath)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Valheim</ValheimPath>
+    <ValheimManaged Condition="'$(ValheimManaged)' == ''">$(ValheimPath)\valheim_Data\Managed</ValheimManaged>
+
+    <!-- BepInEx resolution priority: r2modman profile first, then game directory -->
+    <BepInExCore Condition="'$(BepInExCore)' == '' and '$(R2ModmanProfileDir)' != '' and Exists('$(R2ModmanProfileDir)\BepInEx\core')">$(R2ModmanProfileDir)\BepInEx\core</BepInExCore>
+    <BepInExCore Condition="'$(BepInExCore)' == ''">$(ValheimPath)\BepInEx\core</BepInExCore>
+  </PropertyGroup>
+</Project>

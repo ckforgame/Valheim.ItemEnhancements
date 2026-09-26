@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--
+    =======================================================================
+    Environment.props.advanced.example
+    Advanced Multi-Target / Dedicated Server / Multi-Mod-Manager Template
+    =======================================================================
+  -->
+  <PropertyGroup>
+    <!-- Primary Game Client Path -->
+    <ValheimPath>D:\SteamLibrary\steamapps\common\Valheim</ValheimPath>
+
+    <!-- Optional Dedicated Server Path for synchronized server mod testing -->
+    <ValheimServerPath>D:\SteamLibrary\steamapps\common\Valheim dedicated server</ValheimServerPath>
+
+    <!-- Mod Manager Profile Path (r2modman / Thunderstore / Gale) -->
+    <!-- r2modman: %APPDATA%\r2modmanPlus-local\Valheim\profiles\<ProfileName> -->
+    <!-- Thunderstore: %APPDATA%\Thunderstore Mod Manager\DataFolder\Valheim\profiles\<ProfileName> -->
+    <R2ModmanProfileDir>$(AppData)\r2modmanPlus-local\Valheim\profiles\DevTesting</R2ModmanProfileDir>
+
+    <!-- Direct Custom Assemblies Paths (e.g. unstripped Unity or publicized assemblies) -->
+    <PublicizedAssembliesDir>$(ProjectDir)lib\publicized</PublicizedAssembliesDir>
+
+    <!-- Build & Deployment Flags -->
+    <DeployToClientSteam>true</DeployToClientSteam>
+    <DeployToR2Modman>true</DeployToR2Modman>
+    <DeployToServer>false</DeployToServer>
+
+    <!-- Custom Mod Plugin Subfolder Name inside BepInEx/plugins -->
+    <ModSubfolderName>$(AssemblyName)</ModSubfolderName>
+  </PropertyGroup>
+</Project>
