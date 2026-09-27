@@ -47,6 +47,9 @@ namespace Valheim.ItemEnhancements.Configuration
             // Initialize YAML subsystem
             YamlConfigManager.Initialize();
 
+            // Enable auto-saving on change
+            config.SaveOnConfigSet = true;
+
             // Core UI & Controls bindings in BepInEx CFG
             ToggleGuiKey = config.Bind(
                 "1. General & UI",
@@ -61,6 +64,9 @@ namespace Valheim.ItemEnhancements.Configuration
                 true,
                 "Display tier-colored enhancement level badges (+X) on inventory icons."
             );
+
+            // Save to disk so any missing or newly added config options are populated while keeping user values intact
+            config.Save();
         }
 
         public static float GetSuccessRate(int targetLevel)

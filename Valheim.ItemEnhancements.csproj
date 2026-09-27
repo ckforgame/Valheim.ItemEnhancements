@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <!-- Import local user environment settings if exists (git ignored) -->
   <Import Project="$(ProjectDir)Environment.props" Condition="Exists('$(ProjectDir)Environment.props')" />
@@ -108,14 +108,14 @@
     <!-- Deploy to r2modman if configured and profile exists -->
     <MakeDir Directories="$(R2ModmanPluginDir)" Condition="'$(R2ModmanProfileDir)' != '' and Exists('$(R2ModmanProfileDir)')" />
     <Copy SourceFiles="@(PluginFiles)" DestinationFolder="$(R2ModmanPluginDir)" Condition="'$(R2ModmanProfileDir)' != '' and Exists('$(R2ModmanProfileDir)')" />
-    <Copy SourceFiles="@(ConfigFiles)" DestinationFolder="$(R2ModmanConfigDir)" Condition="'$(R2ModmanProfileDir)' != '' and Exists('$(R2ModmanProfileDir)')" />
+    <Copy SourceFiles="@(ConfigFiles)" DestinationFolder="$(R2ModmanConfigDir)" Condition="'$(R2ModmanProfileDir)' != '' and Exists('$(R2ModmanProfileDir)') and !Exists('$(R2ModmanConfigDir)\%(Filename)%(Extension)')" />
     <MakeDir Directories="$(R2ModmanConfigDir)\ckforgame.ItemEnhancements" Condition="'$(R2ModmanProfileDir)' != '' and Exists('$(R2ModmanProfileDir)')" />
     <Copy SourceFiles="@(YamlFiles)" DestinationFolder="$(R2ModmanConfigDir)\ckforgame.ItemEnhancements" Condition="'$(R2ModmanProfileDir)' != '' and Exists('$(R2ModmanProfileDir)')" />
 
     <!-- Deploy to Steam BepInEx if plugins folder exists -->
     <MakeDir Directories="$(SteamPluginDir)" Condition="Exists('$(ValheimPath)\BepInEx\plugins')" />
     <Copy SourceFiles="@(PluginFiles)" DestinationFolder="$(SteamPluginDir)" Condition="Exists('$(ValheimPath)\BepInEx\plugins')" />
-    <Copy SourceFiles="@(ConfigFiles)" DestinationFolder="$(SteamConfigDir)" Condition="Exists('$(ValheimPath)\BepInEx\plugins')" />
+    <Copy SourceFiles="@(ConfigFiles)" DestinationFolder="$(SteamConfigDir)" Condition="Exists('$(ValheimPath)\BepInEx\plugins') and !Exists('$(SteamConfigDir)\%(Filename)%(Extension)')" />
     <MakeDir Directories="$(SteamConfigDir)\ckforgame.ItemEnhancements" Condition="Exists('$(ValheimPath)\BepInEx\plugins')" />
     <Copy SourceFiles="@(YamlFiles)" DestinationFolder="$(SteamConfigDir)\ckforgame.ItemEnhancements" Condition="Exists('$(ValheimPath)\BepInEx\plugins')" />
   </Target>
