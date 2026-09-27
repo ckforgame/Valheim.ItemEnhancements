@@ -337,6 +337,131 @@ namespace Valheim.ItemEnhancements.Patches
             }
         }
 
+        [HarmonyPatch(typeof(PlayerController), "TakeInput")]
+        public static class PlayerController_TakeInput_Patch
+        {
+            public static void Postfix(ref bool __result)
+            {
+                if (EnhancementGui.IsOpen)
+                {
+                    __result = false;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(PlayerController), "InInventoryEtc")]
+        public static class PlayerController_InInventoryEtc_Patch
+        {
+            public static void Postfix(ref bool __result)
+            {
+                if (EnhancementGui.IsOpen)
+                {
+                    __result = true;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(Player), "UpdateHover")]
+        public static class Player_UpdateHover_Patch
+        {
+            public static bool Prefix()
+            {
+                if (EnhancementGui.IsOpen)
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(Player), "Interact")]
+        public static class Player_Interact_Patch
+        {
+            public static bool Prefix()
+            {
+                if (EnhancementGui.IsOpen)
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(Player), "PlayerAttackInput")]
+        public static class Player_PlayerAttackInput_Patch
+        {
+            public static bool Prefix()
+            {
+                if (EnhancementGui.IsOpen)
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(ZInput), nameof(ZInput.GetButton), new Type[] { typeof(string) })]
+        public static class ZInput_GetButton_Patch
+        {
+            public static bool Prefix(string name, ref bool __result)
+            {
+                if (EnhancementGui.IsOpen)
+                {
+                    if (name == "Attack" || name == "JoyAttack" || name == "SecondAttack" || name == "JoySecondAttack" || name == "Use" || name == "JoyUse" || name == "Block" || name == "JoyBlock")
+                    {
+                        __result = false;
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(ZInput), nameof(ZInput.GetButtonDown), new Type[] { typeof(string) })]
+        public static class ZInput_GetButtonDown_Patch
+        {
+            public static bool Prefix(string name, ref bool __result)
+            {
+                if (EnhancementGui.IsOpen)
+                {
+                    if (name == "Attack" || name == "JoyAttack" || name == "SecondAttack" || name == "JoySecondAttack" || name == "Use" || name == "JoyUse" || name == "Block" || name == "JoyBlock")
+                    {
+                        __result = false;
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(ZInput), nameof(ZInput.GetMouseButton), new Type[] { typeof(int) })]
+        public static class ZInput_GetMouseButton_Patch
+        {
+            public static bool Prefix(int button, ref bool __result)
+            {
+                if (EnhancementGui.IsMouseOverWindow)
+                {
+                    __result = false;
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(ZInput), nameof(ZInput.GetMouseButtonDown), new Type[] { typeof(int) })]
+        public static class ZInput_GetMouseButtonDown_Patch
+        {
+            public static bool Prefix(int button, ref bool __result)
+            {
+                if (EnhancementGui.IsMouseOverWindow)
+                {
+                    __result = false;
+                    return false;
+                }
+                return true;
+            }
+        }
+
         #endregion
     }
 }

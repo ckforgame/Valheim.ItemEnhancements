@@ -47,5 +47,21 @@ namespace Valheim.ItemEnhancements.Patches
                 return true;
             }
         }
+
+        /// <summary>
+        /// Prevents camera rotation and movement while the enhancement window is open.
+        /// </summary>
+        [HarmonyPatch(typeof(GameCamera), "UpdateCamera")]
+        public static class UpdateCamera_Patch
+        {
+            public static bool Prefix()
+            {
+                if (EnhancementGui.IsOpen)
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
     }
 }

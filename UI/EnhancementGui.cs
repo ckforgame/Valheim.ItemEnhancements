@@ -14,6 +14,16 @@ namespace Valheim.ItemEnhancements.UI
         public static EnhancementGui Instance { get; private set; }
         public static bool IsOpen { get; set; } = false;
 
+        public static bool IsMouseOverWindow
+        {
+            get
+            {
+                if (!IsOpen || Instance == null) return false;
+                Vector2 mousePos = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+                return Instance._windowRect.Contains(mousePos);
+            }
+        }
+
         private static readonly Func<List<CraftingStation>> s_getAllStations = CreateStaticFieldGetter<List<CraftingStation>>(typeof(CraftingStation), "m_allStations");
 
         private static Func<T> CreateStaticFieldGetter<T>(Type type, string fieldName)
@@ -376,6 +386,12 @@ namespace Valheim.ItemEnhancements.UI
 
             // Drag window region leaves 45px margin on the right so close button click is never intercepted
             GUI.DragWindow(new Rect(0, 0, _windowRect.width - 45f, 35f));
+
+            // Consume any unhandled mouse down/up events inside window to prevent click-through
+            if (Event.current.isMouse && (Event.current.type == EventType.MouseDown || Event.current.type == EventType.MouseUp))
+            {
+                Event.current.Use();
+            }
         }
 
         private void DrawItemSelectionArea()
@@ -395,7 +411,7 @@ namespace Valheim.ItemEnhancements.UI
 
                 GUILayout.FlexibleSpace();
 
-                if (GUILayout.Button("Change Item", GUILayout.Width(130f), GUILayout.Height(26f)))
+                if (GUILayout.Button("Change Item", _itemButtonStyle, GUILayout.Width(130f), GUILayout.Height(26f)))
                 {
                     _selectedItem = null;
                     _lastResultMessage = "";
@@ -1279,13 +1295,24 @@ namespace Valheim.ItemEnhancements.UI
             _tabButtonStyle = new GUIStyle(GUI.skin.button);
             _tabButtonStyle.normal.background = _texTabNormal;
             _tabButtonStyle.fontSize = 12;
-            _tabButtonStyle.normal.textColor = new Color(0.8f, 0.85f, 0.9f);
+            _tabButtonStyle.normal.textColor = new Color(0.60f, 0.64f, 0.72f);
+            _tabButtonStyle.hover.textColor = new Color(0.90f, 0.92f, 0.96f);
 
             _tabButtonActiveStyle = new GUIStyle(GUI.skin.button);
             _tabButtonActiveStyle.normal.background = _texTabActive;
             _tabButtonActiveStyle.fontStyle = FontStyle.Bold;
             _tabButtonActiveStyle.fontSize = 12;
-            _tabButtonActiveStyle.normal.textColor = new Color(1f, 0.9f, 0.35f);
+            _tabButtonActiveStyle.normal.textColor = new Color(1f, 0.95f, 0.40f);
+            _tabButtonActiveStyle.hover.textColor = new Color(1f, 1f, 0.70f);
+
+            _itemButtonStyle = new GUIStyle(GUI.skin.button);
+            _itemButtonStyle.normal.background = _texButtonNormal;
+            _itemButtonStyle.hover.background = _texButtonHover;
+            _itemButtonStyle.active.background = _texButtonActive;
+            _itemButtonStyle.fontSize = 12;
+            _itemButtonStyle.fontStyle = FontStyle.Bold;
+            _itemButtonStyle.normal.textColor = new Color(1f, 0.90f, 0.35f);
+            _itemButtonStyle.hover.textColor = Color.white;
 
             // Scrollbar Styles
             if (GUI.skin.verticalScrollbar != null)
@@ -1316,8 +1343,8 @@ namespace Valheim.ItemEnhancements.UI
             _texStatusBg = MakeBorderedTexture(16, 16, new Color(0.12f, 0.14f, 0.19f, 0.95f), new Color(0.35f, 0.40f, 0.50f, 0.9f));
             _texMeterBg = MakeBorderedTexture(12, 12, new Color(0.08f, 0.09f, 0.12f, 0.95f), new Color(0.25f, 0.28f, 0.35f, 0.8f));
             _texWhite = MakeSolidTexture(2, 2, Color.white);
-            _texTabNormal = MakeBorderedTexture(12, 12, new Color(0.14f, 0.16f, 0.20f, 0.90f), new Color(0.25f, 0.28f, 0.35f, 0.7f));
-            _texTabActive = MakeBorderedTexture(12, 12, new Color(0.25f, 0.20f, 0.10f, 0.95f), new Color(0.85f, 0.65f, 0.15f, 1f));
+            _texTabNormal = MakeBorderedTexture(12, 12, new Color(0.11f, 0.12f, 0.15f, 0.88f), new Color(0.22f, 0.24f, 0.30f, 0.6f));
+            _texTabActive = MakeBorderedTexture(12, 12, new Color(0.35f, 0.24f, 0.08f, 0.98f), new Color(0.95f, 0.75f, 0.20f, 1f));
         }
 
         private Texture2D MakeSolidTexture(int width, int height, Color color)
